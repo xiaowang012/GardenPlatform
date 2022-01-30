@@ -1,4 +1,4 @@
-# Python Flask 书本管理应用
+# Python +Flask + mysql 智能浇水平台
 
 ## 1.界面展示
 
