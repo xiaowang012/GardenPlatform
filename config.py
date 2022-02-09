@@ -6,8 +6,11 @@ basedir = os.path.abspath(os.path.dirname(__file__))
 
 class DataBaseConfig(object):
     DEBUG = True
-    SQLALCHEMY_DATABASE_URI =   "sqlite:///"+os.path.join(os.sep,basedir + os.sep +"database", "database123.db")
-    # print(SQLALCHEMY_DATABASE_URI)
+    #sqlite
+    #SQLALCHEMY_DATABASE_URI =   "sqlite:///"+os.path.join(os.sep,basedir + os.sep +"database", "database123.db")
+    #mysql
+    SQLALCHEMY_DATABASE_URI = "mysql+pymysql://root:123456@localhost:3306/gardenplatform?charset=utf8"
+	# SQLALCHEMY_TRACK_MODIFICATIONS = True
 
 
 class EmailConfig(object):
@@ -21,7 +24,7 @@ class EmailConfig(object):
 
 
 class Config:
-    SECRET_KEY = '21e2eddqe'
+    SECRET_KEY = 'r34r3ewfwfffffffffffffffffffff'
     # SQLALCHEMY_COMMIT_ON_TEARDOWN = True
     # FLASKY_MAIL_SUBJECT_PREFIX = '[Flasky]'
     # FLASKY_MAIL_SENDER = 'Flasky Admin <flasky@example.com>'
