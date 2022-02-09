@@ -26,7 +26,7 @@ db.init_app(app)
 
 #跳转到主页或登录页
 @app.route('/',methods = ['POST','GET'])
-def index():
+def host():
     if 'user_id' in session:
        return redirect('home')
     else:
@@ -72,11 +72,11 @@ def register():
 #用户登录
 @app.route('/login',methods = ['POST','GET'])
 def login():
-    # if 'user_id' in session:
-    #    return redirect('home')
+    if 'user_id' in session:
+       return redirect('home')
     form = UserForms()
     if request.method == 'GET':
-        return render_template('index.html',form = form)
+        return render_template('login.html',form = form)
     elif request.method == 'POST':
         if form.validate_on_submit():
             user=request.form['username']
@@ -88,20 +88,54 @@ def login():
                 if new_pwd == res.hash_pwd:
                     #验证通过
                     session['user_id'] = user
-                    return 'Login OK!'
-                    #return redirect(url_for('home'))
+                    return redirect(url_for('index'))
                 else:
                     dic1 = {'title':'error','message':'Incorrect password or user does not exist!'}
-                    return render_template('index.html',form =form,dic1 =dic1)
+                    return render_template('login.html',form = form,dic1 = dic1)
             else:
                 dic1 = {'title':'error','message':'Incorrect password or user does not exist!'}
-                return render_template('index.html',form =form,dic1 =dic1)
+                return render_template('login.html',form =form,dic1 =dic1)
         else:
-            return render_template('index.html',form = form)
-    return render_template('index.html',form = form)
+            return render_template('login.html',form = form)
 
+#用户登出
+@app.route('/logout',methods = ['POST','GET'])
+def logout():  
+    if 'user_id' in session:
+        session.pop('user_id')
+    return redirect('login')
 
+#用户主页
+@app.route('/home',methods = ['POST','GET'])
+def index():
+    if request.method == 'GET':
+        return render_template('home.html')
+    else:
+        return 'f'
 
+#我的盆摘
+@app.route('/my_plant',methods = ['POST','GET'])
+def my_plant():
+    if request.method == 'GET':
+        return render_template('my_plant.html')
+    else:
+        return 'f'
+
+#朋友圈
+@app.route('/my_friends',methods = ['POST','GET'])
+def my_friends():
+    if request.method == 'GET':
+        return render_template('my_friends.html')
+    else:
+        return 'f'
+
+#后台管理
+@app.route('/management',methods = ['POST','GET'])
+def management():
+    if request.method == 'GET':
+        return render_template('management.html')
+    else:
+        return 'f'
 
 if __name__ == '__main__':
     app.run(host = '0.0.0.0',port=5001,debug = True)
