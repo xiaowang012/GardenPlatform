@@ -10,9 +10,9 @@
 
 ![](./img/register.png)
 
-### （3） 普通用户书本查询下载界面
+### （3） 用户主页
 
-![home](./img/home.png
+![home](./img/home.png)
 
 ### （4）管理员用户管理界面
 
