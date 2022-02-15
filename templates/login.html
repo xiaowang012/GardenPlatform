@@ -38,15 +38,15 @@ body{
                 <form role="form" action="/login" method="post">
                     {{ form.csrf_token }}
                     <div class="form-group">
-                         <label for="username">用户名:</label><input type="text" class="form-control" name="username" /><p>{%if form.username.errors %}{{ form.username.errors[0] }} {% endif %}</p>
+                         <label for="username">用户名:</label><input style="background: rgba(255,255,255,0.5);" type="text" class="form-control" name="username" /><p>{%if form.username.errors %}{{ form.username.errors[0] }} {% endif %}</p>
                     </div>
                     <div class="form-group">
-                         <label for="password">密码:</label><input type="password" class="form-control" name="password" /><p>{%if form.password.errors %}{{ form.password.errors[0] }} {% endif %}</p>
+                         <label for="password">密码:</label><input style="background: rgba(255,255,255,0.5);" type="password" class="form-control" name="password" /><p>{%if form.password.errors %}{{ form.password.errors[0] }} {% endif %}</p>
                     </div>
                     <button  type="submit" class="btn btn-default btn-primary">登录</button>
                     <p> {%if dic1 %}{{ dic1['message'] }} {% endif %}</p>
                 </form>
-                <a style="line-height: 50px;font-size: larger;margin-left: 70px;" href="/register">没有账号?去注册一个!</a>
+                <a style="line-height: 50px;font-size: larger;text-align: center;" href="/register">没有账号?去注册一个!</a>
             </div>
             <div class="col-md-4 column">
             </div>
