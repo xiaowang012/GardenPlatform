@@ -38,18 +38,18 @@ body{
                 <form role="form" action="/register" method="post">
                     {{ form.csrf_token }}
                     <div class="form-group">
-                         <label for="username">用户名:</label><input type="text" class="form-control" name="username" /><p>{%if form.username.errors %}{{ form.username.errors[0] }} {% endif %}</p>
+                         <label for="username">用户名:</label><input style="background: rgba(255,255,255,0.5);" type="text" class="form-control" name="username" /><p>{%if form.username.errors %}{{ form.username.errors[0] }} {% endif %}</p>
                     </div>
                     <div class="form-group">
-                         <label for="password">密码</label><input type="password" class="form-control" name="password" /><p>{%if form.password.errors %}{{ form.password.errors[0] }} {% endif %}</p>
+                         <label for="password">密码</label><input style="background: rgba(255,255,255,0.5);" type="password" class="form-control" name="password" /><p>{%if form.password.errors %}{{ form.password.errors[0] }} {% endif %}</p>
                     </div>
 					<div class="form-group">
-						<label for="password1">再次确认:</label><input type="password" class="form-control" name="password1" /><p>{%if form.password1.errors %}{{ form.password1.errors[0] }} {% endif %}</p>
+						<label for="password1">再次确认:</label><input style="background: rgba(255,255,255,0.5);" type="password" class="form-control" name="password1" /><p>{%if form.password1.errors %}{{ form.password1.errors[0] }} {% endif %}</p>
 				    </div>
                     <button type="submit" class="btn btn-default btn-primary">注册</button>
                     <p> {%if dic1 %}{{ dic1['message'] }} {% endif %}</p>
                 </form>
-                <a style="line-height: 50px;font-size: larger;margin-left: 100px;" href="/login">去登录!</a>
+                <a style="line-height: 50px;font-size: larger;text-align: center;" href="/login">去登录!</a>
             </div>
             <div class="col-md-4 column">
             </div>
