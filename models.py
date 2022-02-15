@@ -1,16 +1,15 @@
 #coding=utf-8
 from dbs import db
 
-#定义数据表和字段
-class Books(db.Model):
+#设备表
+class Devices(db.Model):
     id = db.Column(db.Integer,primary_key = True,autoincrement=True)
-    book_name = db.Column(db.String(50))
-    book_type = db.Column(db.String(50))
-    book_introduction = db.Column(db.String(100))
-    issue_year = db.Column(db.String(50))
-    book_file_name = db.Column(db.String(50))
-    add_book_time = db.Column(db.String(50))
-    number_of_downloads = db.Column(db.Integer)
+    user_name = db.Column(db.String(50))
+    plant_name = db.Column(db.String(50))
+    plant_type = db.Column(db.String(50))
+    status = db.Column(db.String(100))
+    last_watering_time = db.Column(db.String(50))
+    suggest_watering_time = db.Column(db.String(50))
 
     def __init__(self,id,book_name,book_type,book_introduction,issue_year,book_file_name,add_book_time,number_of_downloads):
         self.id = id
