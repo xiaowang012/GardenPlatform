@@ -5,7 +5,7 @@ from forms import UserForms,RegisterForms,UploadFileForms,SearchBookForms,\
     AddBooksForms,AddPermissionForms,UploadPermissionForms
 from werkzeug.utils import secure_filename
 from config import DataBaseConfig,Config
-#from models import User,Books,Permission,UserGroup
+from models import User,Devices ,Permission,UserGroup
 from decorator import login_required, \
     routing_permission_check,get_hash_value
 import os
