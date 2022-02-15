@@ -5,7 +5,7 @@ from forms import UserForms,RegisterForms,UploadFileForms,SearchBookForms,\
     AddBooksForms,AddPermissionForms,UploadPermissionForms
 from werkzeug.utils import secure_filename
 from config import DataBaseConfig,Config
-from models import User,Books,Permission,UserGroup
+#from models import User,Books,Permission,UserGroup
 from decorator import login_required, \
     routing_permission_check,get_hash_value
 import os
@@ -22,7 +22,7 @@ app.config.from_object(Config)
 db.init_app(app)
 
 #创建数据表
-db.create_all(app=app)
+#db.create_all(app=app)
 
 #跳转到主页或登录页
 @app.route('/',methods = ['POST','GET'])
