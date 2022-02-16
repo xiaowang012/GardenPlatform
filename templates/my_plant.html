@@ -144,6 +144,9 @@
                                 设备ID
                             </th>
                             <th>
+                                用户名
+                            </th>
+                            <th>
                                 植物名称
                             </th>
                             <th>
@@ -159,57 +162,51 @@
                                 建议浇水周期
                             </th>
                             <th>
+                                绑定设备
+                            </th>
+                            <th>
+                                开关编号
+                            </th>
+                            <th>
                                 操作
                             </th>
                         </tr>
                     </thead>
                     <tbody>
-                        <tr>
-                            <td>
-                                1
-                            </td>
-                            <td>
-                                月季1
-                            </td>
-                            <td>
-                                月季
-                            </td>
-                            <td>
-                                当前在线
-                            </td>
-                            <td>
-                                2022/2/11 14:00
-                            </td>
-                            <td>
-                                3天1次
-                            </td>
-                            <td>
-                                <a href="#" > 浇水</a><a href="#" > 定时浇水</a> <a href="#" > 删除设备</a><a href="#" > 托管设备</a><a href="#" > 修改属性</a><a href="#" > 邮件提醒</a>
-                            </td>
-                        </tr>
-                        <tr class="success">
-                            <td>
-                                2
-                            </td>
-                            <td>
-                                太阳花2
-                            </td>
-                            <td>
-                                太阳花
-                            </td>
-                            <td>
-                                离线
-                            </td>
-                            <td>
-                                2022/2/11 14:00
-                            </td>
-                            <td>
-                                7天1次
-                            </td>
-                            <td>
-                                <a href="#" > 浇水</a><a href="#" > 定时浇水</a> <a href="#" > 删除设备</a><a href="#" > 托管设备</a><a href="#" > 修改属性</a><a href="#" > 邮件提醒</a>
-                            </td>
-                        </tr>
+                        {% for item in list1 %}
+                            <tr class="{{ item['style'] }}">
+                                <td>
+                                    {{ item['id'] }}
+                                </td>
+                                <td>
+                                    {{ item['user_name'] }}
+                                </td>
+                                <td>
+                                    {{ item['plant_name'] }}
+                                </td>
+                                <td>
+                                    {{ item['plant_type'] }} 
+                                </td>
+                                <td>
+                                    {{ item['status'] }}
+                                </td>
+                                <td>
+                                    {{ item['last_watering_time'] }}
+                                </td>
+                                <td>
+                                    {{ item['suggest_watering_time'] }}
+                                </td>
+                                <td>
+                                    {{ item['device_name'] }}
+                                </td>
+                                <td>
+                                    {{ item['switch_number'] }}
+                                </td>
+                                <td>
+                                    <a href="#" > 浇水</a><a href="#" > 定时浇水</a> <a href="#" > 删除设备</a><a href="#" > 托管设备</a><a href="#" > 修改属性</a><a href="#" > 邮件提醒</a>
+                                </td>
+                            </tr>  
+                        {% endfor %}
                     </tbody>
                 </table>
                 <div class="row clearfix">
