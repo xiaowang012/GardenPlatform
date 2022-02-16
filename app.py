@@ -1,8 +1,7 @@
 #coding=utf-8
 from flask import Flask,render_template,request,\
     url_for,redirect,session,Response,g,jsonify,abort
-from forms import UserForms,RegisterForms,UploadFileForms,SearchBookForms,\
-    AddBooksForms,AddPermissionForms,UploadPermissionForms
+from forms import UserForms,RegisterForms,SearchPlantForms
 from werkzeug.utils import secure_filename
 from config import DataBaseConfig,Config
 from models import User,Devices ,Permission,UserGroup
@@ -99,6 +98,7 @@ def login():
             return render_template('login.html',form = form)
 
 #用户登出
+@login_required
 @app.route('/logout',methods = ['POST','GET'])
 def logout():  
     if 'user_id' in session:
@@ -106,6 +106,8 @@ def logout():
     return redirect('login')
 
 #用户主页
+@login_required
+#@routing_permission_check
 @app.route('/home',methods = ['POST','GET'])
 def index():
     if request.method == 'GET':
@@ -116,24 +118,42 @@ def index():
 #我的盆摘
 @app.route('/my_plant',methods = ['POST','GET'])
 def my_plant():
+    form = SearchPlantForms()
+    username = session.get('user_id')
     if request.method == 'GET':
-        return render_template('my_plant.html')
-    else:
-        return 'f'
+        dic1 = {'username':username,'active1':'active','active2':'','active3':'',\
+        'active4':'','active5':'','current_page_number':1}
+        #查询devices表中的所有数据
+        devices_info = Devices.query.limit(10).all()
+        if len(devices_info) ==0:
+            devices_info_list=[]
+        else:
+            devices_info_list = []
+            for i in devices_info:
+                devices_info_list.append(i.__dict__)
+            style_list = ['success','info','warning','error']
+            for dict_data in devices_info_list:
+                style_value = random.choice(style_list)
+                dict_data['style'] = style_value
+        return render_template('my_plant.html',form = form,dic1 = dic1,list1 = devices_info_list)
+    elif request.method == 'POST':
+        pass
 
 #朋友圈
 @app.route('/my_friends',methods = ['POST','GET'])
 def my_friends():
+    form = SearchBookForms()
     if request.method == 'GET':
-        return render_template('my_friends.html')
+        return render_template('my_friends.html',form = form)
     else:
         return 'f'
 
 #后台管理
 @app.route('/management',methods = ['POST','GET'])
 def management():
+    form = SearchBookForms()
     if request.method == 'GET':
-        return render_template('management.html')
+        return render_template('management.html',form = form)
     else:
         return 'f'
 

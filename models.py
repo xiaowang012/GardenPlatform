@@ -10,16 +10,19 @@ class Devices(db.Model):
     status = db.Column(db.String(100))
     last_watering_time = db.Column(db.String(50))
     suggest_watering_time = db.Column(db.String(50))
+    device_name = db.Column(db.String(50))
+    switch_number = db.Column(db.Integer)
 
-    def __init__(self,id,book_name,book_type,book_introduction,issue_year,book_file_name,add_book_time,number_of_downloads):
+    def __init__(self,id,user_name,plant_name,plant_type,status,last_watering_time,suggest_watering_time,device_name,switch_number):
         self.id = id
-        self.book_name = book_name
-        self.book_type = book_type
-        self.book_introduction = book_introduction
-        self.issue_year = issue_year
-        self.book_file_name = book_file_name
-        self.add_book_time = add_book_time
-        self.number_of_downloads = number_of_downloads
+        self.user_name = user_name
+        self.plant_name = plant_name
+        self.plant_type = plant_type
+        self.status = status
+        self.last_watering_time = last_watering_time
+        self.suggest_watering_time = suggest_watering_time
+        self.device_name = device_name
+        self.switch_number = switch_number
         
 #用户表
 class User(db.Model):
@@ -57,3 +60,6 @@ class UserGroup(db.Model):
         self.id = id
         self.name = name
 
+#指令表
+# class Commands(db.Model):
+#     pass

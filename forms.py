@@ -27,24 +27,15 @@ class AddBooksForms(FlaskForm):
     bookfile = FileField('bookfile',validators = [FileRequired(message = 'File cannot be empty!'),FileAllowed(['pdf','doc','docx','txt'],message = 'File format error (pdf,doc,docx,txt only)!')])
     submit = SubmitField('submit')
 
-#home界面查询书本的表单
-class SearchBookForms(FlaskForm):
-    book_name= StringField('book_name',validators = [DataRequired()])
+#我的盆摘界面查询植物的表单
+class SearchPlantForms(FlaskForm):
+    plant_name= StringField('plant_name',validators = [DataRequired()])
     submit = SubmitField('submit')
 
 #批量导入用户的表单
 class UploadFileForms(FlaskForm):
     file = FileField('file',validators = [FileRequired(message = 'File cannot be empty!'),FileAllowed(['xlsx','xls'],message = 'File format error (XLSX/XLS only)!')])
     submit = SubmitField('submit')
-
-# #book管理界面修改书本表单
-# class UpdateBookForms(FlaskForm):
-#     book_name = StringField('bookname1') 
-#     book_type = StringField('booktype1')
-#     book_description = TextAreaField('book_description')
-#     issue_year = DateField ('issue_year')
-#     file_name = StringField('file_name')
-#     submit = SubmitField('submit')
 
 #添加权限表单
 class AddPermissionForms(FlaskForm):

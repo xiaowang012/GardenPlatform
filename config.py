@@ -11,8 +11,7 @@ para_path = basedir +os.sep + "parameters.json"
 if os.path.isfile(para_path) == True:
     try:
         with open(para_path) as f:
-            paras = json.load(f)
-            
+            paras = json.load(f)       
     except:
         Error2 = Exception("读取json异常!")
         raise Error2
