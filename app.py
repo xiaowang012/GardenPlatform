@@ -23,6 +23,9 @@ db.init_app(app)
 #创建数据表
 #db.create_all(app=app)
 
+#全局变量
+PLANT_NAME = []
+
 #跳转到主页或登录页
 @app.route('/',methods = ['POST','GET'])
 def host():
@@ -89,10 +92,10 @@ def login():
                     session['user_id'] = user
                     return redirect(url_for('index'))
                 else:
-                    dic1 = {'title':'error','message':'Incorrect password or user does not exist!'}
+                    dic1 = {'title':'error','message':'不正确的密码或用户不存在!'}
                     return render_template('login.html',form = form,dic1 = dic1)
             else:
-                dic1 = {'title':'error','message':'Incorrect password or user does not exist!'}
+                dic1 = {'title':'error','message':'不正确的密码或用户不存在!'}
                 return render_template('login.html',form =form,dic1 =dic1)
         else:
             return render_template('login.html',form = form)
@@ -112,37 +115,200 @@ def logout():
 def index():
     if request.method == 'GET':
         return render_template('home.html')
-    else:
-        return 'f'
 
 #我的盆摘
-@app.route('/my_plant',methods = ['POST','GET'])
+@login_required
+@app.route('/my_plant',methods = ['GET'])
 def my_plant():
     form = SearchPlantForms()
-    username = session.get('user_id')
     if request.method == 'GET':
-        dic1 = {'username':username,'active1':'active','active2':'','active3':'',\
+        dic1 = {'active1':'active','active2':'','active3':'',\
         'active4':'','active5':'','current_page_number':1}
         #查询devices表中的所有数据
+        devices_info_list=[]
         devices_info = Devices.query.limit(10).all()
-        if len(devices_info) ==0:
-            devices_info_list=[]
+        if len(devices_info) == 0:
+            pass
         else:
-            devices_info_list = []
             for i in devices_info:
-                devices_info_list.append(i.__dict__)
+                dic_search_info =  i.__dict__
+                del dic_search_info['_sa_instance_state']
+                devices_info_list.append(dic_search_info)
             style_list = ['success','info','warning','error']
             for dict_data in devices_info_list:
-                style_value = random.choice(style_list)
-                dict_data['style'] = style_value
+                dict_data['style'] = random.choice(style_list)
         return render_template('my_plant.html',form = form,dic1 = dic1,list1 = devices_info_list)
-    elif request.method == 'POST':
-        pass
+
+#我的盆栽翻页
+@login_required
+@app.route('/my_plant/page')
+def my_plant_page():
+    form = SearchPlantForms()
+    if request.method == 'GET':
+        number = request.args.get('number')
+        try:
+            number = int(number)
+        except:
+            return abort(404)
+        else:
+            dic1 = {'active1':'','active2':'','active3':'',\
+            'active4':'','active5':'','current_page_number':number}
+            #根据页码控制分页样式
+            if 1 <= number <= 5:
+                dic1['active'+str(number)] = 'active'
+            elif number > 5:
+                dic1['active_next'] = 'active'
+            #根据页码查询数据
+            offset_num = (int(number)-1)*10
+            limit_num = 10
+            #查询devices表中的所有数据
+            devices_info_list=[]
+            devices_info = Devices.query.limit(limit_num).offset(offset_num).all()
+            if len(devices_info) == 0:
+                pass
+            else:
+                for i in devices_info:
+                    dic_search_info =  i.__dict__
+                    del dic_search_info['_sa_instance_state']
+                    devices_info_list.append(dic_search_info)
+                style_list = ['success','info','warning','error']
+                for dict_data in devices_info_list:
+                    dict_data['style'] = random.choice(style_list)
+            return render_template('my_plant.html',form = form,dic1 = dic1,list1 = devices_info_list)
+
+
+#我的盆摘设备查询主页
+@login_required
+@app.route('/my_plant/search/page',methods = ['POST'])
+def search_plant():
+    form = SearchPlantForms()
+    if request.method == 'POST':
+        if form.validate_on_submit():
+            plant_name = request.form['plant_name']
+            PLANT_NAME.append(plant_name)
+            #默认查询第一页(10条)的数据(直接post进来的数据存到PLANT_NAME中，翻页时用,点击翻页按钮为get请求)
+            dic1 = {'active1':'active','active2':'','active3':'',\
+            'active4':'','active5':'','current_page_number':1}
+            #查询devices表中的所有数据
+            devices_info_list=[]
+            devices_info = Devices.query.filter_by(plant_name = plant_name).limit(10).all()
+            if len(devices_info) == 0:
+                pass
+            else:
+                for i in devices_info:
+                    dic_search_info =  i.__dict__
+                    del dic_search_info['_sa_instance_state']
+                    devices_info_list.append(dic_search_info)
+                style_list = ['success','info','warning','error']
+                for dict_data in devices_info_list:
+                    dict_data['style'] = random.choice(style_list)
+            return render_template('my_plant1.html',form = form,dic1 = dic1,list1 = devices_info_list)
+        else:
+            form_err = form.errors['plant_name'][0]
+            dic1 = {'active1':'active','active2':'','active3':'',\
+            'active4':'','active5':'','current_page_number':1,'errors':form_err}
+            #查询devices表中的所有数据
+            devices_info_list=[]
+            devices_info = Devices.query.limit(10).all()
+            if len(devices_info) == 0:
+                pass
+            else:
+                for i in devices_info:
+                    dic_search_info =  i.__dict__
+                    del dic_search_info['_sa_instance_state']
+                    devices_info_list.append(dic_search_info)
+                style_list = ['success','info','warning','error']
+                for dict_data in devices_info_list:
+                    dict_data['style'] = random.choice(style_list)
+            return render_template('my_plant1.html',form = form,dic1 = dic1,list1 = devices_info_list)
+
+#我的盆摘设备查询主页翻页
+@login_required
+@app.route('/my_plant/search/page',methods = ['GET'])
+def search_plant_page():
+    form = SearchPlantForms()
+    if request.method == 'GET':
+        number = request.args.get('number')
+        try:
+            number = int(number)
+        except:
+            return abort(404)
+        else:
+            dic1 = {'active1':'','active2':'','active3':'',\
+            'active4':'','active5':'','current_page_number':number}
+            #根据页码控制分页样式
+            if 1 <= number <= 5:
+                dic1['active'+str(number)] = 'active'
+            elif number > 5:
+                dic1['active_next'] = 'active'
+            #根据页码查询数据
+            offset_num = (int(number)-1)*10
+            limit_num = 10
+            #查询devices表中的所有数据
+            if PLANT_NAME:
+                plant_name = PLANT_NAME[-1]
+                devices_info = Devices.query.filter_by(plant_name = PLANT_NAME[-1]).limit(limit_num).offset(offset_num).all()
+            else:
+                devices_info = []
+            devices_info_list=[]
+            if len(devices_info) == 0:
+                pass
+            else:
+                for i in devices_info:
+                    dic_search_info =  i.__dict__
+                    del dic_search_info['_sa_instance_state']
+                    devices_info_list.append(dic_search_info)
+                style_list = ['success','info','warning','error']
+                for dict_data in devices_info_list:
+                    dict_data['style'] = random.choice(style_list)
+            return render_template('my_plant1.html',form = form,dic1 = dic1,list1 = devices_info_list)
+
+#我的设备按植物类别查询
+@login_required
+@app.route('/my_plant/search/type',methods = ['GET'])
+def search_plant_page_type():
+    form = SearchPlantForms()
+    if request.method == 'GET':
+        plant_type = request.args.get('type_1')
+        number = request.args.get('number')
+        if plant_type:
+            try:
+                number = int(number)
+            except:
+                return abort(404)
+            else:
+                dic1 = {'active1':'','active2':'','active3':'',\
+                'active4':'','active5':'','current_page_number':number}
+                #根据页码控制分页样式
+                if 1 <= number <= 5:
+                    dic1['active'+str(number)] = 'active'
+                elif number > 5:
+                    dic1['active_next'] = 'active'
+                #根据页码查询数据
+                offset_num = (int(number)-1)*10
+                limit_num = 10
+                #查询devices表中的所有数据
+                devices_info = Devices.query.filter_by(plant_type = plant_type).limit(limit_num).offset(offset_num).all()
+                devices_info_list=[]
+                if len(devices_info) == 0:
+                    pass
+                else:
+                    for i in devices_info:
+                        dic_search_info =  i.__dict__
+                        del dic_search_info['_sa_instance_state']
+                        devices_info_list.append(dic_search_info)
+                    style_list = ['success','info','warning','error']
+                    for dict_data in devices_info_list:
+                        dict_data['style'] = random.choice(style_list)
+                return render_template('my_plant2.html',form = form,dic1 = dic1,list1 = devices_info_list)
+        else:
+            #没拿到类型参数
+            return abort(404)
 
 #朋友圈
 @app.route('/my_friends',methods = ['POST','GET'])
 def my_friends():
-    form = SearchBookForms()
+    form = SearchPlantForms()
     if request.method == 'GET':
         return render_template('my_friends.html',form = form)
     else:
@@ -151,7 +317,7 @@ def my_friends():
 #后台管理
 @app.route('/management',methods = ['POST','GET'])
 def management():
-    form = SearchBookForms()
+    form = SearchPlantForms()
     if request.method == 'GET':
         return render_template('management.html',form = form)
     else:

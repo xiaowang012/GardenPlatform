@@ -7,29 +7,20 @@ from flask_wtf.file import FileRequired,FileAllowed
 
 #用户注册表单
 class RegisterForms(FlaskForm):
-    username = StringField('username',validators = [DataRequired('Username cannot be empty!'),Length(min=6,max=12,message = 'The username must be 6-12 characters long!')])
-    password = PasswordField ('password',validators = [DataRequired('Password cannot be empty!'),Length(min=6,max=12,message = 'The password must be 6-12 characters long!')])
-    password1 = PasswordField ('password1',validators = [DataRequired('Password1 cannot be empty!'),Length(min=6,max=12,message = 'The password must be 6-12 characters long!'),EqualTo('password',message = 'The entered passwords are inconsistent')])
+    username = StringField('username',validators = [DataRequired('用户名不能为空!'),Length(min=6,max=12,message = '用户名长度必须为6-12!')])
+    password = PasswordField ('password',validators = [DataRequired('密码不能为空!'),Length(min=6,max=12,message = '密码长度必须为6-12!')])
+    password1 = PasswordField ('password1',validators = [DataRequired('密码1不能为空!'),Length(min=6,max=12,message = '密码长度必须为6-12!'),EqualTo('password',message = '两次密码输入不一致!')])
     submit = SubmitField('submit')
 
 #用户登录表单
 class UserForms(FlaskForm):
-    username = StringField('username',validators = [DataRequired('Username cannot be empty!'),Length(min=6,max=12,message = 'The username must be 6-12 characters long!')])
-    password = PasswordField ('password',validators = [DataRequired('Password cannot be empty!'),Length(min=6,max=12,message = 'The password must be 6-12 characters long!')])
-    submit = SubmitField('submit')
-
-#添加书本表单
-class AddBooksForms(FlaskForm):
-    bookname = StringField('bookname',validators = [DataRequired('bookname cannot be empty!'),Length(1,50,message = 'The bookname must be 1-50 in length')])
-    booktype = StringField ('booktype',validators=[DataRequired('booktype cannot be empty!')])
-    book_description = TextAreaField('book_description',validators=[DataRequired('book description cannot be empty!')])
-    issue_year = DateField ('issue_year',validators=[DataRequired('book issue year cannot be empty!')])
-    bookfile = FileField('bookfile',validators = [FileRequired(message = 'File cannot be empty!'),FileAllowed(['pdf','doc','docx','txt'],message = 'File format error (pdf,doc,docx,txt only)!')])
+    username = StringField('username',validators = [DataRequired('用户名不能为空!'),Length(min=6,max=12,message = '用户名长度必须为6-12!')])
+    password = PasswordField ('password',validators = [DataRequired('密码不能为空!'),Length(min=6,max=12,message = '密码长度必须为6-12!')])
     submit = SubmitField('submit')
 
 #我的盆摘界面查询植物的表单
 class SearchPlantForms(FlaskForm):
-    plant_name= StringField('plant_name',validators = [DataRequired()])
+    plant_name= StringField('plant_name',validators = [DataRequired('输入不能为空!')])
     submit = SubmitField('submit')
 
 #批量导入用户的表单
