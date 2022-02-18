@@ -1,4 +1,5 @@
 #coding=utf-8
+from pickle import NONE
 from flask import Flask,render_template,request,\
     url_for,redirect,session,Response,g,jsonify,abort
 from forms import UserForms,RegisterForms,SearchPlantForms
@@ -133,6 +134,24 @@ def my_plant():
             for i in devices_info:
                 dic_search_info =  i.__dict__
                 del dic_search_info['_sa_instance_state']
+                #根据plant_type字段确定中文花名
+                plant_type_string = dic_search_info['plant_type']
+                if plant_type_string == "1":
+                    dic_search_info['plant_type'] = '月季花'
+                elif plant_type_string == "2":
+                    dic_search_info['plant_type'] = '玫瑰花'
+                elif plant_type_string == "3":
+                    dic_search_info['plant_type'] = '栀子花'
+                elif plant_type_string == "4":
+                    dic_search_info['plant_type'] = '太阳花'
+                elif plant_type_string == "5":
+                    dic_search_info['plant_type'] = '牡丹花'
+                elif plant_type_string == "6":
+                    dic_search_info['plant_type'] = '杜鹃花'
+                elif plant_type_string == "7":
+                    dic_search_info['plant_type'] = '其他'
+                else:
+                    dic_search_info['plant_type'] = None   
                 devices_info_list.append(dic_search_info)
             style_list = ['success','info','warning','error']
             for dict_data in devices_info_list:
@@ -170,6 +189,24 @@ def my_plant_page():
                 for i in devices_info:
                     dic_search_info =  i.__dict__
                     del dic_search_info['_sa_instance_state']
+                    #根据plant_type字段确定中文花名
+                    plant_type_string = dic_search_info['plant_type']
+                    if plant_type_string == "1":
+                        dic_search_info['plant_type'] = '月季花'
+                    elif plant_type_string == "2":
+                        dic_search_info['plant_type'] = '玫瑰花'
+                    elif plant_type_string == "3":
+                        dic_search_info['plant_type'] = '栀子花'
+                    elif plant_type_string == "4":
+                        dic_search_info['plant_type'] = '太阳花'
+                    elif plant_type_string == "5":
+                        dic_search_info['plant_type'] = '牡丹花'
+                    elif plant_type_string == "6":
+                        dic_search_info['plant_type'] = '杜鹃花'
+                    elif plant_type_string == "7":
+                        dic_search_info['plant_type'] = '其他'
+                    else:
+                        dic_search_info['plant_type'] = None 
                     devices_info_list.append(dic_search_info)
                 style_list = ['success','info','warning','error']
                 for dict_data in devices_info_list:
@@ -198,6 +235,24 @@ def search_plant():
                 for i in devices_info:
                     dic_search_info =  i.__dict__
                     del dic_search_info['_sa_instance_state']
+                    #根据plant_type字段确定中文花名
+                    plant_type_string = dic_search_info['plant_type']
+                    if plant_type_string == "1":
+                        dic_search_info['plant_type'] = '月季花'
+                    elif plant_type_string == "2":
+                        dic_search_info['plant_type'] = '玫瑰花'
+                    elif plant_type_string == "3":
+                        dic_search_info['plant_type'] = '栀子花'
+                    elif plant_type_string == "4":
+                        dic_search_info['plant_type'] = '太阳花'
+                    elif plant_type_string == "5":
+                        dic_search_info['plant_type'] = '牡丹花'
+                    elif plant_type_string == "6":
+                        dic_search_info['plant_type'] = '杜鹃花'
+                    elif plant_type_string == "7":
+                        dic_search_info['plant_type'] = '其他'
+                    else:
+                        dic_search_info['plant_type'] = None 
                     devices_info_list.append(dic_search_info)
                 style_list = ['success','info','warning','error']
                 for dict_data in devices_info_list:
@@ -216,6 +271,24 @@ def search_plant():
                 for i in devices_info:
                     dic_search_info =  i.__dict__
                     del dic_search_info['_sa_instance_state']
+                    #根据plant_type字段确定中文花名
+                    plant_type_string = dic_search_info['plant_type']
+                    if plant_type_string == "1":
+                        dic_search_info['plant_type'] = '月季花'
+                    elif plant_type_string == "2":
+                        dic_search_info['plant_type'] = '玫瑰花'
+                    elif plant_type_string == "3":
+                        dic_search_info['plant_type'] = '栀子花'
+                    elif plant_type_string == "4":
+                        dic_search_info['plant_type'] = '太阳花'
+                    elif plant_type_string == "5":
+                        dic_search_info['plant_type'] = '牡丹花'
+                    elif plant_type_string == "6":
+                        dic_search_info['plant_type'] = '杜鹃花'
+                    elif plant_type_string == "7":
+                        dic_search_info['plant_type'] = '其他'
+                    else:
+                        dic_search_info['plant_type'] = None 
                     devices_info_list.append(dic_search_info)
                 style_list = ['success','info','warning','error']
                 for dict_data in devices_info_list:
@@ -257,6 +330,24 @@ def search_plant_page():
                 for i in devices_info:
                     dic_search_info =  i.__dict__
                     del dic_search_info['_sa_instance_state']
+                    #根据plant_type字段确定中文花名
+                    plant_type_string = dic_search_info['plant_type']
+                    if plant_type_string == "1":
+                        dic_search_info['plant_type'] = '月季花'
+                    elif plant_type_string == "2":
+                        dic_search_info['plant_type'] = '玫瑰花'
+                    elif plant_type_string == "3":
+                        dic_search_info['plant_type'] = '栀子花'
+                    elif plant_type_string == "4":
+                        dic_search_info['plant_type'] = '太阳花'
+                    elif plant_type_string == "5":
+                        dic_search_info['plant_type'] = '牡丹花'
+                    elif plant_type_string == "6":
+                        dic_search_info['plant_type'] = '杜鹃花'
+                    elif plant_type_string == "7":
+                        dic_search_info['plant_type'] = '其他'
+                    else:
+                        dic_search_info['plant_type'] = None 
                     devices_info_list.append(dic_search_info)
                 style_list = ['success','info','warning','error']
                 for dict_data in devices_info_list:
@@ -269,7 +360,7 @@ def search_plant_page():
 def search_plant_page_type():
     form = SearchPlantForms()
     if request.method == 'GET':
-        plant_type = request.args.get('type_1')
+        plant_type = request.args.get('plant_type')
         number = request.args.get('number')
         if plant_type:
             try:
@@ -278,7 +369,7 @@ def search_plant_page_type():
                 return abort(404)
             else:
                 dic1 = {'active1':'','active2':'','active3':'',\
-                'active4':'','active5':'','current_page_number':number}
+                'active4':'','active5':'','current_page_number':number,'type1':plant_type}
                 #根据页码控制分页样式
                 if 1 <= number <= 5:
                     dic1['active'+str(number)] = 'active'
@@ -296,13 +387,31 @@ def search_plant_page_type():
                     for i in devices_info:
                         dic_search_info =  i.__dict__
                         del dic_search_info['_sa_instance_state']
+                        #根据plant_type字段确定中文花名
+                        plant_type_string = dic_search_info['plant_type']
+                        if plant_type_string == "1":
+                            dic_search_info['plant_type'] = '月季花'
+                        elif plant_type_string == "2":
+                            dic_search_info['plant_type'] = '玫瑰花'
+                        elif plant_type_string == "3":
+                            dic_search_info['plant_type'] = '栀子花'
+                        elif plant_type_string == "4":
+                            dic_search_info['plant_type'] = '太阳花'
+                        elif plant_type_string == "5":
+                            dic_search_info['plant_type'] = '牡丹花'
+                        elif plant_type_string == "6":
+                            dic_search_info['plant_type'] = '杜鹃花'
+                        elif plant_type_string == "7":
+                            dic_search_info['plant_type'] = '其他'
+                        else:
+                            dic_search_info['plant_type'] = None 
                         devices_info_list.append(dic_search_info)
                     style_list = ['success','info','warning','error']
                     for dict_data in devices_info_list:
                         dict_data['style'] = random.choice(style_list)
                 return render_template('my_plant2.html',form = form,dic1 = dic1,list1 = devices_info_list)
         else:
-            #没拿到类型参数
+            #没拿到plant_type参数
             return abort(404)
 
 #朋友圈
