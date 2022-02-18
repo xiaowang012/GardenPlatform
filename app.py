@@ -1,5 +1,4 @@
 #coding=utf-8
-from pickle import NONE
 from flask import Flask,render_template,request,\
     url_for,redirect,session,Response,g,jsonify,abort
 from forms import UserForms,RegisterForms,SearchPlantForms
