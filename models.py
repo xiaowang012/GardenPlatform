@@ -7,13 +7,14 @@ class Devices(db.Model):
     user_name = db.Column(db.String(50))
     plant_name = db.Column(db.String(50))
     plant_type = db.Column(db.String(50))
-    status = db.Column(db.String(100))
+    status = db.Column(db.String(50))
     last_watering_time = db.Column(db.String(50))
     suggest_watering_time = db.Column(db.String(50))
     device_name = db.Column(db.String(50))
     switch_number = db.Column(db.Integer)
+    add_time = db.Column(db.String(50))
 
-    def __init__(self,id,user_name,plant_name,plant_type,status,last_watering_time,suggest_watering_time,device_name,switch_number):
+    def __init__(self,id,user_name,plant_name,plant_type,status,last_watering_time,suggest_watering_time,device_name,switch_number,add_time):
         self.id = id
         self.user_name = user_name
         self.plant_name = plant_name
@@ -23,6 +24,7 @@ class Devices(db.Model):
         self.suggest_watering_time = suggest_watering_time
         self.device_name = device_name
         self.switch_number = switch_number
+        self.add_time = add_time
         
 #用户表
 class User(db.Model):
