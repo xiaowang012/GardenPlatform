@@ -23,9 +23,18 @@ class SearchPlantForms(FlaskForm):
     plant_name= StringField('plant_name',validators = [DataRequired('输入不能为空!')])
     submit = SubmitField('submit')
 
-#批量导入用户的表单
-class UploadFileForms(FlaskForm):
-    file = FileField('file',validators = [FileRequired(message = 'File cannot be empty!'),FileAllowed(['xlsx','xls'],message = 'File format error (XLSX/XLS only)!')])
+#我的盆摘界面添加设备
+class AddDeviceForms(FlaskForm):
+    plant_name = StringField('plant_name',validators = [DataRequired('植物名称不能为空!'),Length(1,50,message = '植物名称长度必须为1-50!')])
+    plant_type = StringField ('plant_type',validators=[DataRequired('植物类别不能为空!'),Length(1,50,message = '植物类别长度必须为1-50!')])
+    suggest_watering_time = StringField ('suggest_watering_time',validators=[DataRequired('浇水周期不能为空!'),Length(1,50,message = '浇水周期长度必须为1-50!')])
+    device_name = StringField ('device_name',validators=[DataRequired('绑定设备不能为空!'),Length(1,50,message = '绑定设备长度必须为1-50!')])
+    switch_number = StringField ('switch_number',validators=[DataRequired('开关编号不能为空!'),Length(1,50,message = '开关编号长度必须为1-50!')])
+    submit = SubmitField('submit')
+
+#我的盆摘批量导入设备
+class ImportDevicesForms(FlaskForm):
+    file = FileField('file',validators = [FileRequired(message = '文件上传不能为空!'),FileAllowed(['xlsx','xls'],message = '只支持Excel文件!')])
     submit = SubmitField('submit')
 
 #添加权限表单
