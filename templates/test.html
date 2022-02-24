@@ -1,0 +1,15 @@
+<html>
+<head>
+<script type="text/javascript">
+  function delete_confirm(url)
+  {
+  var r=confirm("您确定要删除吗?")
+    if(r){window.location.href=url
+    }
+  }
+</script>
+</head>
+<body>
+  <a href="" onclick="delete_confirm('{{ url }}')">删除</a>
+</body>
+</html>

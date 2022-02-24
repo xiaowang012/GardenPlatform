@@ -23,10 +23,19 @@
                          <a href="/my_friends">朋友圈</a>
                     </li>
                     <li class="">
-                        <a href="/management">后台管理</a>
+                        <a href="/register">用户注册</a>
                     </li>
                     <li class="">
-                        <a href="/logout">退出</a>
+                        <a href="/update_password">修改密码</a>
+                    </li>
+                    <li class="">
+                        <a href="/management">后台管理</a>
+                    </li>
+                    <li style="float: right;" class="">
+                        <div>
+                            <a id="modal-207276" href="#modal-container-207276" style="margin-right: 15px;font-size: medium;" data-toggle="modal"" >当前用户: {% if dic1['current_user'] %}{{ dic1['current_user'] }}{% endif %}</a>
+                            <a class="btn btn-default" href="/logout">退出</a>
+                        </div>
                     </li>
                 </ul>
                 <div class="page-header">
@@ -34,6 +43,43 @@
                         智能浇水平台<small><span>分享生活,分享快乐!</span></small>
                     </h1>
                 </div>
+                <!--用户个人信息的模态框-->
+                <div class="modal fade" id="modal-container-207276" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+                    <div class="modal-dialog">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">x</button>
+                                <h4 class="modal-title" id="myModalLabel">
+                                    用户个人信息
+                                </h4>
+                            </div>
+                            <div class="modal-body">
+                                <div class="panel panel-primary">
+                                    <div class="panel-heading">
+                                        <h3 class="panel-title">
+                                            用户名: {{ dic1['current_user'] }}
+                                        </h3>
+                                    </div>
+                                    <div class="panel-body">
+                                        姓名: {{ dic1['chinese_name'] }}
+                                    </div>
+                                    <div class="panel-footer">
+                                        性别: {{ dic1['sex'] }}
+                                    </div>
+                                    <div class="panel-body">
+                                        生日: {{ dic1['birthday'] }}
+                                    </div>
+                                    <div class="panel-footer">
+                                        权限: {{ dic1['permission'] }}
+                                    </div>
+                                    <div class="panel-body">
+                                        邮箱: {{ dic1['email'] }}
+                                    </div>
+                                </div>
+                            </div>
+                        </div> 
+                    </div>
+                </div> 
                 <div class="carousel slide" id="carousel-88070">
                     <ol class="carousel-indicators">
                         <li data-slide-to="0" data-target="#carousel-88070">

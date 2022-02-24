@@ -46,10 +46,29 @@ body{
 					<div class="form-group">
 						<label for="password1">再次确认:</label><input style="background: rgba(255,255,255,0.5);" type="password" class="form-control" name="password1" /><p>{%if form.password1.errors %}{{ form.password1.errors[0] }} {% endif %}</p>
 				    </div>
-                    <button type="submit" class="btn btn-default btn-primary">注册</button>
+                    <div class="form-group">
+                        <label for="chinese_name">姓名</label><input style="background: rgba(255,255,255,0.5);" type="text" class="form-control" name="chinese_name" /><p>{%if form.chinese_name.errors %}{{ form.chinese_name.errors[0] }} {% endif %}</p>
+                    </div>
+                    <div  class="form-group">
+                        <label for="sex">性别</label>
+                        <select style="background: rgba(255,255,255,0.5);" name="sex" class="form-control">
+                            <option value="Male">男</option>
+                            <option value="Female">女</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="birthday">生日</label><input style="background: rgba(255,255,255,0.5);" type="date" class="form-control" name="birthday" /><p>{%if form.birthday.errors %}{{ form.birthday.errors[0] }} {% endif %}</p>
+                    </div>
+                    <div class="form-group">
+                        <label for="email">邮箱</label><input style="background: rgba(255,255,255,0.5);" type="email" class="form-control" name="email" /><p>{%if form.email.errors %}{{ form.email.errors[0] }} {% endif %}</p>
+                    </div>
+                    <div>
+                        <button type="submit" class="btn btn-default btn-primary">注册</button><a style="line-height: 50px;font-size: larger;text-align: center;margin-left: 70px;" href="/login">去登录!</a>
+                    </div>
+                    
                     <p> {%if dic1 %}{{ dic1['message'] }} {% endif %}</p>
                 </form>
-                <a style="line-height: 50px;font-size: larger;text-align: center;" href="/login">去登录!</a>
+                <!-- <a style="line-height: 50px;font-size: larger;text-align: center;" href="/login">去登录!</a> -->
             </div>
             <div class="col-md-4 column">
             </div>
