@@ -29,17 +29,25 @@ class Devices(db.Model):
 #用户表
 class User(db.Model):
     username = db.Column(db.String(50),primary_key = True)
+    chinese_name = db.Column(db.String(100))
+    sex = db.Column(db.String(50))
+    birthday = db.Column(db.String(50))
+    email = db.Column(db.String(50))
     hash_pwd = db.Column(db.String(100))
     salt = db.Column(db.String(100))
     group_id = db.Column(db.Integer)
     add_time = db.Column(db.String(50))
 
-    def __init__(self,username,hash_pwd,salt,group_id,add_time):
+    def __init__(self,username,chinese_name,sex,birthday,email,hash_pwd,salt,group_id,add_time):
         self.username = username
         self.hash_pwd = hash_pwd
         self.salt = salt
         self.group_id =group_id
         self.add_time = add_time
+        self.chinese_name = chinese_name
+        self.sex = sex
+        self.birthday = birthday
+        self.email = email
 
 #权限表
 class Permission(db.Model):
