@@ -10,24 +10,26 @@
 
 ![](./img/register.png)
 
-### （3） 用户主页
+### （3）修改密码页面
 
-![home](./img/home.png)
+![](./img/update_passw.png)
 
-### （4）我的盆摘页面
+### （4） 用户主页
+
+![](./img/home.png)
+
+### （5）我的盆摘页面
 
 ![](./img/my_plant01.png)
-
-### 
 ![](./img/my_plant02.png)
 
-### (5）朋友圈页面
 
-![book](./img/book.png)
 
-### （6）管理员后台管理界面
+### (6）朋友圈页面
 
-​	![](./img/permission.png)
+### （7）管理员后台管理界面
+
+
 
 ### 	
 
