@@ -2,6 +2,7 @@
 import os
 import sys
 import json
+import random
 basedir = os.path.abspath(os.path.dirname(__file__))
 
 
@@ -37,7 +38,7 @@ class EmailConfig(object):
 
 
 class Config:
-    SECRET_KEY = 'r34r3ewfwfffffffffffffffffffff'
+    SECRET_KEY = paras['SECRET_KEY']
     # SQLALCHEMY_COMMIT_ON_TEARDOWN = True
     # FLASKY_MAIL_SUBJECT_PREFIX = '[Flasky]'
     # FLASKY_MAIL_SENDER = 'Flasky Admin <flasky@example.com>'
