@@ -14,15 +14,18 @@
 
 ![home](./img/home.png)
 
-### （4）管理员用户管理界面
+### （4）我的盆摘页面
 
-![](./img/user.png)
+![](./img/my_plant01.png)
 
-### （5）管理员书本管理界面
+### 
+![](./img/my_plant02.png)
+
+### (5）朋友圈页面
 
 ![book](./img/book.png)
 
-### （6）管理员权限管理界面
+### （6）管理员后台管理界面
 
 ​	![](./img/permission.png)
 
@@ -34,7 +37,7 @@
 
 ​	windows下：
 
-​			下载Python3.6以上版本（python.org）
+​			下载Python3.6以上版本(python.org)
 
 ​	Linux(centos8)：
 
