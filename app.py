@@ -1,13 +1,11 @@
 #coding=utf-8
-from flask import Flask,render_template,request,\
-    url_for,redirect,session,Response,g,jsonify,abort
-from forms import UserForms,RegisterForms,SearchPlantForms,AddDeviceForms,\
-    ImportDevicesForms
+from mimetypes import init
+from flask import Flask,render_template,request,Response,url_for,redirect,session,g,jsonify,abort
+from forms import UserForms,RegisterForms,SearchPlantForms,AddDeviceForms,ImportDevicesForms,UserUpdatePasswordForms
 from werkzeug.utils import secure_filename
 from config import DataBaseConfig,Config
 from models import User,Devices ,Permission,UserGroup
-from decorator import login_required, \
-    routing_permission_check,get_hash_value
+from decorator import login_required,routing_permission_check,get_hash_value
 import os
 import time
 from dbs import db
@@ -23,7 +21,7 @@ db.init_app(app)
 #创建数据表
 #db.create_all(app=app)
 
-#全局变量
+#全局变量植物名称
 PLANT_NAME = []
 
 #跳转到主页或登录页
@@ -44,29 +42,32 @@ def register():
         if form.validate_on_submit():
             user=request.form['username']
             passw=request.form['password'] 
+            chinese_name = request.form['chinese_name']
+            sex = request.form['sex']
+            birthday = request.form['birthday']
+            email = request.form['email']
             if not User.query.filter_by(username = user).first():
                 try:
-                    username = user
                     salt = str(time.time())
                     hash_pwd = get_hash_value(passw,salt)
                     add_time = time.strftime('%Y-%m-%d %H:%M:%S')
                     group_id = 2
-                    data = User(username,hash_pwd,salt,group_id,add_time)
+                    data = User(username = user,chinese_name = chinese_name,sex = sex,birthday = str(birthday),\
+                    email = email,hash_pwd = hash_pwd,salt = salt,group_id = group_id,add_time = add_time)
                     db.session.add(data)
                     db.session.commit()
-                    message = 'Sign up: '+ user + ' SUCCESS!'
+                    message = '注册: '+ user + ' 成功!'
                     dic2 = {'title':'SUCCESS!','message':message,'frame_type':'alert alert-success alert-dismissable'}
                     return render_template('register.html',form = form,dic2 = dic2)
                 except:
                     db.session.rollback()
-                    message = 'Sign up: '+ user + ' ERROR!'
+                    message = '注册: '+ user + ' 错误!'
                     dic2 = {'title':'ERROR!','message':message,'frame_type':'alert alert-dismissable alert-danger'}
                     return render_template('register.html',form = form,dic2 = dic2)
                 finally:
-                    db.session.close()
-                
+                    db.session.close()              
             else:
-                dic1 = {'title':'fail','message':'The user name already exists, please do not re-register!'}
+                dic1 = {'title':'fail','message':'这个用户已经存在! 请不要重复注册!'}
                 return render_template('register.html',form = form,dic1 = dic1)
         else:
             return render_template('register.html',form = form) 
@@ -113,17 +114,141 @@ def logout():
 #@routing_permission_check
 @app.route('/home',methods = ['POST','GET'])
 def index():
+    current_user = session.get('user_id')
     if request.method == 'GET':
-        return render_template('home.html')
+        #定义dic1
+        res = User.query.filter_by(username = current_user).first()
+        if res:
+            chinese_name = res.chinese_name
+            sex = res.sex
+            birthday = res.birthday
+            email = res.email
+            group_id = res.group_id
+            if sex == 'Male':
+                sex = '男'
+            elif sex == 'Female':
+                sex = '女'
+
+            if group_id == 1:
+                per = '管理员'
+            elif group_id == 2:
+                per = '普通用户'
+            #将数据加入到dic1
+            dic1 = {'current_user':current_user,'chinese_name':chinese_name,'sex':sex,\
+                'birthday':birthday,'email':email,'permission':per}
+        return render_template('home.html',dic1 = dic1)
+
+#用户查看个人信息页面
+# @login_required
+# #@routing_permission_check
+# @app.route('/UserProfile',methods = ['GET'])
+# def get_user_profile():
+#     #定义dic1字典用于渲染html的数据准备
+#     dic1 = {}
+#     #在dic1中添加从session 中获取的user_id 字段
+#     dic1['current_user'] = session.get('user_id')
+#     if request.method == 'GET':
+#         return render_template('user_profile.html',dic1 = dic1)
+
+#用户修改密码
+@login_required
+@app.route('/update_password',methods = ['POST','GET'])
+def update_password():
+    form = UserUpdatePasswordForms()
+    current_user = session.get('user_id')
+    #定义dic1 字典
+    dic1 = {}
+    #将用户加入dic1
+    dic1['current_user'] = current_user
+    if request.method == 'GET':
+        return render_template('update_password.html',form = form,dic1 = dic1)
+    elif request.method == 'POST':
+        if form.validate_on_submit():
+            username = request.form['username']
+            old_password = request.form['old_password'] 
+            new_password1 = request.form['new_password1']
+            new_password2 = request.form['new_password2']
+            if new_password1 == new_password2:
+                #根据用户名查表
+                res = User.query.filter_by(username = username).first()
+                if res:
+                    #获取原密码的hash值
+                    old_hash_password = res.hash_pwd
+                    old_salt = res.salt
+                    #计算输入密码的hash值
+                    new_hash_password = get_hash_value(old_password,old_salt)
+                    if old_hash_password == new_hash_password:
+                        #验证通过，将新密码的hash写入，写入新salt
+                        try:
+                            new_salt = str(time.time())
+                            new_hash_pwd = get_hash_value(new_password1,new_salt)
+                            #更新
+                            res.hash_pwd = new_hash_pwd
+                            res.salt = new_salt
+                            db.session.commit()
+                            message = '修改: '+ username + ' 的密码成功!'
+                            dic2 = {'title':'成功!','message':message,'frame_type':'alert alert-success alert-dismissable'}
+                            return render_template('update_password.html',form = form,dic1 = dic1,dic2 = dic2)
+                        except:
+                            db.session.rollback()
+                            message = '修改: '+ username + ' 的密码失败!'
+                            dic2 = {'title':'失败!','message':message,'frame_type':'alert alert-dismissable alert-danger'}
+                            return render_template('update_password.html',form = form,dic1 = dic1,dic2 = dic2)
+                        finally:
+                            db.session.close()              
+                    else:
+                        #输入原密码错误
+                        message = '输入原密码错误! 请重新输入!'
+                        dic2 = {'title':'失败!','message':message,'frame_type':'alert alert-dismissable alert-danger'}
+                        return render_template('update_password.html',form = form,dic1 = dic1,dic2 = dic2)
+                else:
+                    #用户不存在!
+                    message = '用户: '+ username + ' 不存在!'
+                    dic2 = {'title':'失败!','message':message,'frame_type':'alert alert-dismissable alert-danger'}
+                    return render_template('update_password.html',form = form,dic1 = dic1,dic2 = dic2)
+            else:
+                #两次输入的密码不一致
+                message = '两次输入的密码不一致! 请重新输入!'
+                dic2 = {'title':'失败!','message':message,'frame_type':'alert alert-dismissable alert-danger'}
+                return render_template('update_password.html',form = form,dic1 = dic1,dic2 = dic2)
+        else:   
+            #未通过表单校验
+            err_dic = form.errors
+            errs = ''
+            for key,value in err_dic.items():
+                errs += value[0] + '  '
+            message = errs
+            dic2 = {'title':'失败!','message':message,'frame_type':'alert alert-dismissable alert-danger'}
+            return render_template('update_password.html',form = form,dic1 = dic1,dic2 = dic2)
 
 #我的盆摘
 @login_required
 @app.route('/my_plant',methods = ['GET'])
 def my_plant():
     form = SearchPlantForms()
+    current_user = session.get('user_id')
     if request.method == 'GET':
-        dic1 = {'active1':'active','active2':'','active3':'',\
-        'active4':'','active5':'','current_page_number':1}
+        #定义dic1
+        res = User.query.filter_by(username = current_user).first()
+        if res:
+            chinese_name = res.chinese_name
+            sex = res.sex
+            birthday = res.birthday
+            email = res.email
+            group_id = res.group_id
+            if sex == 'Male':
+                sex = '男'
+            elif sex == 'Female':
+                sex = '女'
+                
+            if group_id == 1:
+                per = '管理员'
+            elif group_id == 2:
+                per = '普通用户'
+            #将数据加入到dic1
+        dic1 = {'active1':'active','active2':'','active3':'','active4':'',\
+            'active5':'','current_page_number':1,'current_user':current_user,\
+            'chinese_name':chinese_name,'sex':sex,'birthday':birthday,'email':email,'permission':per}
         #查询devices表中的所有数据
         devices_info_list=[]
         devices_info = Devices.query.limit(10).all()
@@ -159,6 +284,7 @@ def my_plant():
 @login_required
 @app.route('/my_plant/page')
 def my_plant_page():
+    current_user = session.get('user_id')
     form = SearchPlantForms()
     if request.method == 'GET':
         number = request.args.get('number')
@@ -167,8 +293,26 @@ def my_plant_page():
         except:
             return abort(404)
         else:
+            #定义dic1
+            res = User.query.filter_by(username = current_user).first()
+            if res:
+                chinese_name = res.chinese_name
+                sex = res.sex
+                birthday = res.birthday
+                email = res.email
+                group_id = res.group_id
+                if sex == 'Male':
+                    sex = '男'
+                elif sex == 'Female':
+                    sex = '女' 
+                if group_id == 1:
+                    per = '管理员'
+                elif group_id == 2:
+                    per = '普通用户'
             dic1 = {'active1':'','active2':'','active3':'',\
-            'active4':'','active5':'','current_page_number':number}
+            'active4':'','active5':'','current_page_number':number,\
+            'current_user':current_user,'chinese_name':chinese_name,\
+            'sex':sex,'birthday':birthday,'email':email,'permission':per}
             #根据页码控制分页样式
             if 1 <= number <= 5:
                 dic1['active'+str(number)] = 'active'
@@ -214,13 +358,31 @@ def my_plant_page():
 @app.route('/my_plant/search/page',methods = ['POST'])
 def search_plant():
     form = SearchPlantForms()
+    current_user = session.get('user_id')
     if request.method == 'POST':
         if form.validate_on_submit():
             plant_name = request.form['plant_name']
             PLANT_NAME.append(plant_name)
             #默认查询第一页(10条)的数据(直接post进来的数据存到PLANT_NAME中，翻页时用,点击翻页按钮为get请求)
+            #定义dic1
+            res = User.query.filter_by(username = current_user).first()
+            if res:
+                chinese_name = res.chinese_name
+                sex = res.sex
+                birthday = res.birthday
+                email = res.email
+                group_id = res.group_id
+                if sex == 'Male':
+                    sex = '男'
+                elif sex == 'Female':
+                    sex = '女' 
+                if group_id == 1:
+                    per = '管理员'
+                elif group_id == 2:
+                    per = '普通用户'
             dic1 = {'active1':'active','active2':'','active3':'',\
-            'active4':'','active5':'','current_page_number':1}
+            'active4':'','active5':'','current_page_number':1,'current_user':current_user,'chinese_name':chinese_name,\
+            'sex':sex,'birthday':birthday,'email':email,'permission':per}
             #查询devices表中的所有数据
             devices_info_list=[]
             devices_info = Devices.query.filter_by(plant_name = plant_name).limit(10).all()
@@ -253,8 +415,26 @@ def search_plant():
             return render_template('my_plant1.html',form = form,dic1 = dic1,list1 = devices_info_list)
         else:
             form_err = form.errors['plant_name'][0]
+            #定义dic1
+            res = User.query.filter_by(username = current_user).first()
+            if res:
+                chinese_name = res.chinese_name
+                sex = res.sex
+                birthday = res.birthday
+                email = res.email
+                group_id = res.group_id
+                if sex == 'Male':
+                    sex = '男'
+                elif sex == 'Female':
+                    sex = '女' 
+                if group_id == 1:
+                    per = '管理员'
+                elif group_id == 2:
+                    per = '普通用户'
             dic1 = {'active1':'active','active2':'','active3':'',\
-            'active4':'','active5':'','current_page_number':1,'errors':form_err}
+            'active4':'','active5':'','current_page_number':1,\
+            'errors':form_err,'current_user':current_user,'chinese_name':chinese_name,\
+            'sex':sex,'birthday':birthday,'email':email,'permission':per}
             #查询devices表中的所有数据
             devices_info_list=[]
             devices_info = Devices.query.limit(10).all()
@@ -291,6 +471,7 @@ def search_plant():
 @app.route('/my_plant/search/page',methods = ['GET'])
 def search_plant_page():
     form = SearchPlantForms()
+    current_user = session.get('user_id')
     if request.method == 'GET':
         number = request.args.get('number')
         try:
@@ -298,8 +479,26 @@ def search_plant_page():
         except:
             return abort(404)
         else:
+            #定义dic1
+            res = User.query.filter_by(username = current_user).first()
+            if res:
+                chinese_name = res.chinese_name
+                sex = res.sex
+                birthday = res.birthday
+                email = res.email
+                group_id = res.group_id
+                if sex == 'Male':
+                    sex = '男'
+                elif sex == 'Female':
+                    sex = '女' 
+                if group_id == 1:
+                    per = '管理员'
+                elif group_id == 2:
+                    per = '普通用户'
             dic1 = {'active1':'','active2':'','active3':'',\
-            'active4':'','active5':'','current_page_number':number}
+            'active4':'','active5':'','current_page_number':number,\
+            'current_user':current_user,'chinese_name':chinese_name,\
+            'sex':sex,'birthday':birthday,'email':email,'permission':per}
             #根据页码控制分页样式
             if 1 <= number <= 5:
                 dic1['active'+str(number)] = 'active'
@@ -348,6 +547,7 @@ def search_plant_page():
 @app.route('/my_plant/search/type',methods = ['GET'])
 def search_plant_page_type():
     form = SearchPlantForms()
+    current_user = session.get('user_id')
     if request.method == 'GET':
         plant_type = request.args.get('plant_type')
         number = request.args.get('number')
@@ -357,8 +557,26 @@ def search_plant_page_type():
             except:
                 return abort(404)
             else:
+                #定义dic1
+                res = User.query.filter_by(username = current_user).first()
+                if res:
+                    chinese_name = res.chinese_name
+                    sex = res.sex
+                    birthday = res.birthday
+                    email = res.email
+                    group_id = res.group_id
+                    if sex == 'Male':
+                        sex = '男'
+                    elif sex == 'Female':
+                        sex = '女' 
+                    if group_id == 1:
+                        per = '管理员'
+                    elif group_id == 2:
+                        per = '普通用户'
                 dic1 = {'active1':'','active2':'','active3':'',\
-                'active4':'','active5':'','current_page_number':number,'type1':plant_type}
+                'active4':'','active5':'','current_page_number':number,\
+                'type1':plant_type,'current_user':current_user,'chinese_name':chinese_name,\
+                'sex':sex,'birthday':birthday,'email':email,'permission':per}
                 #根据页码控制分页样式
                 if 1 <= number <= 5:
                     dic1['active'+str(number)] = 'active'
@@ -406,7 +624,7 @@ def search_plant_page_type():
 @app.route('/my_plant/AddDevice',methods = ['POST'])
 def add_devices():
     form = AddDeviceForms()
-    username = session.get('user_id')
+    current_user = session.get('user_id')
     if request.method == 'POST':
         if form.validate_on_submit():
             #写入数据库
@@ -417,7 +635,7 @@ def add_devices():
                 device_name = request.form['device_name']
                 switch_number = request.form['switch_number']
                 #添加到数据库
-                db.session.add(Devices(id = None,user_name = username,plant_name = plant_name,plant_type = plant_type,\
+                db.session.add(Devices(id = None,user_name = current_user,plant_name = plant_name,plant_type = plant_type,\
                     status = None,last_watering_time = None,suggest_watering_time = suggest_watering_time,device_name = device_name,\
                         switch_number = switch_number,add_time = time.strftime('%Y-%m-%d %H:%M:%S')))
                 db.session.commit()
@@ -425,7 +643,7 @@ def add_devices():
                 dic1 = {'active1':'active','active2':'','active3':'',\
                 'active4':'','active5':'','current_page_number':1,\
                 'title':' 成功! ','message':'导入成功!',\
-                'style':'alert alert-success alert-dismissable'}
+                    'style':'alert alert-success alert-dismissable','current_user':current_user}
                 #查询devices表中的所有数据
                 devices_info_list=[]
                 devices_info = Devices.query.limit(10).all()
@@ -461,7 +679,7 @@ def add_devices():
                 #渲染主页
                 dic1 = {'active1':'active','active2':'','active3':'',\
                 'active4':'','active5':'','current_page_number':1,\
-                'title':' 错误! ','message':'导入失败!',\
+                'title':' 错误! ','message':'导入失败!','current_user':current_user,\
                 'style':'alert alert-dismissable alert-danger'}
                 #查询devices表中的所有数据
                 devices_info_list=[]
@@ -504,7 +722,7 @@ def add_devices():
             #渲染主页
             dic1 = {'active1':'active','active2':'','active3':'',\
             'active4':'','active5':'','current_page_number':1,\
-            'title':' 错误! ','message':err1,\
+            'title':' 错误! ','message':err1,'current_user':current_user,\
             'style':'alert alert-dismissable alert-danger'}
             #查询devices表中的所有数据
             devices_info_list=[]
@@ -537,12 +755,59 @@ def add_devices():
                     dict_data['style'] = random.choice(style_list)
             return render_template('my_plant.html',form = form,dic1 = dic1,list1 = devices_info_list)
 
+#我的盆摘页面修改设备
+@login_required
+@app.route('/my_plant/UpdateDevice',methods = ['GET'])
+def update_device():
+    pass
+
+#我的盆摘页面删除设备
+@login_required
+@app.route('/my_plant/DeleteDevice',methods = ['GET'])
+def delete_device():
+    id = request.args.get('id')
+    try:
+        id = int(id)
+    except:
+        return abort(404)
+    else:
+        search_devices = Devices.query.filter_by(id = id).first()
+        if search_devices:
+            if session.get('user_id') == search_devices.user_name:
+                #删除
+                db.session.delete(search_devices)
+                db.session.commit()
+                return redirect(url_for('my_plant'))
+            else:
+                return render_template('error_403.html')
+        else:
+            return '未查到数据!'
+
+
+#我的盆摘页面浇花操作开始
+@login_required
+@app.route('/my_plant/WateringOperation/start',methods = ['GET'])
+def watering_operation_start():
+    pass
+
+#我的盆摘页面浇花操作停止
+@login_required
+@app.route('/my_plant/WateringOperation/end',methods = ['GET'])
+def watering_operation_stop():
+    pass
+
+#我的盆摘页面浇花操作定时浇花
+@login_required
+@app.route('/my_plant/AutoWatering',methods = ['GET'])
+def auto_watering():
+    pass
+
 #我的盆摘页面批量导入设备
 @login_required
-@app.route('/my_plant/ImportDevices',methods = ['POST'])
+@app.route('/my_plant/ImportDevices',methods = ['POST','GET'])
 def ImportDevices():
     form = ImportDevicesForms()
-    username = session.get('user_id')
+    current_user = session.get('user_id')
     if request.method =='POST':
         if form.validate_on_submit():
             #通过表单验证,接收文件并临时保存
@@ -583,7 +848,7 @@ def ImportDevices():
                             switch_number = str(switch_number).replace('.0','')
                         #print(plant_name,plant_type,suggest_watering_time,device_name,switch_number)
                         #写入数据库
-                        add_data_list.append(Devices(id = None,user_name = username,plant_name = plant_name,plant_type = plant_type,\
+                        add_data_list.append(Devices(id = None,user_name = current_user,plant_name = plant_name,plant_type = plant_type,\
                                             status = None,last_watering_time = None,suggest_watering_time = suggest_watering_time,\
                                             device_name = device_name,switch_number = switch_number,add_time = time.strftime('%Y-%m-%d %H:%M:%S')))
                     #一次添加所有数据add_all
@@ -624,7 +889,7 @@ def ImportDevices():
             title = '错误!  '
         #渲染页面
         dic1 = {'active1':'active','active2':'','active3':'',\
-        'active4':'','active5':'','current_page_number':1}
+        'active4':'','active5':'','current_page_number':1,'current_user':current_user}
         #将提示信息加入到dic1中
         dic1['message'] = message
         dic1['title'] = title
@@ -662,8 +927,8 @@ def ImportDevices():
         return render_template('my_plant.html',form = form,dic1 = dic1,list1 = devices_info_list)
 
 #我的盆摘页面批量导入设备下载模板文件
-@app.route("/my_plant/ImportDevices/DownloadTemplateFile",methods = ['GET'])
 @login_required
+@app.route("/my_plant/ImportDevices/DownloadTemplateFile",methods = ['GET'])
 def download_import_devices_template():
     file_name = 'template_devices.zip'
     file_path = os.getcwd() + os.path.join(os.sep,'media',file_name )
@@ -681,25 +946,67 @@ def download_import_devices_template():
         response.headers["Content-disposition"] = 'attachment; filename=%s' % file_name 
         return response
     else:  
-        return jsonify({'code':404,'message':'Unable to find resources'})
+        return render_template('error_404.html')
 
 #朋友圈
+@login_required
 @app.route('/my_friends',methods = ['POST','GET'])
 def my_friends():
     form = SearchPlantForms()
+    current_user = session.get('user_id')
     if request.method == 'GET':
-        return render_template('my_friends.html',form = form)
+        #定义字典渲染页面
+        #定义dic1
+        res = User.query.filter_by(username = current_user).first()
+        if res:
+            chinese_name = res.chinese_name
+            sex = res.sex
+            birthday = res.birthday
+            email = res.email
+            group_id = res.group_id
+            if sex == 'Male':
+                sex = '男'
+            elif sex == 'Female':
+                sex = '女' 
+            if group_id == 1:
+                per = '管理员'
+            elif group_id == 2:
+                per = '普通用户'
+        dic1 = {'current_user':current_user,'chinese_name':chinese_name,\
+            'sex':sex,'birthday':birthday,'email':email,'permission':per}
+        return render_template('my_friends.html',form = form,dic1 = dic1)
     else:
         return 'f'
 
 #后台管理
+@login_required
 @app.route('/management',methods = ['POST','GET'])
 def management():
     form = SearchPlantForms()
+    current_user = session.get('user_id')
     if request.method == 'GET':
-        return render_template('management.html',form = form)
+        #定义字典渲染页面
+        #定义dic1
+        res = User.query.filter_by(username = current_user).first()
+        if res:
+            chinese_name = res.chinese_name
+            sex = res.sex
+            birthday = res.birthday
+            email = res.email
+            group_id = res.group_id
+            if sex == 'Male':
+                sex = '男'
+            elif sex == 'Female':
+                sex = '女' 
+            if group_id == 1:
+                per = '管理员'
+            elif group_id == 2:
+                per = '普通用户'
+        dic1 = {'current_user':current_user,'chinese_name':chinese_name,\
+            'sex':sex,'birthday':birthday,'email':email,'permission':per}
+        return render_template('management.html',form = form,dic1 = dic1)
     else:
         return 'f'
 
 if __name__ == '__main__':
-    app.run(host = '0.0.0.0',port=5001,debug = True)
+    app.run(host = '0.0.0.0',port = 5001,debug = True)
