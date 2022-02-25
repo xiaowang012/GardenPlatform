@@ -409,7 +409,7 @@
                                 </h4>
                             </div>
                             <div class="modal-body">
-                                <form role="form" action="/my_plant/UpdateDevices" method="post" enctype = "multipart/form-data">
+                                <form role="form" action="/my_plant/UpdateDevices" method="post" >
                                     {{ form.csrf_token }}
                                     <div class="form-group">
                                         <label for="id1">ID</label><input type="text" class="form-control" name="id1" id="updateDeptId"  readonly="readonly" />
