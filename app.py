@@ -1,7 +1,8 @@
 #coding=utf-8
 from mimetypes import init
 from flask import Flask,render_template,request,Response,url_for,redirect,session,g,jsonify,abort
-from forms import UserForms,RegisterForms,SearchPlantForms,AddDeviceForms,ImportDevicesForms,UserUpdatePasswordForms
+from forms import UserForms,RegisterForms,SearchPlantForms,AddDeviceForms,ImportDevicesForms,\
+    UpdateDevicesForms,UserUpdatePasswordForms
 from werkzeug.utils import secure_filename
 from config import DataBaseConfig,Config
 from models import User,Devices ,Permission,UserGroup
@@ -239,8 +240,7 @@ def my_plant():
             if sex == 'Male':
                 sex = '男'
             elif sex == 'Female':
-                sex = '女'
-                
+                sex = '女'    
             if group_id == 1:
                 per = '管理员'
             elif group_id == 2:
@@ -351,7 +351,6 @@ def my_plant_page():
                 for dict_data in devices_info_list:
                     dict_data['style'] = random.choice(style_list)
             return render_template('my_plant.html',form = form,dic1 = dic1,list1 = devices_info_list)
-
 
 #我的盆摘设备查询主页
 @login_required
@@ -640,10 +639,26 @@ def add_devices():
                         switch_number = switch_number,add_time = time.strftime('%Y-%m-%d %H:%M:%S')))
                 db.session.commit()
                 #渲染主页
-                dic1 = {'active1':'active','active2':'','active3':'',\
-                'active4':'','active5':'','current_page_number':1,\
-                'title':' 成功! ','message':'导入成功!',\
-                    'style':'alert alert-success alert-dismissable','current_user':current_user}
+                res = User.query.filter_by(username = current_user).first()
+                if res:
+                    chinese_name = res.chinese_name
+                    sex = res.sex
+                    birthday = res.birthday
+                    email = res.email
+                    group_id = res.group_id
+                    if sex == 'Male':
+                        sex = '男'
+                    elif sex == 'Female':
+                        sex = '女'    
+                    if group_id == 1:
+                        per = '管理员'
+                    elif group_id == 2:
+                        per = '普通用户'
+                #将数据加入到dic1
+                dic1 = {'active1':'active','active2':'','active3':'','active4':'',\
+                'active5':'','current_page_number':1,'title':' 成功! ','message':'导入成功!',\
+                'style':'alert alert-success alert-dismissable','current_user':current_user,\
+                'chinese_name':chinese_name,'sex':sex,'birthday':birthday,'email':email,'permission':per}
                 #查询devices表中的所有数据
                 devices_info_list=[]
                 devices_info = Devices.query.limit(10).all()
@@ -677,10 +692,26 @@ def add_devices():
             except:
                 db.session.rollback()
                 #渲染主页
+                res = User.query.filter_by(username = current_user).first()
+                if res:
+                    chinese_name = res.chinese_name
+                    sex = res.sex
+                    birthday = res.birthday
+                    email = res.email
+                    group_id = res.group_id
+                    if sex == 'Male':
+                        sex = '男'
+                    elif sex == 'Female':
+                        sex = '女'    
+                    if group_id == 1:
+                        per = '管理员'
+                    elif group_id == 2:
+                        per = '普通用户'
                 dic1 = {'active1':'active','active2':'','active3':'',\
                 'active4':'','active5':'','current_page_number':1,\
                 'title':' 错误! ','message':'导入失败!','current_user':current_user,\
-                'style':'alert alert-dismissable alert-danger'}
+                'style':'alert alert-dismissable alert-danger','chinese_name':chinese_name,\
+                    'sex':sex,'birthday':birthday,'email':email,'permission':per}
                 #查询devices表中的所有数据
                 devices_info_list=[]
                 devices_info = Devices.query.limit(10).all()
@@ -720,10 +751,26 @@ def add_devices():
             for key,value in err_dic.items():
                 err1 += value[0] +'   '
             #渲染主页
+            res = User.query.filter_by(username = current_user).first()
+            if res:
+                chinese_name = res.chinese_name
+                sex = res.sex
+                birthday = res.birthday
+                email = res.email
+                group_id = res.group_id
+                if sex == 'Male':
+                    sex = '男'
+                elif sex == 'Female':
+                    sex = '女'    
+                if group_id == 1:
+                    per = '管理员'
+                elif group_id == 2:
+                    per = '普通用户'
             dic1 = {'active1':'active','active2':'','active3':'',\
             'active4':'','active5':'','current_page_number':1,\
             'title':' 错误! ','message':err1,'current_user':current_user,\
-            'style':'alert alert-dismissable alert-danger'}
+            'style':'alert alert-dismissable alert-danger','chinese_name':chinese_name,\
+            'sex':sex,'birthday':birthday,'email':email,'permission':per}
             #查询devices表中的所有数据
             devices_info_list=[]
             devices_info = Devices.query.limit(10).all()
@@ -757,9 +804,137 @@ def add_devices():
 
 #我的盆摘页面修改设备
 @login_required
-@app.route('/my_plant/UpdateDevice',methods = ['GET'])
+@app.route('/my_plant/UpdateDevices',methods = ['POST'])
 def update_device():
-    pass
+    form = UpdateDevicesForms()
+    current_user = session.get('user_id')
+    if request.method == 'POST':
+        if form.validate_on_submit():
+            id1 = request.form['id1']
+            plant_name1 = request.form['plant_name1']
+            plant_type1 = request.form['plant_type1']
+            suggest_watering_time1 = request.form['suggest_watering_time1']
+            device_name1 = request.form['device_name1']
+            switch_number1 = request.form['switch_number1']
+            #print(id1,plant_name1,plant_type1,suggest_watering_time1,device_name1,switch_number1)
+            if id !='':
+                device_info = Devices.query.filter_by(id = int(id1)).first()
+                if device_info:
+                    try:
+                        if device_info.plant_name != plant_name1:
+                            device_info.plant_name = plant_name1
+                            msg1 = 'plant_name'
+                        else:
+                            msg1 = ''
+
+                        if device_info.plant_type != plant_type1:
+                            device_info.plant_type = plant_type1
+                            msg2 = 'plant_type'
+                        else:
+                            msg2 = ''
+
+                        if device_info.suggest_watering_time != suggest_watering_time1:
+                            device_info.suggest_watering_time = suggest_watering_time1
+                            msg3 = 'suggest_watering_time'
+                        else:
+                            msg3 = ''
+
+                        if device_info.device_name != device_name1:
+                            device_info.device_name = device_name1
+                            msg4 = 'device_name'
+                        else:
+                            msg4 = ''
+
+                        if str(device_info.switch_number) != switch_number1:
+                            #print(type(device_info.switch_number),type(switch_number1))
+                            device_info.switch_number = switch_number1
+                            msg5 = 'switch_number'
+                        else:
+                            msg5 = ''
+                        db.session.commit()
+                        #添加成功后渲染到主页
+                        mssage_full = msg1 + ' '+msg2+ ' ' + msg3+ ' ' + msg4+ ' ' + msg5
+                        message = '修改了 '+ mssage_full +  '字段,成功!'
+                        style = 'alert alert-success alert-dismissable'
+                        title = '成功! '
+                    except:
+                        db.session.rollback()
+                        message = '写入数据库异常!'
+                        style = 'alert alert-dismissable alert-danger'
+                        title = '失败! ' 
+                    finally:
+                        db.session.close()
+                else:
+                    message = '数据库查询无数据!'
+                    style = 'alert alert-dismissable alert-danger'
+                    title = '错误! '   
+            else:
+                message = 'ID字段丢失!'
+                style = 'alert alert-dismissable alert-danger'
+                title = '错误! ' 
+        else:
+            err_dic = form.errors
+            errs = ''
+            for key,value in err_dic.items():
+                errs += value[0] + ' '
+            message = errs
+            style = 'alert alert-dismissable alert-danger'
+            title = 'forms错误! '
+            print(errs)
+        #返回对应的错误信息渲染页面
+        res = User.query.filter_by(username = current_user).first()
+        if res:
+            chinese_name = res.chinese_name
+            sex = res.sex
+            birthday = res.birthday
+            email = res.email
+            group_id = res.group_id
+            if sex == 'Male':
+                sex = '男'
+            elif sex == 'Female':
+                sex = '女'    
+            if group_id == 1:
+                per = '管理员'
+            elif group_id == 2:
+                per = '普通用户'
+            #将数据加入到dic1
+        dic1 = {'active1':'active','active2':'','active3':'','active4':'',\
+            'active5':'','current_page_number':1,'current_user':current_user,\
+            'chinese_name':chinese_name,'sex':sex,'birthday':birthday,'email':email,'permission':per}
+        #加入提示信息
+        dic1['message'] = message
+        dic1['style'] = style
+        dic1['title'] = title
+        #查询devices表中的所有数据
+        devices_info_list=[]
+        devices_info = Devices.query.limit(10).all()
+        if len(devices_info) == 0:
+            pass
+        else:
+            for i in devices_info:
+                dic_search_info =  i.__dict__
+                del dic_search_info['_sa_instance_state']
+                #根据plant_type字段确定中文花名
+                plant_type_string = dic_search_info['plant_type']
+                #花名和数字对应
+                dic_plants = {"1":"月季花",
+                            "2":"玫瑰花",
+                            "3":"栀子花",
+                            "4":"太阳花",
+                            "5":"牡丹花",
+                            "6":"杜鹃花",
+                            "7":"其他"
+                            }
+                #更新字典
+                try:
+                    dic_search_info['plant_type'] = dic_plants[plant_type_string] 
+                except:
+                    dic_search_info['plant_type'] = None  
+                devices_info_list.append(dic_search_info)
+            style_list = ['success','info','warning','error']
+            for dict_data in devices_info_list:
+                dict_data['style'] = random.choice(style_list)
+        return render_template('my_plant.html',form = form,list1 = devices_info_list,dic1 = dic1)
 
 #我的盆摘页面删除设备
 @login_required
@@ -888,8 +1063,24 @@ def ImportDevices():
             style = 'alert alert-dismissable alert-danger'
             title = '错误!  '
         #渲染页面
-        dic1 = {'active1':'active','active2':'','active3':'',\
-        'active4':'','active5':'','current_page_number':1,'current_user':current_user}
+        res = User.query.filter_by(username = current_user).first()
+        if res:
+            chinese_name = res.chinese_name
+            sex = res.sex
+            birthday = res.birthday
+            email = res.email
+            group_id = res.group_id
+            if sex == 'Male':
+                sex = '男'
+            elif sex == 'Female':
+                sex = '女' 
+            if group_id == 1:
+                per = '管理员'
+            elif group_id == 2:
+                per = '普通用户'
+        dic1 = {'active1':'active','active2':'','active3':'','active4':'','active5':'',\
+        'current_page_number':1,'current_user':current_user,'chinese_name':chinese_name,\
+            'sex':sex,'birthday':birthday,'email':email,'permission':per}
         #将提示信息加入到dic1中
         dic1['message'] = message
         dic1['title'] = title
