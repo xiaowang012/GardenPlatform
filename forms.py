@@ -51,6 +51,7 @@ class ImportDevicesForms(FlaskForm):
 
 #我的盆摘修改设备信息
 class UpdateDevicesForms(FlaskForm):
+    id1 = StringField('id1')
     plant_name1 = StringField('plant_name1',validators = [DataRequired('植物名称不能为空!'),Length(1,50,message = '植物名称长度必须为1-50!')])
     plant_type1 = StringField ('plant_type1',validators=[DataRequired('植物类别不能为空!'),Length(1,50,message = '植物类别长度必须为1-50!')])
     suggest_watering_time1 = StringField ('suggest_watering_time1',validators=[DataRequired('浇水周期不能为空!'),Length(1,50,message = '浇水周期长度必须为1-50!')])
