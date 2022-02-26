@@ -4,7 +4,7 @@ from flask import Flask,render_template,request,Response,url_for,redirect,sessio
 from forms import UserForms,RegisterForms,SearchPlantForms,AddDeviceForms,ImportDevicesForms,\
     UpdateDevicesForms,UserUpdatePasswordForms
 from werkzeug.utils import secure_filename
-from config import DataBaseConfig,Config
+from config import Config
 from models import User,Devices ,Permission,UserGroup
 from decorator import login_required,routing_permission_check,get_hash_value
 import os
@@ -13,9 +13,9 @@ from dbs import db
 import random
 import xlrd
 
+
 #初始化
 app = Flask(__name__)
-app.config.from_object(DataBaseConfig)
 app.config.from_object(Config)
 db.init_app(app)
 
@@ -251,8 +251,8 @@ def my_plant():
             'chinese_name':chinese_name,'sex':sex,'birthday':birthday,'email':email,'permission':per}
         #查询devices表中的所有数据
         devices_info_list=[]
-        devices_info = Devices.query.limit(10).all()
-        if len(devices_info) == 0:
+        devices_info = Devices.query.filter_by(user_name = current_user).limit(10)
+        if not devices_info:
             pass
         else:
             for i in devices_info:
@@ -323,8 +323,8 @@ def my_plant_page():
             limit_num = 10
             #查询devices表中的所有数据
             devices_info_list=[]
-            devices_info = Devices.query.limit(limit_num).offset(offset_num).all()
-            if len(devices_info) == 0:
+            devices_info = Devices.query.filter_by(user_name = current_user).limit(limit_num).offset(offset_num)
+            if not devices_info:
                 pass
             else:
                 for i in devices_info:
@@ -384,8 +384,8 @@ def search_plant():
             'sex':sex,'birthday':birthday,'email':email,'permission':per}
             #查询devices表中的所有数据
             devices_info_list=[]
-            devices_info = Devices.query.filter_by(plant_name = plant_name).limit(10).all()
-            if len(devices_info) == 0:
+            devices_info = Devices.query.filter_by(plant_name = plant_name,user_name = current_user).limit(10)
+            if not devices_info:
                 pass
             else:
                 for i in devices_info:
@@ -436,8 +436,8 @@ def search_plant():
             'sex':sex,'birthday':birthday,'email':email,'permission':per}
             #查询devices表中的所有数据
             devices_info_list=[]
-            devices_info = Devices.query.limit(10).all()
-            if len(devices_info) == 0:
+            devices_info = Devices.query.filter_by(user_name = current_user).limit(10)
+            if not devices_info:
                 pass
             else:
                 for i in devices_info:
@@ -509,11 +509,11 @@ def search_plant_page():
             #查询devices表中的所有数据
             if PLANT_NAME:
                 plant_name = PLANT_NAME[-1]
-                devices_info = Devices.query.filter_by(plant_name = PLANT_NAME[-1]).limit(limit_num).offset(offset_num).all()
+                devices_info = Devices.query.filter_by(plant_name = PLANT_NAME[-1],user_name = current_user).limit(limit_num).offset(offset_num)
             else:
                 devices_info = []
             devices_info_list=[]
-            if len(devices_info) == 0:
+            if not devices_info:
                 pass
             else:
                 for i in devices_info:
@@ -585,9 +585,9 @@ def search_plant_page_type():
                 offset_num = (int(number)-1)*10
                 limit_num = 10
                 #查询devices表中的所有数据
-                devices_info = Devices.query.filter_by(plant_type = plant_type).limit(limit_num).offset(offset_num).all()
+                devices_info = Devices.query.filter_by(plant_type = plant_type,user_name = current_user).limit(limit_num).offset(offset_num)
                 devices_info_list=[]
-                if len(devices_info) == 0:
+                if not devices_info:
                     pass
                 else:
                     for i in devices_info:
@@ -661,8 +661,8 @@ def add_devices():
                 'chinese_name':chinese_name,'sex':sex,'birthday':birthday,'email':email,'permission':per}
                 #查询devices表中的所有数据
                 devices_info_list=[]
-                devices_info = Devices.query.limit(10).all()
-                if len(devices_info) == 0:
+                devices_info = Devices.query.filter_by(user_name = current_user). limit(10)
+                if not devices_info:
                     pass
                 else:
                     for i in devices_info:
@@ -714,8 +714,8 @@ def add_devices():
                     'sex':sex,'birthday':birthday,'email':email,'permission':per}
                 #查询devices表中的所有数据
                 devices_info_list=[]
-                devices_info = Devices.query.limit(10).all()
-                if len(devices_info) == 0:
+                devices_info = Devices.query.filter_by(user_name = current_user). limit(10)
+                if not devices_info:
                     pass
                 else:
                     for i in devices_info:
@@ -773,8 +773,8 @@ def add_devices():
             'sex':sex,'birthday':birthday,'email':email,'permission':per}
             #查询devices表中的所有数据
             devices_info_list=[]
-            devices_info = Devices.query.limit(10).all()
-            if len(devices_info) == 0:
+            devices_info = Devices.query.filter_by(user_name = current_user).limit(10)
+            if not devices_info:
                 pass
             else:
                 for i in devices_info:
@@ -907,8 +907,8 @@ def update_device():
         dic1['title'] = title
         #查询devices表中的所有数据
         devices_info_list=[]
-        devices_info = Devices.query.limit(10).all()
-        if len(devices_info) == 0:
+        devices_info = Devices.query.filter_by(user_name = current_user).limit(10)
+        if not devices_info:
             pass
         else:
             for i in devices_info:
@@ -958,7 +958,6 @@ def delete_device():
         else:
             return '未查到数据!'
 
-
 #我的盆摘页面浇花操作开始
 @login_required
 @app.route('/my_plant/WateringOperation/start',methods = ['GET'])
@@ -980,7 +979,7 @@ def auto_watering():
 #我的盆摘页面批量导入设备
 @login_required
 @app.route('/my_plant/ImportDevices',methods = ['POST','GET'])
-def ImportDevices():
+def import_devices():
     form = ImportDevicesForms()
     current_user = session.get('user_id')
     if request.method =='POST':
@@ -1133,7 +1132,7 @@ def download_import_devices_template():
                     if not data:
                         break
                     yield data
-        response = Response(sendfile(file_path), content_type='application/octet-stream')
+        response = Response(sendfile(file_path), content_type='app/octet-stream')
         response.headers["Content-disposition"] = 'attachment; filename=%s' % file_name 
         return response
     else:  
