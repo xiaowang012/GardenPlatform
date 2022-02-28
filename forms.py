@@ -59,6 +59,17 @@ class UpdateDevicesForms(FlaskForm):
     switch_number1 = StringField ('switch_number1',validators=[DataRequired('开关编号不能为空!'),Length(1,50,message = '开关编号长度必须为1-50!')])
     submit = SubmitField('submit')
 
+# #我的盆摘浇水操作开始浇水
+# class DevicesWaterOperationStartForms(FlaskForm):
+#     id1 = StringField('id1',validators = [DataRequired('id不能为空!')])
+#     submit = SubmitField('submit')
+
+# #我的盆摘浇水操作停止浇水
+# class DevicesWaterOperationEndForms(FlaskForm):
+#     id2 = StringField('id2',validators = [DataRequired('id不能为空!')])
+#     submit = SubmitField('submit')
+
+
 #添加权限表单
 class AddPermissionForms(FlaskForm):
     group_name = StringField('group_name',validators=[DataRequired('name cannot be empty!')])
