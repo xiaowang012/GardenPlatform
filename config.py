@@ -1,7 +1,6 @@
 #coding=utf-8
 import os
 import json
-from pickle import TRUE
 basedir = os.path.abspath(os.path.dirname(__file__))
 
 #get Parameters
@@ -22,7 +21,7 @@ class Config:
     SECRET_KEY = paras['SECRET_KEY']
     #mysql
     SQLALCHEMY_DATABASE_URI = paras["SQLALCHEMY_DATABASE_URI"]
-    SQLALCHEMY_TRACK_MODIFICATIONS = False
+    SQLALCHEMY_TRACK_MODIFICATIONS = True
     #email
     MAIL_SERVER = 'smtp.qq.com'
     MAIL_PORT = 465
