@@ -5,16 +5,11 @@ basedir = os.path.abspath(os.path.dirname(__file__))
 
 #get Parameters
 para_path = basedir +os.sep + "parameters.json"
-if os.path.isfile(para_path) == True:
-    try:
-        with open(para_path) as f:
-            paras = json.load(f)       
-    except:
-        Error2 = Exception("读取json异常!")
-        raise Error2
-else:
-    Error1 = Exception("读取参数失败!")
-    raise Error1
+try:
+    with open(para_path) as f:
+        paras = json.load(f)       
+except:
+    raise Exception("read json config error!")
 
 class Config:
     #secret_key
