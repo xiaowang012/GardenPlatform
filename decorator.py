@@ -1,5 +1,5 @@
 #coding=utf-8
-from flask import session,jsonify,request,g
+from flask import session,jsonify,request,g,render_template
 from functools import wraps
 from models import Permission, User,UserGroup
 import hashlib
@@ -37,7 +37,7 @@ def routing_permission_check(func):
         #获取用户名
         user_id = session.get('user_id')
         #获取当前访问的url
-        current_url = str(request.path)
+        current_url = request.path
 
         #判断权限字典是否为空
         if PERMISSION_DICT:
@@ -50,11 +50,11 @@ def routing_permission_check(func):
                     if current_url in PERMISSION_DICT[name]:
                         return func(*args,**kwargs)
                     else:
-                        return jsonify({'code':403,'message':'Unauthorized access'})
+                        return render_template('error_403.html')
                 else:
-                    return jsonify({'code':403,'message':'Unauthorized access'})
+                    return render_template('error_403.html')
             else:
-                return jsonify({'code':403,'message':'Unauthorized access'})
+                return render_template('error_403.html')
         else:
             #在全局变量中写入权限表中得数据格式为{'admin':{},'others':{}}
             #查询所有的用户组
@@ -71,9 +71,9 @@ def routing_permission_check(func):
                             set1.add(k.url)
                         PERMISSION_DICT[j] = set1
                     else:
-                        return jsonify({'code':403,'message':'Unauthorized access'})
+                        return render_template('error_403.html')
             else:
-                return jsonify({'code':403,'message':'Unauthorized access'})
+                return render_template('error_403.html')
             #print(PERMISSION_DICT)
             result = User.query.filter(User.username == user_id).first()
             if result:
@@ -84,11 +84,11 @@ def routing_permission_check(func):
                     if current_url in PERMISSION_DICT[name]:
                         return func(*args,**kwargs)
                     else:
-                        return jsonify({'code':403,'message':'Unauthorized access'})
+                        return render_template('error_403.html')
                 else:
-                    return jsonify({'code':403,'message':'Unauthorized access'})
+                    return render_template('error_403.html')
             else:
-                return jsonify({'code':403,'message':'Unauthorized access'})
+                return render_template('error_403.html')
     return wrapper
 
 #hash加密
