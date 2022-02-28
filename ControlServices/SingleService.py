@@ -5,49 +5,18 @@ import time
 import os
 basedir = os.path.abspath(os.path.dirname(__file__))
 
-
+#file path 
 file_path = basedir +os.sep  + 'datas.json'
 file_path_log = basedir +os.sep  + 'logs.txt'
+file_path_control_commands = basedir +os.sep  + 'control_commands.json'
 
 #control commands
-control_instruction = {
-    "on": {
-        "0": "fe050000ff009835",
-        "1": "fe050001ff00c9f5",
-        "2": "fe050002ff0039f5",
-        "3": "fe050003ff006835",
-        "4": "fe050004ff00d9f4",
-        "5": "fe050005ff008834",
-        "6": "fe050006ff007834",
-        "7": "fe050007ff0029f4",
-        "8": "fe050008ff0019f7",
-        "9": "fe050009ff004837",
-        "10": "fe05000aff00b837",
-        "11": "fe05000bff00e9f7",
-        "12": "fe05000cff005836",
-        "13": "fe05000dff0009f6",
-        "14": "fe05000eff00f9f6",
-        "15": "fe05000fff00a836"
-    },
-    "off": {
-        "0": "fe0500000000d9c5",
-        "1": "fe05000100008805",
-        "2": "fe05000200007805",
-        "3": "fe050003000029c5",
-        "4": "fe05000400009804",
-        "5": "fe0500050000c9c4",
-        "6": "fe050006000039c4",
-        "7": "fe05000700006804",
-        "8": "fe05000800005807",
-        "9": "fe050009000009c7",
-        "10": "fe05000a0000f9c7",
-        "11": "fe05000b0000a807",
-        "12": "fe05000c000019c6",
-        "13": "fe05000d00004806",
-        "14": "fe05000e0000b806",
-        "15": "fe05000f0000e9c6"
-    }
-}
+try:
+    with open(file_path_control_commands,'r',encoding='utf-8') as f:
+        control_instruction = json.load(f)
+except:
+    raise Exception('read control commands error!')
+
 
 host = '0.0.0.0'
 port = 1111
