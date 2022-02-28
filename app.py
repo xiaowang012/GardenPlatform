@@ -1,17 +1,17 @@
 #coding=utf-8
-from mimetypes import init
 from flask import Flask,render_template,request,Response,url_for,redirect,session,g,jsonify,abort
 from forms import UserForms,RegisterForms,SearchPlantForms,AddDeviceForms,ImportDevicesForms,\
     UpdateDevicesForms,UserUpdatePasswordForms
 from werkzeug.utils import secure_filename
 from config import Config
 from models import User,Devices ,Permission,UserGroup
-from decorator import login_required,routing_permission_check,get_hash_value
+from decorator import login_required,routing_permission_check,get_hash_value,PERMISSION_DICT
 import os
 import time
 from dbs import db
 import random
 import xlrd
+import json
 
 
 #初始化
@@ -103,17 +103,17 @@ def login():
             return render_template('login.html',form = form)
 
 #用户登出
-@login_required
 @app.route('/logout',methods = ['POST','GET'])
+@login_required
 def logout():  
     if 'user_id' in session:
         session.pop('user_id')
     return redirect('login')
 
 #用户主页
-@login_required
-#@routing_permission_check
 @app.route('/home',methods = ['POST','GET'])
+@login_required
+@routing_permission_check
 def index():
     current_user = session.get('user_id')
     if request.method == 'GET':
@@ -140,9 +140,9 @@ def index():
         return render_template('home.html',dic1 = dic1)
 
 #用户查看个人信息页面
+# @app.route('/UserProfile',methods = ['GET'])
 # @login_required
 # #@routing_permission_check
-# @app.route('/UserProfile',methods = ['GET'])
 # def get_user_profile():
 #     #定义dic1字典用于渲染html的数据准备
 #     dic1 = {}
@@ -152,8 +152,9 @@ def index():
 #         return render_template('user_profile.html',dic1 = dic1)
 
 #用户修改密码
-@login_required
 @app.route('/update_password',methods = ['POST','GET'])
+@login_required
+@routing_permission_check
 def update_password():
     form = UserUpdatePasswordForms()
     current_user = session.get('user_id')
@@ -223,8 +224,9 @@ def update_password():
             return render_template('update_password.html',form = form,dic1 = dic1,dic2 = dic2)
 
 #我的盆摘
-@login_required
 @app.route('/my_plant',methods = ['GET'])
+@login_required
+@routing_permission_check
 def my_plant():
     form = SearchPlantForms()
     current_user = session.get('user_id')
@@ -281,8 +283,9 @@ def my_plant():
         return render_template('my_plant.html',form = form,dic1 = dic1,list1 = devices_info_list)
 
 #我的盆栽翻页
+@app.route('/my_plant/page',methods = ['GET'])
 @login_required
-@app.route('/my_plant/page')
+@routing_permission_check
 def my_plant_page():
     current_user = session.get('user_id')
     form = SearchPlantForms()
@@ -353,8 +356,9 @@ def my_plant_page():
             return render_template('my_plant.html',form = form,dic1 = dic1,list1 = devices_info_list)
 
 #我的盆摘设备查询主页
-@login_required
 @app.route('/my_plant/search/page',methods = ['POST'])
+@login_required
+@routing_permission_check
 def search_plant():
     form = SearchPlantForms()
     current_user = session.get('user_id')
@@ -466,8 +470,9 @@ def search_plant():
             return render_template('my_plant1.html',form = form,dic1 = dic1,list1 = devices_info_list)
 
 #我的盆摘设备查询主页翻页
-@login_required
 @app.route('/my_plant/search/page',methods = ['GET'])
+@login_required
+@routing_permission_check
 def search_plant_page():
     form = SearchPlantForms()
     current_user = session.get('user_id')
@@ -542,8 +547,9 @@ def search_plant_page():
             return render_template('my_plant1.html',form = form,dic1 = dic1,list1 = devices_info_list)
 
 #我的盆摘按植物类别查询
-@login_required
 @app.route('/my_plant/search/type',methods = ['GET'])
+@login_required
+@routing_permission_check
 def search_plant_page_type():
     form = SearchPlantForms()
     current_user = session.get('user_id')
@@ -619,8 +625,9 @@ def search_plant_page_type():
             return abort(404)
 
 #我的盆摘页面添加设备
-@login_required
 @app.route('/my_plant/AddDevice',methods = ['POST'])
+@login_required
+@routing_permission_check
 def add_devices():
     form = AddDeviceForms()
     current_user = session.get('user_id')
@@ -803,8 +810,9 @@ def add_devices():
             return render_template('my_plant.html',form = form,dic1 = dic1,list1 = devices_info_list)
 
 #我的盆摘页面修改设备
-@login_required
 @app.route('/my_plant/UpdateDevices',methods = ['POST'])
+@login_required
+@routing_permission_check
 def update_device():
     form = UpdateDevicesForms()
     current_user = session.get('user_id')
@@ -937,8 +945,9 @@ def update_device():
         return render_template('my_plant.html',form = form,list1 = devices_info_list,dic1 = dic1)
 
 #我的盆摘页面删除设备
-@login_required
 @app.route('/my_plant/DeleteDevice',methods = ['GET'])
+@login_required
+@routing_permission_check
 def delete_device():
     id = request.args.get('id')
     try:
@@ -959,26 +968,217 @@ def delete_device():
             return '未查到数据!'
 
 #我的盆摘页面浇花操作开始
-@login_required
 @app.route('/my_plant/WateringOperation/start',methods = ['GET'])
+@login_required
+@routing_permission_check
 def watering_operation_start():
-    pass
+    id1 = request.args.get('id')
+    current_user = session.get('user_id')
+    form = AddDeviceForms()
+    if request.method == 'GET':
+        if id1:
+            device_info = Devices.query.filter_by(user_name = current_user,id = int(id1)).first()
+            if device_info:
+                #设备编号
+                device_name = device_info.device_name
+                switch_number = device_info.switch_number
+                #print(device_name,str(switch_number))
+                dic1 = {}
+                dic1["device"] = device_name
+                dic1["command"] = 'on#' + str(switch_number)
+                time_1 = str(time.time())
+                dic1["time"] = time_1
+                json_path = os.getcwd()+ os.sep +"ControlServices" +os.sep + 'datas.json'
+                txt_status_path = os.getcwd()+ os.sep +"ControlServices" +os.sep + 'logs.txt'
+                with open(json_path,'w',encoding='utf-8') as f:
+                    json.dump(dic1,f)
+                status = None
+                for i in range (10):
+                    time.sleep(1)
+                    with open(txt_status_path,'r',encoding='utf-8') as f:
+                        text = f.read()
+                    if time_1 in text:
+                        status = 'OK'
+                        break
+                if status == 'OK':   
+                    message = '设备: '+ str(id1) +' 浇水成功! '
+                    style = 'alert alert-success alert-dismissable'
+                    title = '成功!  ' 
+                else:
+                    message = '设备: '+ str(id1) +' 浇水失败! ' 
+                    style = 'alert alert-dismissable alert-danger'
+                    title = '失败!  '
+            else:
+                message = '设备权限错误! ' 
+                style = 'alert alert-dismissable alert-danger'
+                title = '失败!  '
+        else:
+            message = '设备不存在!' 
+            style = 'alert alert-dismissable alert-danger'
+            title = '失败!  '
+    #渲染页面
+    res = User.query.filter_by(username = current_user).first()
+    if res:
+        chinese_name = res.chinese_name
+        sex = res.sex
+        birthday = res.birthday
+        email = res.email
+        group_id = res.group_id
+        if sex == 'Male':
+            sex = '男'
+        elif sex == 'Female':
+            sex = '女'    
+        if group_id == 1:
+            per = '管理员'
+        elif group_id == 2:
+            per = '普通用户'
+    dic1 = {'active1':'active','active2':'','active3':'','active4':'','active5':'','current_page_number':1,\
+    'title':title,'message':message,'current_user':current_user,'style':style,'chinese_name':chinese_name,\
+    'sex':sex,'birthday':birthday,'email':email,'permission':per}
+    #查询devices表中的所有数据
+    devices_info_list=[]
+    devices_info = Devices.query.filter_by(user_name = current_user).limit(10)
+    if not devices_info:
+        pass
+    else:
+        for i in devices_info:
+            dic_search_info =  i.__dict__
+            del dic_search_info['_sa_instance_state']
+            #根据plant_type字段确定中文花名
+            plant_type_string = dic_search_info['plant_type']
+            #花名和数字对应
+            dic_plants = {"1":"月季花",
+                        "2":"玫瑰花",
+                        "3":"栀子花",
+                        "4":"太阳花",
+                        "5":"牡丹花",
+                        "6":"杜鹃花",
+                        "7":"其他"
+                        }
+            #更新字典
+            try:
+                dic_search_info['plant_type'] = dic_plants[plant_type_string] 
+            except:
+                dic_search_info['plant_type'] = None  
+            devices_info_list.append(dic_search_info)
+        style_list = ['success','info','warning','error']
+        for dict_data in devices_info_list:
+            dict_data['style'] = random.choice(style_list)
+    return render_template('my_plant.html',form = form,dic1 = dic1,list1 = devices_info_list)
+    
 
 #我的盆摘页面浇花操作停止
-@login_required
 @app.route('/my_plant/WateringOperation/end',methods = ['GET'])
+@login_required
+@routing_permission_check
 def watering_operation_stop():
-    pass
+    id2 = request.args.get('id')
+    current_user = session.get('user_id')
+    form = AddDeviceForms()
+    if request.method == 'GET':
+        if id2:
+            device_info = Devices.query.filter_by(user_name = current_user,id = int(id2)).first()
+            if device_info:
+                #设备编号
+                device_name = device_info.device_name
+                switch_number = device_info.switch_number
+                #print(device_name,str(switch_number))
+                dic1 = {}
+                dic1["device"] = device_name
+                dic1["command"] = 'off#' + str(switch_number)
+                time_1 = str(time.time())
+                dic1["time"] = time_1
+                json_path = os.getcwd()+ os.sep +"ControlServices" +os.sep + 'datas.json'
+                txt_status_path = os.getcwd()+ os.sep +"ControlServices" +os.sep + 'logs.txt'
+                with open(json_path,'w',encoding='utf-8') as f:
+                    json.dump(dic1,f)
+                status = None
+                for i in range (10):
+                    time.sleep(1)
+                    with open(txt_status_path,'r',encoding='utf-8') as f:
+                        text = f.read()
+                    if time_1 in text:
+                        status = 'OK'
+                        break
+                if status == 'OK':   
+                    message = '设备: '+ str(id2) +' 停止成功! '
+                    style = 'alert alert-success alert-dismissable'
+                    title = '成功!  ' 
+                else:
+                    message = '设备: '+ str(id2) +' 停止失败! ' 
+                    style = 'alert alert-dismissable alert-danger'
+                    title = '失败!  '
+            else:
+                message = '设备权限错误! ' 
+                style = 'alert alert-dismissable alert-danger'
+                title = '失败!  '
+        else:
+            message = '设备不存在!' 
+            style = 'alert alert-dismissable alert-danger'
+            title = '失败!  '
+    #渲染页面
+    res = User.query.filter_by(username = current_user).first()
+    if res:
+        chinese_name = res.chinese_name
+        sex = res.sex
+        birthday = res.birthday
+        email = res.email
+        group_id = res.group_id
+        if sex == 'Male':
+            sex = '男'
+        elif sex == 'Female':
+            sex = '女'    
+        if group_id == 1:
+            per = '管理员'
+        elif group_id == 2:
+            per = '普通用户'
+    dic1 = {'active1':'active','active2':'','active3':'','active4':'','active5':'','current_page_number':1,\
+    'title':title,'message':message,'current_user':current_user,'style':style,'chinese_name':chinese_name,\
+    'sex':sex,'birthday':birthday,'email':email,'permission':per}
+    #查询devices表中的所有数据
+    devices_info_list=[]
+    devices_info = Devices.query.filter_by(user_name = current_user).limit(10)
+    if not devices_info:
+        pass
+    else:
+        for i in devices_info:
+            dic_search_info =  i.__dict__
+            del dic_search_info['_sa_instance_state']
+            #根据plant_type字段确定中文花名
+            plant_type_string = dic_search_info['plant_type']
+            #花名和数字对应
+            dic_plants = {"1":"月季花",
+                        "2":"玫瑰花",
+                        "3":"栀子花",
+                        "4":"太阳花",
+                        "5":"牡丹花",
+                        "6":"杜鹃花",
+                        "7":"其他"
+                        }
+            #更新字典
+            try:
+                dic_search_info['plant_type'] = dic_plants[plant_type_string] 
+            except:
+                dic_search_info['plant_type'] = None  
+            devices_info_list.append(dic_search_info)
+        style_list = ['success','info','warning','error']
+        for dict_data in devices_info_list:
+            dict_data['style'] = random.choice(style_list)
+    return render_template('my_plant.html',form = form,dic1 = dic1,list1 = devices_info_list)
+    
+    
 
 #我的盆摘页面浇花操作定时浇花
-@login_required
 @app.route('/my_plant/AutoWatering',methods = ['GET'])
+@login_required
+@routing_permission_check
 def auto_watering():
     pass
 
 #我的盆摘页面批量导入设备
-@login_required
 @app.route('/my_plant/ImportDevices',methods = ['POST','GET'])
+@login_required
+@routing_permission_check
 def import_devices():
     form = ImportDevicesForms()
     current_user = session.get('user_id')
@@ -1117,8 +1317,9 @@ def import_devices():
         return render_template('my_plant.html',form = form,dic1 = dic1,list1 = devices_info_list)
 
 #我的盆摘页面批量导入设备下载模板文件
-@login_required
 @app.route("/my_plant/ImportDevices/DownloadTemplateFile",methods = ['GET'])
+@login_required
+@routing_permission_check
 def download_import_devices_template():
     file_name = 'template_devices.zip'
     file_path = os.getcwd() + os.path.join(os.sep,'media',file_name )
@@ -1138,9 +1339,40 @@ def download_import_devices_template():
     else:  
         return render_template('error_404.html')
 
-#朋友圈
+#刷新权限PERMISSION_DICT的值
+@app.route("/management/refresh")
 @login_required
+@routing_permission_check
+def refresh_permission():
+    cur_url = request.args.get('cur_url')
+    if cur_url:
+        #更新权限表
+        #print(cur_url)
+        user_group_list = []
+        user_group_data = UserGroup.query.all()
+        if user_group_data:
+            for i in user_group_data:
+                user_group_list.append( i.name)
+            for j in user_group_list:
+                result2 = Permission.query.filter(Permission.name == j).all()
+                set1 = set()
+                if result2:
+                    for k in result2:
+                        set1.add(k.url)
+                    PERMISSION_DICT[j] = set1
+                    #print(PERMISSION_DICT)
+                    return redirect(cur_url)
+                else:
+                    return abort(404)
+        else:
+            return abort(404)
+    else:
+        return abort(404)
+
+#朋友圈
 @app.route('/my_friends',methods = ['POST','GET'])
+@login_required
+@routing_permission_check
 def my_friends():
     form = SearchPlantForms()
     current_user = session.get('user_id')
@@ -1169,8 +1401,9 @@ def my_friends():
         return 'f'
 
 #后台管理
-@login_required
 @app.route('/management',methods = ['POST','GET'])
+@login_required
+@routing_permission_check
 def management():
     form = SearchPlantForms()
     current_user = session.get('user_id')
