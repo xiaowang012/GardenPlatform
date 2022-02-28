@@ -16,6 +16,18 @@
           if(r){window.location.href=url
           }
         }
+        function water_start_confirm(url)
+        {
+        var r=confirm("您确定要开始浇水吗?")
+          if(r){window.location.href=url
+          }
+        }
+        function water_stop_confirm(url)
+        {
+        var r=confirm("您确定要停止浇水吗?")
+          if(r){window.location.href=url
+          }
+        }
         function parameter_id(id1,plant_name1,plant_type1,suggest_watering_time1,device_name1,switch_number1) {
         $( '#updateDeptId').val(id1);
         $( '#updateDeptname').val(plant_name1);
@@ -23,6 +35,9 @@
         $( '#updateDeptwater').val(suggest_watering_time1);
         $( '#updateDeptdevice').val(device_name1);
         $( '#updateDeptnumber').val(switch_number1);
+        }
+        function parameter_id1(id1) {
+        $( '#updateDeptId1').val(id1);
         }
     </script>
     <div style="margin-top: 20px;" class="container">
@@ -392,7 +407,7 @@
                                     {% if type1=='牡丹花' %}{% set type2='5' %}{% endif %}
                                     {% if type1=='杜鹃花' %}{% set type2='6' %}{% endif %}
                                     {% if type1=='其他' %}{% set type2='7' %}{% endif %}
-                                    <a role="button" class="btn btn-primary" href="#" > 浇水</a><a role="button" style="margin-left: 10px;" class="btn btn-default" href="" > 提醒</a><a role="button" onclick="parameter_id('{{ id1 }}','{{ name1 }}','{{ type2 }}','{{ water1 }}','{{ device1 }}','{{ switch1 }}')" id="modal-207277" href="#modal-container-207277" style="margin-left: 10px;" class="btn btn-default"  data-toggle="modal" > 修改</a><button style="margin-left: 10px;" class="btn btn-default btn-primary" onclick="delete_confirm('/my_plant/DeleteDevice?id={{ item.id }}')" > 删除</button>
+                                    <button role="button" class="btn btn-default" onclick="water_start_confirm('/my_plant/WateringOperation/start?id={{ item.id }}')" > 浇水</button><button role="button" onclick="water_stop_confirm('/my_plant/WateringOperation/end?id={{ item.id }}')" class="btn btn-primary" style="margin-left: 10px;"   > 停止</button><a role="button" onclick="parameter_id('{{ id1 }}','{{ name1 }}','{{ type2 }}','{{ water1 }}','{{ device1 }}','{{ switch1 }}')" id="modal-207277" href="#modal-container-207277" style="margin-left: 10px;" class="btn btn-default"  data-toggle="modal" > 修改</a><button style="margin-left: 10px;" class="btn btn-default btn-primary" onclick="delete_confirm('/my_plant/DeleteDevice?id={{ item.id }}')" > 删除</button>
                                 </td>
                             </tr>  
                         {% endfor %}
@@ -463,7 +478,7 @@
                             </div>
                         </div> 
                     </div>
-                </div> 
+                </div>  
                 <!--分页模块。-->
                 <div class="row clearfix">
                     <div class="col-md-2 column">
