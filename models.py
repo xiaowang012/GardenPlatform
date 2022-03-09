@@ -70,6 +70,38 @@ class UserGroup(db.Model):
         self.id = id
         self.name = name
 
-#指令表
-# class Commands(db.Model):
-#     pass
+#朋友圈消息表
+class FriendInfo(db.Model):
+    id = db.Column(db.Integer(),autoincrement=True,primary_key = True)
+    send_user = db.Column(db.String(50))
+    time_format = db.Column(db.String(50))
+    picture_path = db.Column(db.String(50))
+    message_title = db.Column(db.String(100))
+    message_content = db.Column(db.String(200))
+    comments_number = db.Column(db.Integer)
+    
+    def __init__(self,id,send_user,time_format,picture_path,message_title,messgae_content,comments_number):
+        self.id = id
+        self.send_user = send_user
+        self.time_format = time_format
+        self.picture_path = picture_path
+        self.message_title = message_title
+        self.message_content = messgae_content
+        self.comments_number = comments_number
+
+#朋友圈的评论信息表
+class FriendComments(db.Model):
+    id = db.Column(db.Integer(),autoincrement=True,primary_key = True)
+    friendinfo_id = db.Column(db.Integer)
+    commenting_user = db.Column(db.String(50))
+    commenting_message = db.Column(db.String(200))
+    commenting_time = db.Column(db.String(50))
+
+    def __init__(self,id,friendinfo_id,commenting_user,commenting_message,commenting_time):
+        self.id = id
+        self.friendinfo_id = friendinfo_id
+        self.commenting_user = commenting_user
+        self.commenting_message = commenting_message
+        self.commenting_time = commenting_time
+
+
