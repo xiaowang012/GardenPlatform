@@ -20,7 +20,7 @@ app.config.from_object(Config)
 db.init_app(app)
 
 #创建数据表
-#db.create_all(app=app)
+db.create_all(app=app)
 
 #全局变量植物名称
 PLANT_NAME = []
@@ -1396,7 +1396,7 @@ def my_friends():
                 per = '普通用户'
         dic1 = {'current_user':current_user,'chinese_name':chinese_name,\
             'sex':sex,'birthday':birthday,'email':email,'permission':per}
-        return render_template('my_friends.html',form = form,dic1 = dic1)
+        return render_template('blog.html',form = form,dic1 = dic1)
     else:
         return 'f'
 
