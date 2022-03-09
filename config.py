@@ -10,7 +10,7 @@ try:
         paras = json.load(f)       
 except:
     raise Exception("read json config error!")
-
+    
 class Config:
     #secret_key
     SECRET_KEY = paras['SECRET_KEY']
