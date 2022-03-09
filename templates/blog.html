@@ -1,0 +1,220 @@
+
+<!DOCTYPE HTML>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<title>朋友圈</title>
+<link href="/static/css/style.css" type="text/css" rel="stylesheet" media="screen" /> 
+<link rel="stylesheet" href="https://cdn.staticfile.org/twitter-bootstrap/3.3.7/css/bootstrap.min.css">  
+<script src="https://cdn.staticfile.org/jquery/2.1.1/jquery.min.js"></script>
+<script src="https://cdn.staticfile.org/twitter-bootstrap/3.3.7/js/bootstrap.min.js"></script>
+</head>
+<body>
+    <div style="margin-top: 20px;" class="container">
+        <div  class="row clearfix">
+            <div  class="col-md-12 column">
+                <ul  class="nav nav-pills">
+                    <li class="">
+                         <a href="/home">首页</a>
+                    </li>
+                    <li class="">
+                         <a href="/my_plant">我的盆摘</a>
+                    </li>
+                    <li class="active">
+                         <a href="/my_friends">朋友圈</a>
+                    </li>
+                    <li class="">
+                        <a href="/register">用户注册</a>
+                    </li>
+                    <li class="">
+                        <a href="/update_password">修改密码</a>
+                    </li>
+                    <li class="">
+                        <a href="/management">后台管理</a>
+                    </li>
+                    <li style="float: right;" class="">
+                        <div>
+                            <a id="modal-207276" href="#modal-container-207276" style="margin-right: 15px;font-size: medium;" data-toggle="modal"" >当前用户: {% if dic1['current_user'] %}{{ dic1['current_user'] }}{% endif %}</a>
+                            <a class="btn btn-default" href="/logout">退出</a>
+                        </div>
+                    </li>
+                </ul>
+                <div class="page-header">
+                    <h1>
+                        智能浇水平台<small><span>分享生活,分享快乐!</span></small>
+                    </h1>
+                </div>
+                <!--用户个人信息的模态框-->
+                <div class="modal fade" id="modal-container-207276" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+                    <div class="modal-dialog">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">x</button>
+                                <h4 class="modal-title" id="myModalLabel">
+                                    用户个人信息
+                                </h4>
+                            </div>
+                            <div class="modal-body">
+                                <div class="panel panel-primary">
+                                    <div class="panel-heading">
+                                        <h3 class="panel-title">
+                                            用户名: {{ dic1['current_user'] }}
+                                        </h3>
+                                    </div>
+                                    <div class="panel-body">
+                                        姓名: {{ dic1['chinese_name'] }}
+                                    </div>
+                                    <div class="panel-footer">
+                                        性别: {{ dic1['sex'] }}
+                                    </div>
+                                    <div class="panel-body">
+                                        生日: {{ dic1['birthday'] }}
+                                    </div>
+                                    <div class="panel-footer">
+                                        权限: {{ dic1['permission'] }}
+                                    </div>
+                                    <div class="panel-body">
+                                        邮箱: {{ dic1['email'] }}
+                                    </div>
+                                </div>
+                            </div>
+                        </div> 
+                    </div>
+                </div> 
+                <div  class="panel panel-success">
+                    <div class="panel-heading">
+                        <h3 class="panel-title">
+                            <div>
+                                朋友的动态
+                            </div>
+                        </h3>
+                    </div>
+                </div>
+                <div class="container">
+                    <div class="row clearfix">
+                        <div class="col-md-2 column">
+                            <div style="margin-top: 20px;" >           
+                                <div class="page-header">
+                                    <h1>
+                                        星期三<br><small>2022年3月9日</small>
+                                    </h1>
+                                </div>
+                                <ul style="float: right;" >
+                                    <li>评论: <a href="#">0 条评论</a></li>
+                                    <li>用户: <a href="#">@热心小王</a></li>
+                                </ul>
+                            </div>
+                        </div>
+                        <div class="col-md-6 column">
+                            <div style="margin-top: 20px;" class="postblog">
+                                <a href="#" class="image-blog"><img src="/static/imgs/blog-1.jpg" alt="" /></a>
+                                <h3><a href="#">日记3</a></h3>
+                                <p>Python由荷兰数学和计算机科学研究学会的吉多·范罗苏姆 于1990 年代初设计
+                                    ,作为一门叫做ABC语言的替代品。Python提供了高效的高级数据结构,还能简
+                                    单有效地面向对象编程。</p>
+                                <span><a href="#">点赞</a></span>
+                                <span class="right-bot"><a href="#">回复</a></span>
+                            </div>
+                        </div>
+                        <div class="col-md-4 column">
+                            <div class="whole">
+                                <h3>最近的动态</h3>
+                                <ul class="post">
+                                    <li>
+                                        <a href="#"><img src="/static/imgs/thumb-blog-1.jpg" alt="" /></a>
+                                        <p><a style="margin-top: 5px;" href="#">乌克兰像俄罗斯开火!</a> <br><small>May 30, 2022 3条评论</small></p>
+                                    </li>
+                                    <li>
+                                        <a href="#"><img src="/static/imgs/thumb-blog-2.jpg" alt="" /></a>
+                                        <p><a style="margin-top: 5px;" href="#">泽连斯基宣布与俄罗斯断交!</a> <br><small>May 30, 2022 31条评论</small></p>
+                                    </li>
+                                    <li>
+                                        <a href="#"><img src="/static/imgs/thumb-blog-3.jpg" alt="" /></a>
+                                        <p><a style="margin-top: 5px;" href="#">日本宣布制裁俄罗斯!</a> <br><small>May 3, 2022 13条评论</small></p>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row clearfix">
+                        <div class="col-md-2 column">
+                            <div style="margin-top: 20px;">
+                                <div class="page-header">
+                                    <h1>
+                                        星期二<br><small>2022年3月8日</small>
+                                    </h1>
+                                </div>
+                                <ul style="float: right;" >
+                                    <li>评论: <a href="#">0 条评论</a></li>
+                                    <li>用户: <a href="#">@热心小王</a></li>
+                                </ul>
+                            </div>
+                        </div>
+                        <div class="col-md-6 column">
+                            <div style="margin-top: 20px;" class="postblog">
+                                <a href="#" class="image-blog"><img src="/static/imgs/blog-1.jpg" alt="" /></a>
+                                <h3><a href="#">日记3</a></h3>
+                                <p>Python由荷兰数学和计算机科学研究学会的吉多·范罗苏姆 于1990 年代初设计
+                                    ,作为一门叫做ABC语言的替代品。Python提供了高效的高级数据结构,还能简
+                                    单有效地面向对象编程。</p>
+                                <span><a href="#">点赞</a></span>
+                                <span class="right-bot"><a href="#">回复</a></span>
+                            </div>
+                        </div>
+                        <div class="col-md-4 column">
+                        </div>
+                    </div>
+                    <div class="row clearfix">
+                        <div class="col-md-2 column">
+                            <div style="margin-top: 20px;">
+                                <div class="page-header">
+                                    <h1>
+                                        星期一<br><small>2022年3月7日</small>
+                                    </h1>
+                                </div>
+                                <ul style="float: right;" >
+                                    <li>评论: <a href="#">0 条评论</a></li>
+                                    <li>用户: <a href="#">@热心小王</a></li>
+                                </ul>
+                            </div>
+                        </div>
+                        <div class="col-md-6 column">
+                            <div style="margin-top: 20px;" class="postblog">
+                                <a href="#" class="image-blog"><img src="/static/imgs/blog-1.jpg" alt="" /></a>
+                                <h3><a href="#">日记3</a></h3>
+                                <p>Python由荷兰数学和计算机科学研究学会的吉多·范罗苏姆 于1990 年代初设计
+                                    ,作为一门叫做ABC语言的替代品。Python提供了高效的高级数据结构,还能简
+                                    单有效地面向对象编程。</p>
+                                <span><a href="#">点赞</a></span>
+                                <span class="right-bot"><a href="#">回复</a></span>
+                            </div>
+                            <div>
+                                <a role="button" style="font-size: small;float: right;" class="btn btn-primary" href="/nextpage" >查看更多</a>
+                            </div>
+                        </div>
+                        <div class="col-md-4 column">
+                        </div>
+                    </div>
+                </div>
+                <div style="margin-top: 20px;" class="panel panel-success">
+                    <div class="panel-heading">
+                        <h3 class="panel-title">
+                            联系方式
+                        </h3>
+                    </div>
+                </div>
+                <div class="row clearfix">
+                    <div class="col-md-12 column">
+                        <p>
+                            <div>
+                                Github项目地址:<a href="https://github.com/xiaowang012/GardenPlatform.git">点击进入</a>
+                                邮箱: 1300202481@qq.com
+                            </div>
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div> 
+    </div>  
+</body>
+</html>
