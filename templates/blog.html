@@ -9,6 +9,14 @@
 <script src="https://cdn.staticfile.org/twitter-bootstrap/3.3.7/js/bootstrap.min.js"></script>
 </head>
 <body>
+    <script type="text/javascript">
+        function delete_confirm(url)
+        {
+        var r=confirm("您确定要删除吗?")
+          if(r){window.location.href=url
+          }
+        }
+    </script>
     <div style="margin-top: 20px;" class="container">
         <div  class="row clearfix">
             <div  class="col-md-12 column">
@@ -50,6 +58,9 @@
                             <div style="margin-right: 15px;" class="{{ dic1['style'] }}">
                                 <h4>
                                     {{ dic1['title'] }}
+                                    {% for message in get_flashed_messages() %}
+                                        <div style="color: red;" class="alert">{{ message }}</div>
+                                    {% endfor %}
                                 </h4> <strong>{{ dic1['title'] }}</strong>{{ dic1['message'] }}
                             </div>
                         </div>
@@ -140,24 +151,26 @@
                                         {% if list1[0] %}{{ list1[0]['week'] }}{% endif %}<br><small>{% if list1[0] %}{{ list1[0]['date'] }}{% endif %}</small>
                                     </h1>
                                 </div>
-                                <ul style="float: right;" >
+                                <ul>
+                                    <li>用户: <a  href="#">@{% if list1[0] %}{{ list1[0]['send_user'] }}{% endif %}</a></li>
                                     <li>评论: <a href="#">{% if list1[0] %}{{ list1[0]['comments_number'] }}{% endif %} 条评论</a></li>
-                                    <li>用户: <a href="#">@{% if list1[0] %}{{ list1[0]['send_user'] }}{% endif %}</a></li>
+                                    <li>点赞: <a href="#">{% if list1[0] %}{{ list1[0]['comments_number'] }}{% endif %} 个赞</a></li>
                                 </ul>
                             </div>
                         </div>
                         <div class="col-md-6 column">
                             <div style="margin-top: 20px;" class="postblog">
-                                <a href="#" class="image-blog"><img src="{% if list1[0] %}{{ list1[0]['picture_path_html'] }}{% endif %}" alt="" height="30%" width="%30" /></a>
+                                <a href="#" class="image-blog"><img src="{% if list1[0] %}{{ list1[0]['picture_path_html'] }}{% endif %}" alt="" height="300px" width="550px" /></a>
                                 <h3><a href="#">{% if list1[0] %}{{ list1[0]['message_title'] }}{% endif %}</a></h3>
-                                <p>{% if list1[0] %} {{ list1[0]['message_content'] }}{% endif %}</p>
+                                <p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{% if list1[0] %} {{ list1[0]['message_content'] }}{% endif %}</p>
                                 <span><a href="#">点赞</a></span>
                                 <span class="right-bot"><a href="#">回复</a></span>
+                                <button style="float: right;font-size:smaller;"  class="btn btn-primary" onclick="delete_confirm('/my_friends/delete_message?cur_url=/my_friends&id={% if list1[0] %}{{ list1[0].id }}{% endif %}')"  >删除</button>
                             </div>
                         </div>
                         <div class="col-md-4 column">
-                            <div class="whole">
-                                <h3>最近的动态</h3>
+                            <div style="margin-left: 60px;" class="whole">
+                                <h3>&nbsp;&nbsp;&nbsp;最近的动态</h3>
                                 <ul class="post">
                                     <li>
                                         <a href="#"><img src="/static/imgs/thumb-blog-1.jpg" alt="" /></a>
@@ -183,19 +196,21 @@
                                         {% if list1[1] %}{{ list1[1]['week'] }}{% endif %}<br><small>{% if list1[1] %}{{ list1[1]['date'] }}{% endif %}</small>
                                     </h1>
                                 </div>
-                                <ul style="float: right;" >
+                                <ul>
+                                    <li>用户: <a  href="#">@{% if list1[1] %}{{ list1[1]['send_user'] }}{% endif %}</a></li>
                                     <li>评论: <a href="#">{% if list1[1] %}{{ list1[1]['comments_number'] }}{% endif %} 条评论</a></li>
-                                    <li>用户: <a href="#">@{% if list1[1] %}{{ list1[1]['send_user'] }}{% endif %}</a></li>
+                                    <li>点赞: <a href="#">{% if list1[1] %}{{ list1[1]['comments_number'] }}{% endif %} 个赞</a></li>
                                 </ul>
                             </div>
                         </div>
                         <div class="col-md-6 column">
                             <div style="margin-top: 20px;" class="postblog">
-                                <a href="#" class="image-blog"><img src="{% if list1[1] %}{{ list1[1]['picture_path_html'] }}{% endif %}" alt="" height="30%" width="%30" /></a>
+                                <a href="#" class="image-blog"><img src="{% if list1[1] %}{{ list1[1]['picture_path_html'] }}{% endif %}" alt="" height="300px" width="550px" /></a>
                                 <h3><a href="#">{% if list1[1] %}{{ list1[1]['message_title'] }}{% endif %}</a></h3>
-                                <p>{% if list1[1] %} {{ list1[1]['message_content'] }}{% endif %}</p>
+                                <p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{% if list1[1] %} {{ list1[1]['message_content'] }}{% endif %}</p>
                                 <span><a href="#">点赞</a></span>
                                 <span class="right-bot"><a href="#">回复</a></span>
+                                <button style="float: right;font-size:smaller;"  class="btn btn-primary" onclick="delete_confirm('/my_friends/delete_message?cur_url=/my_friends&id={% if list1[1] %}{{ list1[1].id }}{% endif %}')"  >删除</button>
                             </div>
                         </div>
                         <div class="col-md-4 column">
@@ -209,22 +224,25 @@
                                         {% if list1[2] %}{{ list1[2]['week'] }}{% endif %}<br><small>{% if list1[2] %}{{ list1[2]['date'] }}{% endif %}</small>
                                     </h1>
                                 </div>
-                                <ul style="float: right;" >
-                                    <li>评论: <a href="#">{% if list1[2] %}{{ list1[2]['comments_number'] }}{% endif %} 条评论</a></li>
+                                <ul >
                                     <li>用户: <a  href="#">@{% if list1[2] %}{{ list1[2]['send_user'] }}{% endif %}</a></li>
+                                    <li>评论: <a href="#">{% if list1[2] %}{{ list1[2]['comments_number'] }}{% endif %} 条评论</a></li>
+                                    <li>点赞: <a href="#">{% if list1[2] %}{{ list1[2]['comments_number'] }}{% endif %} 个赞</a></li>
                                 </ul>
                             </div>
                         </div>
                         <div class="col-md-6 column">
                             <div style="margin-top: 20px;" class="postblog">
-                                <a href="#" class="image-blog"><img src="{% if list1[2] %}{{ list1[2]['picture_path_html'] }}{% endif %}" alt="" height="30%" width="%30" /></a>
+                                <a href="#" class="image-blog"><img src="{% if list1[2] %}{{ list1[2]['picture_path_html'] }}{% endif %}" alt="" height="300px" width="550px" /></a>
                                 <h3><a href="#">{% if list1[2] %}{{ list1[2]['message_title'] }}{% endif %}</a></h3>
-                                <p>{% if list1[2] %} {{ list1[2]['message_content'] }}{% endif %}</p>
+                                <p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{% if list1[2] %} {{ list1[2]['message_content'] }}{% endif %}</p>
                                 <span><a href="#">点赞</a></span>
                                 <span class="right-bot"><a href="#">回复</a></span>
+                                <button style="float: right;font-size:smaller;"  class="btn btn-primary" onclick="delete_confirm('/my_friends/delete_message?cur_url=/my_friends&id={% if list1[2] %}{{ list1[2].id }}{% endif %}')"  >删除</button>
                             </div>
                             <div>
-                                <a role="button" style="font-size: small;float: right;" class="btn btn-primary" href="/nextpage" >查看更多</a>
+                                <a role="button" style="font-size: small;margin-top: 50px;" class="btn btn-default" href="/my_friends/nextpage?page=1" >返回第一页</a>
+                                <a role="button" style="font-size: small;margin-top: 50px;float: right;" class="btn btn-default" href="/my_friends/nextpage?page={{ dic1['page_number'] + 1 }}" >查看更多</a>
                             </div>
                         </div>
                         <div class="col-md-4 column">
