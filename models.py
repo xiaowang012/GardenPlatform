@@ -75,16 +75,18 @@ class FriendInfo(db.Model):
     id = db.Column(db.Integer(),autoincrement=True,primary_key = True)
     send_user = db.Column(db.String(50))
     time_format = db.Column(db.String(50))
-    picture_path = db.Column(db.String(50))
+    picture_path = db.Column(db.String(100))
+    picture_path_html = db.Column(db.String(100))
     message_title = db.Column(db.String(100))
     message_content = db.Column(db.String(200))
     comments_number = db.Column(db.Integer)
     
-    def __init__(self,id,send_user,time_format,picture_path,message_title,messgae_content,comments_number):
+    def __init__(self,id,send_user,time_format,picture_path,picture_path_html,message_title,messgae_content,comments_number):
         self.id = id
         self.send_user = send_user
         self.time_format = time_format
         self.picture_path = picture_path
+        self.picture_path_html = picture_path_html
         self.message_title = message_title
         self.message_content = messgae_content
         self.comments_number = comments_number
