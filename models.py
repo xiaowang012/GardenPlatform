@@ -1,5 +1,6 @@
 #coding=utf-8
 from dbs import db
+import datetime
 
 #设备表
 class Devices(db.Model):
@@ -80,8 +81,9 @@ class FriendInfo(db.Model):
     message_title = db.Column(db.String(100))
     message_content = db.Column(db.String(200))
     comments_number = db.Column(db.Integer)
-    
-    def __init__(self,id,send_user,time_format,picture_path,picture_path_html,message_title,messgae_content,comments_number):
+    create_time = db.Column(db.DateTime)
+
+    def __init__(self,id,send_user,time_format,picture_path,picture_path_html,message_title,messgae_content,comments_number,create_time):
         self.id = id
         self.send_user = send_user
         self.time_format = time_format
@@ -90,6 +92,7 @@ class FriendInfo(db.Model):
         self.message_title = message_title
         self.message_content = messgae_content
         self.comments_number = comments_number
+        self.create_time = create_time
 
 #朋友圈的评论信息表
 class FriendComments(db.Model):
