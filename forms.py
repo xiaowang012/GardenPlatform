@@ -69,6 +69,11 @@ class UpdateDevicesForms(FlaskForm):
 #     id2 = StringField('id2',validators = [DataRequired('id不能为空!')])
 #     submit = SubmitField('submit')
 
+#朋友圈发动态表单
+class MyFridensSendMessageForms(FlaskForm):
+    message_title = StringField('message_title',validators = [DataRequired('标题不能为空!'),Length(1,100,message = '标题长度必须为1-100!')])
+    message_content = StringField('message_content',validators = [DataRequired('内容不能为空!'),Length(1,200,message = '内容长度必须为1-200!')])
+    picture = FileField('picture',validators = [FileAllowed(['jpg','jpeg','png','gif'],message = '只支持jpg,jpeg,png,gif 图片!')])
 
 #添加权限表单
 class AddPermissionForms(FlaskForm):
