@@ -47,7 +47,7 @@
 
 ​			yum install python3
 
-![](G:\python_web\flask\练习项目\智能浇水平台\GardenPlatform\img\py3.png)
+![](./img/py3.png)
 
 ​	
 
