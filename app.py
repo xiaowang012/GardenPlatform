@@ -1,5 +1,6 @@
 #coding=utf-8
-from flask import Flask,render_template,request,Response,url_for,redirect,session,g,jsonify,abort
+from flask import Flask,render_template,request,Response,url_for,redirect,session,g,jsonify,abort,flash
+from sqlalchemy import true
 from forms import UserForms,RegisterForms,SearchPlantForms,AddDeviceForms,ImportDevicesForms,\
     UpdateDevicesForms,UserUpdatePasswordForms,MyFridensSendMessageForms
 from werkzeug.utils import secure_filename
@@ -8,6 +9,7 @@ from models import User,Devices ,Permission,UserGroup,FriendInfo,FriendComments
 from decorator import login_required,routing_permission_check,get_hash_value,PERMISSION_DICT
 import os
 import time
+import datetime
 from dbs import db
 import random
 import xlrd
@@ -322,7 +324,7 @@ def my_plant_page():
             elif number > 5:
                 dic1['active_next'] = 'active'
             #根据页码查询数据
-            offset_num = (int(number)-1)*10
+            offset_num = (number-1)*10
             limit_num = 10
             #查询devices表中的所有数据
             devices_info_list=[]
@@ -509,7 +511,7 @@ def search_plant_page():
             elif number > 5:
                 dic1['active_next'] = 'active'
             #根据页码查询数据
-            offset_num = (int(number)-1)*10
+            offset_num = (number-1)*10
             limit_num = 10
             #查询devices表中的所有数据
             if PLANT_NAME:
@@ -1360,7 +1362,6 @@ def refresh_permission():
                     for k in result2:
                         set1.add(k.url)
                     PERMISSION_DICT[j] = set1
-                    #print(PERMISSION_DICT)
                     return redirect(cur_url)
                 else:
                     return abort(404)
@@ -1395,9 +1396,9 @@ def my_friends():
             elif group_id == 2:
                 per = '普通用户'
         dic1 = {'current_user':current_user,'chinese_name':chinese_name,\
-            'sex':sex,'birthday':birthday,'email':email,'permission':per}
+            'sex':sex,'birthday':birthday,'email':email,'permission':per,'page_number':1}
         #查询朋友动态信息
-        friends_info = FriendInfo.query.limit(3).all()
+        friends_info = FriendInfo.query.order_by(FriendInfo.create_time.desc()).limit(3)
         friends_info_list = []
         for i in friends_info:
             data = i.__dict__
@@ -1410,13 +1411,12 @@ def my_friends():
             data['week'] = digital_week_dic[ time_list[3]]
             data['date'] = time_list[0] +'年' +time_list[1] +'月' + time_list[2] +'日'
             friends_info_list.append(data)
-        #print(friends_info_list)
         return render_template('blog.html',dic1 = dic1, form = form ,list1 = friends_info_list)
 
 #发盆友圈动态
 @app.route('/my_friends/send_message',methods = ['POST','GET'])
 @login_required
-#@routing_permission_check
+@routing_permission_check
 def my_friends_send_message():
     form = MyFridensSendMessageForms()
     current_user = session.get('user_id')
@@ -1445,7 +1445,7 @@ def my_friends_send_message():
                 db.session.add(FriendInfo(id = None,send_user = send_user ,\
                     time_format = time_format,picture_path = picture_path,\
                     message_title = message_title,messgae_content = message_content,\
-                    comments_number = comments_number,picture_path_html = picture_path_html))
+                    comments_number = comments_number,picture_path_html = picture_path_html,create_time = datetime.datetime.now()))
                 db.session.commit()
                 message = '发送动态成功!刷新后查看'
                 title = '成功!'
@@ -1484,13 +1484,13 @@ def my_friends_send_message():
             elif group_id == 2:
                 per = '普通用户'
         dic1 = {'current_user':current_user,'chinese_name':chinese_name,\
-            'sex':sex,'birthday':birthday,'email':email,'permission':per}
+            'sex':sex,'birthday':birthday,'email':email,'permission':per,'page_number':1}
         #把对应的提示信息加入到dic1中
         dic1['message'] = message
         dic1['title'] = title
         dic1['style'] = style
         #查询朋友动态信息
-        friends_info = FriendInfo.query.limit(3).all()
+        friends_info = FriendInfo.query.order_by(FriendInfo.create_time.desc()).limit(3)
         friends_info_list = []
         for i in friends_info:
             data = i.__dict__
@@ -1505,8 +1505,95 @@ def my_friends_send_message():
             friends_info_list.append(data)
         return render_template('blog.html',dic1 = dic1, form = form ,list1 = friends_info_list)
         
+#删除朋友圈动态(用户界面,管理员和普通用户都只能删除自己发的)
+@app.route('/my_friends/delete_message',methods = ['GET'])
+@login_required
+#@routing_permission_check
+def delete_my_message():
+    if request.method == 'GET':
+        cur_user = session.get('user_id')
+        cur_url = request.args.get('cur_url')
+        id = request.args.get('id')
+        if cur_url:
+            try:
+                id = int(id)
+            except:
+                return abort(404)
+            else:
+                #根据id查用户
+                user_info = FriendInfo.query.filter_by(id = id).first()
+                if user_info:
+                    if user_info.send_user == cur_user:
+                        #当前用户和发送用户一致，执行删除操作
+                        #删除static中的图片
+                        file_path_remove = user_info.picture_path
+                        if os.path.isfile(file_path_remove) == True:
+                            os.remove(file_path_remove)
+                        db.session.delete(user_info)
+                        db.session.commit()
+                        flash('删除成功!')
+                        return redirect(cur_url)
+                    else:
+                        flash('无权限删除别人的动态!')
+                        return redirect(cur_url)
+                else:
+                    flash('用户未找到!')
+                    return redirect(cur_url)
+        else:
+            return abort(404)
 
-    
+#朋友圈动态翻页
+@app.route('/my_friends/nextpage',methods = ['GET'])
+@login_required
+#@routing_permission_check
+def my_friend_next_page():
+    form = MyFridensSendMessageForms()
+    current_user = session.get('user_id')
+    if request.method == 'GET':
+        #定义字典渲染页面
+        #定义dic1
+        page_number = request.args.get('page')
+        try:
+            page_number = int(page_number)
+        except:
+            print('para err')
+        else:
+            res = User.query.filter_by(username = current_user).first()
+            if res:
+                chinese_name = res.chinese_name
+                sex = res.sex
+                birthday = res.birthday
+                email = res.email
+                group_id = res.group_id
+                if sex == 'Male':
+                    sex = '男'
+                elif sex == 'Female':
+                    sex = '女' 
+                if group_id == 1:
+                    per = '管理员'
+                elif group_id == 2:
+                    per = '普通用户'
+            dic1 = {'current_user':current_user,'chinese_name':chinese_name,\
+                'sex':sex,'birthday':birthday,'email':email,'permission':per,'page_number':page_number}
+            #查询朋友动态信息
+            #根据页码查询不同的数据
+            offset_num = (page_number-1)*3
+            limit_num = 3
+            friends_info = FriendInfo.query.order_by(FriendInfo.create_time.desc()).limit(limit_num).offset(offset_num)
+            friends_info_list = []
+            for i in friends_info:
+                data = i.__dict__
+                #对data进行处理
+                del data['_sa_instance_state']
+                del data['picture_path']
+                #处理时间time_format
+                digital_week_dic = {'1':'星期一','2':'星期二','3':'星期三','4':'星期四','5':'星期五','6':'星期六','7':'星期日'}
+                time_list = data['time_format'].split(',')
+                data['week'] = digital_week_dic[ time_list[3]]
+                data['date'] = time_list[0] +'年' +time_list[1] +'月' + time_list[2] +'日'
+                friends_info_list.append(data)
+            return render_template('blog.html',dic1 = dic1, form = form ,list1 = friends_info_list)
+
 
 #后台管理
 @app.route('/management',methods = ['POST','GET'])
