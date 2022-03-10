@@ -1,10 +1,10 @@
 #coding=utf-8
 from flask import Flask,render_template,request,Response,url_for,redirect,session,g,jsonify,abort
 from forms import UserForms,RegisterForms,SearchPlantForms,AddDeviceForms,ImportDevicesForms,\
-    UpdateDevicesForms,UserUpdatePasswordForms
+    UpdateDevicesForms,UserUpdatePasswordForms,MyFridensSendMessageForms
 from werkzeug.utils import secure_filename
 from config import Config
-from models import User,Devices ,Permission,UserGroup
+from models import User,Devices ,Permission,UserGroup,FriendInfo,FriendComments
 from decorator import login_required,routing_permission_check,get_hash_value,PERMISSION_DICT
 import os
 import time
@@ -1166,7 +1166,6 @@ def watering_operation_stop():
             dict_data['style'] = random.choice(style_list)
     return render_template('my_plant.html',form = form,dic1 = dic1,list1 = devices_info_list)
     
-    
 
 #我的盆摘页面浇花操作定时浇花
 @app.route('/my_plant/AutoWatering',methods = ['GET'])
@@ -1230,15 +1229,16 @@ def import_devices():
                         try:
                             db.session.add_all(add_data_list)
                             db.session.commit()
+                            message = '导入成功! '
+                            style = 'alert alert-success alert-dismissable'
+                            title = '成功!  ' 
                         except:
                             db.session.rollback()
                             message = '导入失败! '
                             style = 'alert alert-dismissable alert-danger'
                             title = '错误!  ' 
-                        else:
-                            message = '导入成功! '
-                            style = 'alert alert-success alert-dismissable'
-                            title = '成功!  ' 
+                        finally:
+                            db.session.close()
                     else:
                         message = '导入失败! EXCEL表中无数据! '
                         style = 'alert alert-dismissable alert-danger'
@@ -1374,7 +1374,7 @@ def refresh_permission():
 @login_required
 @routing_permission_check
 def my_friends():
-    form = SearchPlantForms()
+    form = MyFridensSendMessageForms()
     current_user = session.get('user_id')
     if request.method == 'GET':
         #定义字典渲染页面
@@ -1396,9 +1396,117 @@ def my_friends():
                 per = '普通用户'
         dic1 = {'current_user':current_user,'chinese_name':chinese_name,\
             'sex':sex,'birthday':birthday,'email':email,'permission':per}
-        return render_template('blog.html',form = form,dic1 = dic1)
-    else:
-        return 'f'
+        #查询朋友动态信息
+        friends_info = FriendInfo.query.limit(3).all()
+        friends_info_list = []
+        for i in friends_info:
+            data = i.__dict__
+            #对data进行处理
+            del data['_sa_instance_state']
+            del data['picture_path']
+            #处理时间time_format
+            digital_week_dic = {'1':'星期一','2':'星期二','3':'星期三','4':'星期四','5':'星期五','6':'星期六','7':'星期日'}
+            time_list = data['time_format'].split(',')
+            data['week'] = digital_week_dic[ time_list[3]]
+            data['date'] = time_list[0] +'年' +time_list[1] +'月' + time_list[2] +'日'
+            friends_info_list.append(data)
+        #print(friends_info_list)
+        return render_template('blog.html',dic1 = dic1, form = form ,list1 = friends_info_list)
+
+#发盆友圈动态
+@app.route('/my_friends/send_message',methods = ['POST','GET'])
+@login_required
+#@routing_permission_check
+def my_friends_send_message():
+    form = MyFridensSendMessageForms()
+    current_user = session.get('user_id')
+    if request.method == 'POST':
+        if form.validate_on_submit():
+            message_title = request.form['message_title']
+            message_content = request.form['message_content']
+            #接收图片
+            f = request.files['picture']
+            #print(f)
+            if f:
+                file_name = str(time.time()) + os.path.splitext(f.filename)[-1]
+                file_path = os.getcwd() + os.sep + 'static' + os.sep + 'imgs' +os.sep
+                f.save(file_path + secure_filename(file_name))
+                picture_path = '.' + os.sep + 'static' + os.sep + 'imgs' + os.sep + file_name
+                picture_path_html = '/static/imgs/' + file_name
+            else:
+                picture_path = None
+                picture_path_html = None
+            #print(message_title,message_content,picture_path)
+            try:
+                #获取格式化时间，包括星期，用逗号分隔，用于前端的渲染,split
+                time_format = time.strftime('%Y,%m,%d,%w')
+                send_user = current_user
+                comments_number = 0
+                db.session.add(FriendInfo(id = None,send_user = send_user ,\
+                    time_format = time_format,picture_path = picture_path,\
+                    message_title = message_title,messgae_content = message_content,\
+                    comments_number = comments_number,picture_path_html = picture_path_html))
+                db.session.commit()
+                message = '发送动态成功!刷新后查看'
+                title = '成功!'
+                style = 'alert alert-success alert-dismissable'
+            except:
+                db.session.rollback()
+                message = '写入数据错误!'
+                title = '错误!'
+                style = 'alert alert-dismissable alert-danger'
+            finally:
+                db.session.close()
+        else:
+            #未通过表单校验
+            err_dic = form.errors
+            errs = ''
+            for key,value in err_dic.items():
+                errs += value[0] + '  '
+            message = errs
+            title = '错误!'
+            style = 'alert alert-dismissable alert-danger'
+        #渲染页面
+        #查询用户个人信息
+        res = User.query.filter_by(username = current_user).first()
+        if res:
+            chinese_name = res.chinese_name
+            sex = res.sex
+            birthday = res.birthday
+            email = res.email
+            group_id = res.group_id
+            if sex == 'Male':
+                sex = '男'
+            elif sex == 'Female':
+                sex = '女' 
+            if group_id == 1:
+                per = '管理员'
+            elif group_id == 2:
+                per = '普通用户'
+        dic1 = {'current_user':current_user,'chinese_name':chinese_name,\
+            'sex':sex,'birthday':birthday,'email':email,'permission':per}
+        #把对应的提示信息加入到dic1中
+        dic1['message'] = message
+        dic1['title'] = title
+        dic1['style'] = style
+        #查询朋友动态信息
+        friends_info = FriendInfo.query.limit(3).all()
+        friends_info_list = []
+        for i in friends_info:
+            data = i.__dict__
+            #对data进行处理
+            del data['_sa_instance_state']
+            del data['picture_path']
+            #处理时间time_format
+            digital_week_dic = {'1':'星期一','2':'星期二','3':'星期三','4':'星期四','5':'星期五','6':'星期六','7':'星期日'}
+            time_list = data['time_format'].split(',')
+            data['week'] = digital_week_dic[ time_list[3]]
+            data['date'] = time_list[0] +'年' +time_list[1] +'月' + time_list[2] +'日'
+            friends_info_list.append(data)
+        return render_template('blog.html',dic1 = dic1, form = form ,list1 = friends_info_list)
+        
+
+    
 
 #后台管理
 @app.route('/management',methods = ['POST','GET'])
