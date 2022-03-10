@@ -1,5 +1,5 @@
 #coding=utf-8
-from flask import session,jsonify,request,g,render_template
+from flask import session,request,g,render_template
 from functools import wraps
 from models import Permission, User,UserGroup
 import hashlib
@@ -15,8 +15,7 @@ def login_required(func):
         user_id = session.get('user_id')
         #print("session user_id:", user_id)
         if not user_id:
-            return jsonify({'error':'User not logged in'}
-                           )
+            return render_template('error_403_login.html')
         else:
             g.user_id = user_id
             return func(*args, **kwargs)
