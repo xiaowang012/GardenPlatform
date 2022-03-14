@@ -81,9 +81,10 @@ class FriendInfo(db.Model):
     message_title = db.Column(db.String(100))
     message_content = db.Column(db.String(200))
     comments_number = db.Column(db.Integer)
+    like_number = db.Column(db.Integer)
     create_time = db.Column(db.DateTime)
 
-    def __init__(self,id,send_user,time_format,picture_path,picture_path_html,message_title,messgae_content,comments_number,create_time):
+    def __init__(self,id,send_user,time_format,picture_path,picture_path_html,message_title,messgae_content,comments_number,like_number,create_time):
         self.id = id
         self.send_user = send_user
         self.time_format = time_format
@@ -92,6 +93,7 @@ class FriendInfo(db.Model):
         self.message_title = message_title
         self.message_content = messgae_content
         self.comments_number = comments_number
+        self.like_number = like_number
         self.create_time = create_time
 
 #朋友圈的评论信息表
@@ -100,7 +102,7 @@ class FriendComments(db.Model):
     friendinfo_id = db.Column(db.Integer)
     commenting_user = db.Column(db.String(50))
     commenting_message = db.Column(db.String(200))
-    commenting_time = db.Column(db.String(50))
+    commenting_time = db.Column(db.DateTime)
 
     def __init__(self,id,friendinfo_id,commenting_user,commenting_message,commenting_time):
         self.id = id
@@ -108,5 +110,18 @@ class FriendComments(db.Model):
         self.commenting_user = commenting_user
         self.commenting_message = commenting_message
         self.commenting_time = commenting_time
+
+#朋友圈的点赞信息表
+class FriendLikes(db.Model):
+    id = db.Column(db.Integer(),autoincrement=True,primary_key = True)
+    friendinfo_id = db.Column(db.Integer)
+    like_user = db.Column(db.String(50))
+    like_time = db.Column(db.DateTime)
+
+    def __init__(self,id,friendinfo_id,like_user,like_time):
+        self.id = id
+        self.friendinfo_id = friendinfo_id
+        self.like_user = like_user
+        self.like_time = like_time
 
 
