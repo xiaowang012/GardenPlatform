@@ -1400,6 +1400,19 @@ def my_friends():
         friends_info_list = []
         for i in friends_info:
             data = i.__dict__
+            #根据data中的id查询评论数据
+            #评论信息ID
+            comment_id = data['id']
+            #print(comment_id)
+            comments_info = FriendComments.query.filter_by(friendinfo_id = comment_id).order_by(FriendComments.commenting_time.desc()).limit(5)
+            comments_list = []
+            for j in comments_info:
+                data_1 = j.__dict__
+                #删除多余字段
+                del data_1['_sa_instance_state']
+                data_1['style'] = random.choice(['success','info','warning','error',''])
+                comments_list.append(data_1)
+            data['comments_list'] = comments_list
             #对data进行处理
             del data['_sa_instance_state']
             del data['picture_path']
@@ -1496,6 +1509,18 @@ def my_friends_send_message():
         friends_info_list = []
         for i in friends_info:
             data = i.__dict__
+            #评论信息ID
+            comment_id = data['id']
+            #print(comment_id)
+            comments_info = FriendComments.query.filter_by(friendinfo_id = comment_id).order_by(FriendComments.commenting_time.desc()).limit(5)
+            comments_list = []
+            for j in comments_info:
+                data_1 = j.__dict__
+                #删除多余字段
+                del data_1['_sa_instance_state']
+                data_1['style'] = random.choice(['success','info','warning','error',''])
+                comments_list.append(data_1)
+            data['comments_list'] = comments_list
             #对data进行处理
             del data['_sa_instance_state']
             del data['picture_path']
@@ -1586,6 +1611,18 @@ def my_friend_next_page():
             friends_info_list = []
             for i in friends_info:
                 data = i.__dict__
+                #评论信息ID
+                comment_id = data['id']
+                #print(comment_id)
+                comments_info = FriendComments.query.filter_by(friendinfo_id = comment_id).order_by(FriendComments.commenting_time.desc()).limit(5)
+                comments_list = []
+                for j in comments_info:
+                    data_1 = j.__dict__
+                    #删除多余字段
+                    del data_1['_sa_instance_state']
+                    data_1['style'] = random.choice(['success','info','warning','error',''])
+                    comments_list.append(data_1)
+                data['comments_list'] = comments_list
                 #对data进行处理
                 del data['_sa_instance_state']
                 del data['picture_path']
@@ -1668,6 +1705,18 @@ def my_friend_commenting_message():
         friends_info_list = []
         for i in friends_info:
             data = i.__dict__
+            #评论信息ID
+            comment_id = data['id']
+            #print(comment_id)
+            comments_info = FriendComments.query.filter_by(friendinfo_id = comment_id).order_by(FriendComments.commenting_time.desc()).limit(5)
+            comments_list = []
+            for j in comments_info:
+                data_1 = j.__dict__
+                #删除多余字段
+                del data_1['_sa_instance_state']
+                data_1['style'] = random.choice(['success','info','warning','error',''])
+                comments_list.append(data_1)
+            data['comments_list'] = comments_list
             #对data进行处理
             del data['_sa_instance_state']
             del data['picture_path']
@@ -1718,6 +1767,12 @@ def my_friends_add_likes():
 def get_likes_list():
     pass
 
+#删除评论(只能删除自己添加的评论)
+@app.route('/my_friends/send_message/delete_comments',methods = ['GET'])
+@login_required
+#@routing_permission_check
+def my_friend_delete_comments():
+    pass
 
 #后台管理
 @app.route('/management',methods = ['POST','GET'])
