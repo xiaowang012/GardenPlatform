@@ -181,21 +181,19 @@
                                     </h3>
                                     <table class="table table-striped">
                                         <tbody>
-                                            <!-- {% for comment in comments_list %} -->
-                                            <tr class="success">
-                                                <td>
-                                                    @wangli01: 哈哈哈哈啊啊啊啊 <a href="#">删除</a>
-                                                </td>
-                                                <td>
-                                                    2022-03-08 15:00:01
-                                                </td>
-                                            </tr>
-                                            <!-- {% endfor %}  -->
+                                            {% for comment in item['comments_list'] %}
+                                                <tr class="{{ comment['style'] }}">
+                                                    <td>
+                                                        @{{ comment['commenting_user'] }}: {{ comment['commenting_message'] }} <a style="float: right;" href="#">删除</a>
+                                                    </td>
+                                                </tr>
+                                            {% endfor %} 
                                         </tbody>
                                     </table> 
                                     <div>
-                                        <button type="button" class="btn btn-default">返回第一页</button>
-                                        <button style="float:right" type="button" class="btn btn-default">查看更多</button> 
+                                        {% if item['comments_list'] %}
+                                            <button style="float:right" type="button" class="btn btn-default">查看更多</button> 
+                                        {% endif %}
                                     </div>
                                 </div>
                                 
