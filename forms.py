@@ -70,10 +70,15 @@ class UpdateDevicesForms(FlaskForm):
 #     submit = SubmitField('submit')
 
 #朋友圈发动态表单
-class MyFridensSendMessageForms(FlaskForm):
+class MyFriendsSendMessageForms(FlaskForm):
     message_title = StringField('message_title',validators = [DataRequired('标题不能为空!'),Length(1,100,message = '标题长度必须为1-100!')])
     message_content = StringField('message_content',validators = [DataRequired('内容不能为空!'),Length(1,200,message = '内容长度必须为1-200!')])
     picture = FileField('picture',validators = [FileAllowed(['jpg','jpeg','png','gif'],message = '只支持jpg,jpeg,png,gif 图片!')])
+
+#添加评论
+class MyFriendAddCommentsForms(FlaskForm):
+    friendinfo_id = StringField('friendinfo_id',validators = [DataRequired('friendinfo_id不能为空!')])
+    commenting_message = StringField('commenting_message',validators = [DataRequired('评论内容不能为空!'),Length(1,200,message = '评论内容长度必须为1-200!')])
 
 #添加权限表单
 class AddPermissionForms(FlaskForm):
