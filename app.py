@@ -1,11 +1,10 @@
 #coding=utf-8
 from flask import Flask,render_template,request,Response,url_for,redirect,session,g,jsonify,abort,flash
-from sqlalchemy import true
 from forms import UserForms,RegisterForms,SearchPlantForms,AddDeviceForms,ImportDevicesForms,\
-    UpdateDevicesForms,UserUpdatePasswordForms,MyFridensSendMessageForms
+    UpdateDevicesForms,UserUpdatePasswordForms,MyFriendsSendMessageForms,MyFriendAddCommentsForms
 from werkzeug.utils import secure_filename
 from config import Config
-from models import User,Devices ,Permission,UserGroup,FriendInfo,FriendComments
+from models import User,Devices ,Permission,UserGroup,FriendInfo,FriendComments,FriendLikes
 from decorator import login_required,routing_permission_check,get_hash_value,PERMISSION_DICT
 import os
 import time
@@ -14,7 +13,6 @@ from dbs import db
 import random
 import xlrd
 import json
-
 
 #初始化
 app = Flask(__name__)
@@ -1375,7 +1373,7 @@ def refresh_permission():
 @login_required
 @routing_permission_check
 def my_friends():
-    form = MyFridensSendMessageForms()
+    form = MyFriendsSendMessageForms()
     current_user = session.get('user_id')
     if request.method == 'GET':
         #定义字典渲染页面
@@ -1411,14 +1409,14 @@ def my_friends():
             data['week'] = digital_week_dic[ time_list[3]]
             data['date'] = time_list[0] +'年' +time_list[1] +'月' + time_list[2] +'日'
             friends_info_list.append(data)
-        return render_template('blog.html',dic1 = dic1, form = form ,list1 = friends_info_list)
+        return render_template('blog_1.html',dic1 = dic1, form = form ,list1 = friends_info_list)
 
 #发盆友圈动态
 @app.route('/my_friends/send_message',methods = ['POST','GET'])
 @login_required
 @routing_permission_check
 def my_friends_send_message():
-    form = MyFridensSendMessageForms()
+    form = MyFriendsSendMessageForms()
     current_user = session.get('user_id')
     if request.method == 'POST':
         if form.validate_on_submit():
@@ -1441,11 +1439,15 @@ def my_friends_send_message():
                 #获取格式化时间，包括星期，用逗号分隔，用于前端的渲染,split
                 time_format = time.strftime('%Y,%m,%d,%w')
                 send_user = current_user
+                #评论数
                 comments_number = 0
+                #点赞数
+                like_number = 0
                 db.session.add(FriendInfo(id = None,send_user = send_user ,\
                     time_format = time_format,picture_path = picture_path,\
                     message_title = message_title,messgae_content = message_content,\
-                    comments_number = comments_number,picture_path_html = picture_path_html,create_time = datetime.datetime.now()))
+                    comments_number = comments_number,picture_path_html = picture_path_html,\
+                    like_number = like_number,create_time = datetime.datetime.now()))
                 db.session.commit()
                 message = '发送动态成功!刷新后查看'
                 title = '成功!'
@@ -1503,7 +1505,7 @@ def my_friends_send_message():
             data['week'] = digital_week_dic[ time_list[3]]
             data['date'] = time_list[0] +'年' +time_list[1] +'月' + time_list[2] +'日'
             friends_info_list.append(data)
-        return render_template('blog.html',dic1 = dic1, form = form ,list1 = friends_info_list)
+        return render_template('blog_1.html',dic1 = dic1, form = form ,list1 = friends_info_list)
         
 #删除朋友圈动态(用户界面,管理员和普通用户都只能删除自己发的)
 @app.route('/my_friends/delete_message',methods = ['GET'])
@@ -1527,8 +1529,9 @@ def delete_my_message():
                         #当前用户和发送用户一致，执行删除操作
                         #删除static中的图片
                         file_path_remove = user_info.picture_path
-                        if os.path.isfile(file_path_remove) == True:
-                            os.remove(file_path_remove)
+                        if file_path_remove:
+                            if os.path.isfile(file_path_remove) == True:
+                                os.remove(file_path_remove)
                         db.session.delete(user_info)
                         db.session.commit()
                         flash('删除成功!')
@@ -1547,7 +1550,7 @@ def delete_my_message():
 @login_required
 #@routing_permission_check
 def my_friend_next_page():
-    form = MyFridensSendMessageForms()
+    form = MyFriendsSendMessageForms()
     current_user = session.get('user_id')
     if request.method == 'GET':
         #定义字典渲染页面
@@ -1592,7 +1595,128 @@ def my_friend_next_page():
                 data['week'] = digital_week_dic[ time_list[3]]
                 data['date'] = time_list[0] +'年' +time_list[1] +'月' + time_list[2] +'日'
                 friends_info_list.append(data)
-            return render_template('blog.html',dic1 = dic1, form = form ,list1 = friends_info_list)
+            return render_template('blog_1.html',dic1 = dic1, form = form ,list1 = friends_info_list)
+
+#添加朋友圈动态评论
+@app.route('/my_friends/send_message/add_comments',methods = ['POST'])
+@login_required
+#@routing_permission_check
+def my_friend_commenting_message():
+    current_user = session.get('user_id')
+    form = MyFriendAddCommentsForms()
+    if request.method == 'POST':
+        if form.validate_on_submit():
+            friendinfo_id = request.form['friendinfo_id']
+            commenting_message = request.form['commenting_message']
+            commenting_user = current_user
+            commenting_time = datetime.datetime.now()
+            try:
+                db.session.add(FriendComments(id = None,friendinfo_id = friendinfo_id,\
+                    commenting_user= commenting_user,commenting_message = commenting_message,\
+                    commenting_time = commenting_time))
+                #更新评论数
+                friends_info = FriendInfo.query.filter_by(id = friendinfo_id).first()
+                if friends_info:
+                    old_comments = friends_info.comments_number
+                    friends_info.comments_number = old_comments + 1
+                db.session.commit()
+                message = '评论成功! 刷新后查看'
+                title = '成功! '
+                style = 'alert alert-success alert-dismissable'
+            except:
+                db.session.rollback()
+                message = '数据库错误!'
+                title = '错误!'
+                style = 'alert alert-dismissable alert-danger'
+            finally:
+                db.session.close()
+        else:
+            #未通过表单校验
+            err_dic = form.errors
+            errs = ''
+            for key,value in err_dic.items():
+                errs += value[0] + '  '
+            message = errs
+            title = '错误! '
+            style = 'alert alert-dismissable alert-danger'
+        #渲染页面
+        #渲染页面
+        #查询用户个人信息
+        res = User.query.filter_by(username = current_user).first()
+        if res:
+            chinese_name = res.chinese_name
+            sex = res.sex
+            birthday = res.birthday
+            email = res.email
+            group_id = res.group_id
+            if sex == 'Male':
+                sex = '男'
+            elif sex == 'Female':
+                sex = '女' 
+            if group_id == 1:
+                per = '管理员'
+            elif group_id == 2:
+                per = '普通用户'
+        dic1 = {'current_user':current_user,'chinese_name':chinese_name,\
+            'sex':sex,'birthday':birthday,'email':email,'permission':per,'page_number':1}
+        #把对应的提示信息加入到dic1中
+        dic1['message'] = message
+        dic1['title'] = title
+        dic1['style'] = style
+        #查询朋友动态信息
+        friends_info = FriendInfo.query.order_by(FriendInfo.create_time.desc()).limit(3)
+        friends_info_list = []
+        for i in friends_info:
+            data = i.__dict__
+            #对data进行处理
+            del data['_sa_instance_state']
+            del data['picture_path']
+            #处理时间time_format
+            digital_week_dic = {'1':'星期一','2':'星期二','3':'星期三','4':'星期四','5':'星期五','6':'星期六','7':'星期日'}
+            time_list = data['time_format'].split(',')
+            data['week'] = digital_week_dic[ time_list[3]]
+            data['date'] = time_list[0] +'年' +time_list[1] +'月' + time_list[2] +'日'
+            friends_info_list.append(data)
+        return render_template('blog_1.html',dic1 = dic1, form = form ,list1 = friends_info_list)
+
+#朋友圈点赞
+@app.route('/my_friends/send_message/add_likes',methods = ['GET'])
+@login_required
+#@routing_permission_check
+def my_friends_add_likes():
+    current_user = session.get('user_id')
+    if request.method == 'GET':
+        friendinfo_id = request.args.get('friendinfo_id')
+        try:
+            friendinfo_id = int(friendinfo_id)
+        except:
+            return abort(404)
+        else:
+            try:
+                #写入数据库
+                db.session.add(FriendLikes(id = None,friendinfo_id = friendinfo_id ,\
+                    like_user = current_user ,like_time = datetime.datetime.now()))
+                #更新点赞数
+                friends_info = FriendInfo.query.filter_by(id = friendinfo_id).first()
+                if friends_info:
+                    old_likes = friends_info.like_number
+                    friends_info.like_number = old_likes + 1
+                db.session.commit()
+                flash('点赞成功!')
+                return redirect('/my_friends')
+            except:
+                db.session.rollback()
+                flash('点赞失败!数据库错误!')
+                return redirect('/my_friends')
+            finally:
+                db.session.close()
+
+#查看点赞列表
+@app.route('/my_friends/send_message/get_likes_list',methods = ['GET'])
+@login_required
+#@routing_permission_check
+def get_likes_list():
+    pass
 
 
 #后台管理
