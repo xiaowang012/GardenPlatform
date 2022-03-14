@@ -4,6 +4,7 @@
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 <title>朋友圈</title>
+<link rel="icon" href="/static/imgs/title.png" type="image/x-icon"> 
 <link rel="stylesheet" href="https://cdn.staticfile.org/twitter-bootstrap/3.3.7/css/bootstrap.min.css">  
 <script src="https://cdn.staticfile.org/jquery/2.1.1/jquery.min.js"></script>
 <script src="https://cdn.staticfile.org/twitter-bootstrap/3.3.7/js/bootstrap.min.js"></script>
@@ -15,6 +16,9 @@
         var r=confirm("您确定要删除吗?")
           if(r){window.location.href=url
           }
+        }
+        function send_comments_id(id1) {
+        $( '#friendinfo_id').val(id1);
         }
     </script>
     <div style="margin-top: 20px;" class="container">
@@ -143,103 +147,65 @@
                 </div> 
                 <!-- end -->
                 <div class="container">
+                    <!-- 添加一个计次循环 -->
+                    {% for item in list1 %}
+                        <div class="row clearfix">
+                            <div class="col-md-2 column">
+                                <div style="margin-top: 20px;" >           
+                                    <div class="page-header">
+                                        <h1>
+                                            {% if item %}{{ item['week'] }}{% endif %}<br><small>{% if item %}{{ item['date'] }}{% endif %}</small>
+                                        </h1>
+                                    </div>
+                                    <ul>
+                                        <li><p> 用户: @{% if item %}{{ item['send_user'] }}{% endif %}</p></li>
+                                        <li>评论: <a id="modal-207291" href="#modal-container-207291" data-toggle="modal" >{% if item %}{{ item['comments_number'] }}{% endif %} 条评论</a></li>
+                                        <li>点赞: <a href="#">{% if item %}{{ item['like_number'] }}{% endif %} 个赞</a></li>
+                                    </ul>
+                                </div>
+                            </div>
+                            <div class="col-md-6 column">
+                                <div style="margin-top: 20px;" class="postblog">
+                                    <a href="#" class="image-blog"><img src="{% if item %}{{ item['picture_path_html'] }}{% endif %}" alt="" height="300px" width="550px" /></a>
+                                    <h3><a href="#">{% if item %}{{ item['message_title'] }}{% endif %}</a></h3>
+                                    <p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{% if item %} {{ item['message_content'] }}{% endif %}</p>
+                                    <span><a href="/my_friends/send_message/add_likes?friendinfo_id={{ item['id'] }}">点赞</a></span>
+                                    <span class="right-bot"><a id="modal-207290" onclick="send_comments_id('{{ item.id }}')" href="#modal-container-207290" data-toggle="modal" >评论</a></span>
+                                    <button style="float: right;font-size:smaller;"  class="btn btn-primary" onclick="delete_confirm('/my_friends/delete_message?cur_url=/my_friends&id={% if item %}{{ item.id }}{% endif %}')"  >删除</button>
+                                </div>
+                            </div>
+                            <div class="col-md-4 column">
+                                <div style="margin-left: 60px;" class="whole">
+                                    <h3>
+                                        评论列表
+                                    </h3>
+                                    <table class="table table-striped">
+                                        <tbody>
+                                            <!-- {% for comment in comments_list %} -->
+                                            <tr class="success">
+                                                <td>
+                                                    @wangli01: 哈哈哈哈啊啊啊啊 <a href="#">删除</a>
+                                                </td>
+                                                <td>
+                                                    2022-03-08 15:00:01
+                                                </td>
+                                            </tr>
+                                            <!-- {% endfor %}  -->
+                                        </tbody>
+                                    </table> 
+                                    <div>
+                                        <button type="button" class="btn btn-default">返回第一页</button>
+                                        <button style="float:right" type="button" class="btn btn-default">查看更多</button> 
+                                    </div>
+                                </div>
+                                
+                            </div>
+                        </div>
+                    {% endfor %}
                     <div class="row clearfix">
                         <div class="col-md-2 column">
-                            <div style="margin-top: 20px;" >           
-                                <div class="page-header">
-                                    <h1>
-                                        {% if list1[0] %}{{ list1[0]['week'] }}{% endif %}<br><small>{% if list1[0] %}{{ list1[0]['date'] }}{% endif %}</small>
-                                    </h1>
-                                </div>
-                                <ul>
-                                    <li>用户: <a  href="#">@{% if list1[0] %}{{ list1[0]['send_user'] }}{% endif %}</a></li>
-                                    <li>评论: <a href="#">{% if list1[0] %}{{ list1[0]['comments_number'] }}{% endif %} 条评论</a></li>
-                                    <li>点赞: <a href="#">{% if list1[0] %}{{ list1[0]['comments_number'] }}{% endif %} 个赞</a></li>
-                                </ul>
-                            </div>
                         </div>
                         <div class="col-md-6 column">
-                            <div style="margin-top: 20px;" class="postblog">
-                                <a href="#" class="image-blog"><img src="{% if list1[0] %}{{ list1[0]['picture_path_html'] }}{% endif %}" alt="" height="300px" width="550px" /></a>
-                                <h3><a href="#">{% if list1[0] %}{{ list1[0]['message_title'] }}{% endif %}</a></h3>
-                                <p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{% if list1[0] %} {{ list1[0]['message_content'] }}{% endif %}</p>
-                                <span><a href="#">点赞</a></span>
-                                <span class="right-bot"><a href="#">回复</a></span>
-                                <button style="float: right;font-size:smaller;"  class="btn btn-primary" onclick="delete_confirm('/my_friends/delete_message?cur_url=/my_friends&id={% if list1[0] %}{{ list1[0].id }}{% endif %}')"  >删除</button>
-                            </div>
-                        </div>
-                        <div class="col-md-4 column">
-                            <div style="margin-left: 60px;" class="whole">
-                                <h3>&nbsp;&nbsp;&nbsp;搜一下</h3>
-                                <ul class="post">
-                                    <li>
-                                        <a href="#"><img src="/static/imgs/thumb-blog-1.jpg" alt="" /></a>
-                                        <p><a  href="#">乌克兰像俄罗斯开火!</a> <br><small>May 30, 2022 3条评论</small></p>
-                                    </li>
-                                    <li>
-                                        <a href="#"><img src="/static/imgs/thumb-blog-2.jpg" alt="" /></a>
-                                        <p><a  href="#">泽连斯基宣布与俄罗斯断交!</a> <br><small>May 30, 2022 31条评论</small></p>
-                                    </li>
-                                    <li>
-                                        <a href="#"><img src="/static/imgs/thumb-blog-3.jpg" alt="" /></a>
-                                        <p><a  href="#">日本宣布制裁俄罗斯!</a> <br><small>May 3, 2022 13条评论</small></p>
-                                    </li>
-                                </ul>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="row clearfix">
-                        <div class="col-md-2 column">
-                            <div style="margin-top: 20px;">
-                                <div class="page-header">
-                                    <h1>
-                                        {% if list1[1] %}{{ list1[1]['week'] }}{% endif %}<br><small>{% if list1[1] %}{{ list1[1]['date'] }}{% endif %}</small>
-                                    </h1>
-                                </div>
-                                <ul>
-                                    <li>用户: <a  href="#">@{% if list1[1] %}{{ list1[1]['send_user'] }}{% endif %}</a></li>
-                                    <li>评论: <a href="#">{% if list1[1] %}{{ list1[1]['comments_number'] }}{% endif %} 条评论</a></li>
-                                    <li>点赞: <a href="#">{% if list1[1] %}{{ list1[1]['comments_number'] }}{% endif %} 个赞</a></li>
-                                </ul>
-                            </div>
-                        </div>
-                        <div class="col-md-6 column">
-                            <div style="margin-top: 20px;" class="postblog">
-                                <a href="#" class="image-blog"><img src="{% if list1[1] %}{{ list1[1]['picture_path_html'] }}{% endif %}" alt="" height="300px" width="550px" /></a>
-                                <h3><a href="#">{% if list1[1] %}{{ list1[1]['message_title'] }}{% endif %}</a></h3>
-                                <p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{% if list1[1] %} {{ list1[1]['message_content'] }}{% endif %}</p>
-                                <span><a href="#">点赞</a></span>
-                                <span class="right-bot"><a href="#">回复</a></span>
-                                <button style="float: right;font-size:smaller;"  class="btn btn-primary" onclick="delete_confirm('/my_friends/delete_message?cur_url=/my_friends&id={% if list1[1] %}{{ list1[1].id }}{% endif %}')"  >删除</button>
-                            </div>
-                        </div>
-                        <div class="col-md-4 column">
-                        </div>
-                    </div>
-                    <div class="row clearfix">
-                        <div class="col-md-2 column">
-                            <div style="margin-top: 20px;">
-                                <div class="page-header">
-                                    <h1>
-                                        {% if list1[2] %}{{ list1[2]['week'] }}{% endif %}<br><small>{% if list1[2] %}{{ list1[2]['date'] }}{% endif %}</small>
-                                    </h1>
-                                </div>
-                                <ul >
-                                    <li>用户: <a  href="#">@{% if list1[2] %}{{ list1[2]['send_user'] }}{% endif %}</a></li>
-                                    <li>评论: <a href="#">{% if list1[2] %}{{ list1[2]['comments_number'] }}{% endif %} 条评论</a></li>
-                                    <li>点赞: <a href="#">{% if list1[2] %}{{ list1[2]['comments_number'] }}{% endif %} 个赞</a></li>
-                                </ul>
-                            </div>
-                        </div>
-                        <div class="col-md-6 column">
-                            <div style="margin-top: 20px;" class="postblog">
-                                <a href="#" class="image-blog"><img src="{% if list1[2] %}{{ list1[2]['picture_path_html'] }}{% endif %}" alt="" height="300px" width="550px" /></a>
-                                <h3><a href="#">{% if list1[2] %}{{ list1[2]['message_title'] }}{% endif %}</a></h3>
-                                <p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{% if list1[2] %} {{ list1[2]['message_content'] }}{% endif %}</p>
-                                <span><a href="#">点赞</a></span>
-                                <span class="right-bot"><a href="#">回复</a></span>
-                                <button style="float: right;font-size:smaller;"  class="btn btn-primary" onclick="delete_confirm('/my_friends/delete_message?cur_url=/my_friends&id={% if list1[2] %}{{ list1[2].id }}{% endif %}')"  >删除</button>
-                            </div>
                             <div>
                                 <a role="button" style="font-size: small;margin-top: 50px;" class="btn btn-default" href="/my_friends/nextpage?page=1" >返回第一页</a>
                                 <a role="button" style="font-size: small;margin-top: 50px;float: right;" class="btn btn-default" href="/my_friends/nextpage?page={{ dic1['page_number'] + 1 }}" >查看更多</a>
@@ -248,7 +214,36 @@
                         <div class="col-md-4 column">
                         </div>
                     </div>
+                   
+                    <div class="col-md-4 column">
+                    </div>
                 </div>
+                <!-- 添加评论模态框 -->
+                <div class="modal fade" id="modal-container-207290" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+                    <div class="modal-dialog">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">x</button>
+                                <h4 class="modal-title" id="myModalLabel">
+                                    写个评论
+                                </h4>
+                            </div>
+                            <div class="modal-body">
+                                <form role="form" action="/my_friends/send_message/add_comments" method="post" >
+                                    {{ form.csrf_token }}
+                                    <div class="form-group">
+                                        <label for="friendinfo_id">ID</label><input type="text" class="form-control" name="friendinfo_id" id="friendinfo_id"  readonly="readonly" />
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="commenting_message">内容</label>
+                                        <textarea class="form-control" rows="3" name="commenting_message"></textarea>
+                                    </div>
+                                    <button type="submit" class="btn btn-default btn-primary">提交</button>
+                                </form>
+                            </div>
+                        </div> 
+                    </div>
+                </div>  
                 <div style="margin-top: 20px;" class="panel panel-success">
                     <div class="panel-heading">
                         <h3 class="panel-title">
