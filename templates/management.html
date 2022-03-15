@@ -164,26 +164,30 @@
                                 </tbody>
                             </table>
                             <ul style="float: right;" class="pagination">
-                                <li>
-                                     <a href="#">Prev</a>
+                                <li class="{{ dic1['active_Prev'] }}">
+                                    {% if dic1['page_number'] <=2  %}
+                                        <a href="/management/permissionTable/page?page_number=1">Prev</a>
+                                    {% else %}
+                                        <a href="/management/permissionTable/page?page_number={{ dic1['page_number']-1 }}">Prev</a>
+                                    {% endif %}
+                                   </li>
+                                <li class="{{ dic1['active1'] }}">
+                                     <a href="/management/permissionTable/page?page_number=1">1</a>
                                 </li>
-                                <li class="active" >
-                                     <a href="#">1</a>
+                                <li class="{{ dic1['active2'] }}">
+                                     <a href="/management/permissionTable/page?page_number=2">2</a>
                                 </li>
-                                <li>
-                                     <a href="#">2</a>
+                                <li class="{{ dic1['active3'] }}">
+                                     <a href="/management/permissionTable/page?page_number=3">3</a>
                                 </li>
-                                <li>
-                                     <a href="#">3</a>
+                                <li class="{{ dic1['active4'] }}">
+                                     <a href="/management/permissionTable/page?page_number=4">4</a>
                                 </li>
-                                <li>
-                                     <a href="#">4</a>
+                                <li class="{{ dic1['active5'] }}">
+                                     <a href="/management/permissionTable/page?page_number=5">5</a>
                                 </li>
-                                <li>
-                                     <a href="#">5</a>
-                                </li>
-                                <li>
-                                     <a href="#">Next</a>
+                                <li class="{{ dic1['active_next'] }}">
+                                     <a href="/management/permissionTable/page?page_number={{ dic1['page_number']+1 }}">Next</a>
                                 </li>
                             </ul>
                         </div>
