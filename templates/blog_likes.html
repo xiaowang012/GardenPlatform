@@ -41,7 +41,7 @@
                         <a href="/update_password">修改密码</a>
                     </li>
                     <li class="">
-                        <a href="/management/permissionTable">后台管理</a>
+                        <a href="/management">后台管理</a>
                     </li>
                     <li style="float: right;" class="">
                         <div>
@@ -149,6 +149,7 @@
                 <div class="container">
                     <!-- 添加一个计次循环 -->
                     {% for item in list1 %}
+                        {% set j =  loop.index %}
                         <div class="row clearfix">
                             <div class="col-md-2 column">
                                 <div style="margin-top: 20px;" >           
@@ -175,29 +176,25 @@
                                 </div>
                             </div>
                             <div class="col-md-4 column">
-                                <div style="margin-left: 60px;" class="whole">
-                                    <h3>
-                                        评论列表
-                                    </h3>
-                                    <table class="table table-striped">
-                                        <tbody>
-                                            {% for comment in item['comments_list'] %}
-                                                <tr class="{{ comment['style'] }}">
-                                                    <td>
-                                                        @{{ comment['commenting_user'] }}: {{ comment['commenting_message'] }} <button style="float: right;font-size: smaller;" class="btn btn-primary" onclick="delete_confirm('/my_friends/send_message/delete_comments?id={{ comment.id }}')" >删除</button>
-                                                    </td>
-                                                </tr>
-                                            {% endfor %} 
-                                        </tbody>
-                                    </table> 
-                                    <div>
-                                        {% if item['comments_list'] %}
-                                            <button style="float:left;font-size: smaller;" type="button" class="btn btn-default">第一页</button> 
-                                            <button style="float:right;font-size: smaller;" type="button" class="btn btn-default" href="" >更多</button> 
-                                        {% endif %}
+                                {% if j ==1 %}
+                                    <div style="margin-left: 60px;" class="whole">
+                                        <h3>&nbsp;&nbsp;&nbsp;最近评论</h3>
+                                        <ul class="post">
+                                            <li>
+                                                <a href="#"><img src="/static/imgs/thumb-blog-1.jpg" alt="" /></a>
+                                                <p><a  href="#">乌克兰像俄罗斯开火!</a> <br><small>May 30, 2022 3条评论</small></p>
+                                            </li>
+                                            <li>
+                                                <a href="#"><img src="/static/imgs/thumb-blog-2.jpg" alt="" /></a>
+                                                <p><a  href="#">泽连斯基宣布与俄罗斯断交!</a> <br><small>May 30, 2022 31条评论</small></p>
+                                            </li>
+                                            <li>
+                                                <a href="#"><img src="/static/imgs/thumb-blog-3.jpg" alt="" /></a>
+                                                <p><a  href="#">日本宣布制裁俄罗斯!</a> <br><small>May 3, 2022 13条评论</small></p>
+                                            </li>
+                                        </ul>
                                     </div>
-                                </div>
-                                
+                                {% endif %}
                             </div>
                         </div>
                     {% endfor %}
@@ -206,8 +203,8 @@
                         </div>
                         <div class="col-md-6 column">
                             <div>
-                                <a role="button" style="font-size: small;margin-top: 50px;" class="btn btn-default" href="/my_friends/nextpage?page=1" >第一页</a>
-                                <a role="button" style="font-size: small;margin-top: 50px;float: right;" class="btn btn-default" href="/my_friends/nextpage?page={{ dic1['page_number'] + 1 }}" >更多</a>
+                                <a role="button" style="font-size: small;margin-top: 50px;" class="btn btn-default" href="/my_friends/nextpage?page=1" >返回第一页</a>
+                                <a role="button" style="font-size: small;margin-top: 50px;float: right;" class="btn btn-default" href="/my_friends/nextpage?page={{ dic1['page_number'] + 1 }}" >查看更多</a>
                             </div>
                         </div>
                         <div class="col-md-4 column">

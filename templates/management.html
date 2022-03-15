@@ -30,7 +30,7 @@
                         <a href="/update_password">修改密码</a>
                     </li>
                     <li class="active">
-                        <a href="/management">后台管理</a>
+                        <a href="/management/permissionTable">后台管理</a>
                     </li>
                     <li style="float: right;" class="">
                         <div>
@@ -43,43 +43,6 @@
                     <h1>
                         智能浇水平台<small><span>分享生活,分享快乐!</span></small>
                     </h1>
-                </div>
-                <div class="carousel slide" id="carousel-88070">
-                    <ol class="carousel-indicators">
-                        <li data-slide-to="0" data-target="#carousel-88070">
-                        </li>
-                        <li data-slide-to="1" data-target="#carousel-88070">
-                        </li>
-                        <li data-slide-to="2" data-target="#carousel-88070" class="active">
-                        </li>
-                    </ol>
-                    <div class="carousel-inner">
-                        <div class="item">
-                            <img alt="" src="../static/imgs/default.jpg" />
-                            <div class="carousel-caption">
-                                <p>
-                                    这是一款智能浇花神器
-                                </p>
-                            </div>
-                        </div>
-                        <div class="item">
-                            <img alt="" src="../static/imgs/default2.jpg" />
-                            <div class="carousel-caption">
-                                <p>
-                                    这是一款智能浇花神器
-                                </p>
-                            </div>
-                        </div>
-                        <div class="item active">
-                            <img alt="" src="../static/imgs/default1.jpg" />
-                            <div class="carousel-caption">
-                                <p>
-                                    这是一款智能浇花神器
-                                </p>
-                            </div>
-                        </div>
-
-                    </div> <a class="left carousel-control" href="#carousel-88070" data-slide="prev"><span class="glyphicon glyphicon-chevron-left"></span></a> <a class="right carousel-control" href="#carousel-88070" data-slide="next"><span class="glyphicon glyphicon-chevron-right"></span></a>
                 </div>
                 <!--用户个人信息的模态框-->
                 <div class="modal fade" id="modal-container-207276" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
@@ -118,7 +81,7 @@
                         </div> 
                     </div>
                 </div> 
-                <div style="margin-top: 20px;" class="panel panel-success">
+                <!-- <div style="margin-top: 20px;" class="panel panel-success">
                     <div class="panel-heading">
                         <h3 class="panel-title">
                             <div>
@@ -126,60 +89,107 @@
                             </div>
                         </h3>
                     </div>
+                </div> -->
+                <div  class="container">
+                    <div class="row clearfix">
+                        <div style="padding-left:0" class="col-md-12 column">
+                            <ul style="text-align: left;font-size: large;" class="breadcrumb">
+                                <li>
+                                     <a href="/management/permissionTable">权限表</a>
+                                </li>
+                                <li> 
+                                     <a href="/management/userTable">用户表</a>
+                                </li>
+                                <li>
+                                    <a href="/management/userGroupTable">用户组表</a>
+                                </li>
+                                <li>
+                                    <a href="/management/devicesTable">设备表</a>
+                                </li>
+                                <li>
+                                    <a href="/management/friendInfoTable">朋友圈动态表</a>
+                                </li>
+                                <li>
+                                    <a href="/management/friendCommentsTable">朋友圈动态评论表</a>
+                                </li>
+                                <li>
+                                    <a href="/management/friendLikesTable">朋友圈点赞信息表</a>
+                                </li>
+                            </ul>
+                            <h3 class="text-center">
+                                权限表<a href="/management/refresh?cur_url=/management" style="float: right;font-size: medium;"> 刷新权限</a>
+                            </h3>
+                            <table style="margin-top: 20px;" class="table table-bordered">
+                                <thead>
+                                    <tr>
+                                        <th>
+                                            id
+                                        </th>
+                                        <th>
+                                            name
+                                        </th>
+                                        <th>
+                                            url
+                                        </th>
+                                        <th>
+                                            description
+                                        </th>
+                                        <th>
+                                            <a role="button" style="font-size: smaller;" class="btn btn-default" href="#" >添加</a><a role="button" class="btn btn-default" style="float: right;font-size: smaller;" href="#" >导入</a>
+                                        </th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for item in list1 %}
+                                        <tr class="{{ item['style'] }}">
+                                            <td>
+                                                {{ item['id'] }}
+                                            </td>
+                                            <td>
+                                                {{ item['name'] }}
+                                            </td>
+                                            <td>
+                                                {{ item['url'] }}
+                                            </td>
+                                            <td>
+                                                {{ item['description'] }} 
+                                            </td>
+                                            <td>
+                                                {% set id=item['id'] %}
+                                                <a id="modal-207275" onclick="parameter_id('{{ id }}')" href="#modal-container-207275" role="button" style="font-size: x-small;" class="btn btn-default" data-toggle="modal">修改</a><a role="button" class="btn btn-default btn-primary" style="margin-left: 15px;font-size: x-small;" href="/management/system/permission/delete?id={{ item['id'] }}">删除</a>
+                                            </td>
+                                        </tr>  
+                                    {% endfor %}
+                                    
+                                </tbody>
+                            </table>
+                            <ul style="float: right;" class="pagination">
+                                <li>
+                                     <a href="#">Prev</a>
+                                </li>
+                                <li class="active" >
+                                     <a href="#">1</a>
+                                </li>
+                                <li>
+                                     <a href="#">2</a>
+                                </li>
+                                <li>
+                                     <a href="#">3</a>
+                                </li>
+                                <li>
+                                     <a href="#">4</a>
+                                </li>
+                                <li>
+                                     <a href="#">5</a>
+                                </li>
+                                <li>
+                                     <a href="#">Next</a>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
                 </div>
-                <div class="row">
-                    <div class="col-md-4">
-                        <div class="thumbnail">
-                            <div class="caption">
-                                <h3>
-                                    1.远程控制功能
-                                </h3>
-                                <p>
-                                    需要设备:小型水泵,继电器,4G DTU ,温度传感器(可选)
-                                    湿度传感器,摄像头设备。使用智能浇水平台可以随心
-                                    所欲的控制浇水时机,定时浇水等自动化任务。
-                                </p>
-                                <p>
-                                     <a class="btn btn-primary" href="#">用户界面</a> 
-                                </p>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-md-4">
-                        <div class="thumbnail">
-                            <div class="caption">
-                                <h3>
-                                    2.朋友圈功能
-                                </h3>
-                                <p>
-                                    智能浇水平台可以多用户同时使用,配对的浇水设备和用户
-                                    绑定,其他用户无法控制您的浇水设备,可以在朋友圈页面
-                                    分享快乐,就像微博一样!
-                                </p>
-                                <p>
-                                     <a class="btn btn-primary" href="#">朋友圈</a>
-                                </p>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-md-4">
-                        <div class="thumbnail">
-                            <div class="caption">
-                                <h3>
-                                    3.后台管理功能
-                                </h3>
-                                <p>
-                                    管理员可以对用户进行管理,处理异常的情况,也可以对长时间
-                                    忘记浇花的用户进行邮件提醒,用户也可以将浇花权限托管给管
-                                    理员进行操作。
-                                </p>
-                                <p>
-                                     <a class="btn btn-primary" href="#">管理界面</a>
-                                </p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+                
                 <div style="margin-top: 20px;" class="panel panel-success">
                     <div class="panel-heading">
                         <h3 class="panel-title">
