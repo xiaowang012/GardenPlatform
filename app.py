@@ -1885,7 +1885,7 @@ def my_friend_delete_comments():
 @login_required
 @routing_permission_check
 def management_permission():
-    #form = SearchPlantForms()
+    form = SearchPlantForms()
     current_user = session.get('user_id')
     if request.method == 'GET':
         #定义字典渲染页面
@@ -1905,7 +1905,8 @@ def management_permission():
             elif group_id == 2:
                 per = '普通用户'
         dic1 = {'current_user':current_user,'chinese_name':chinese_name,\
-            'sex':sex,'birthday':birthday,'email':email,'permission':per}
+            'sex':sex,'birthday':birthday,'email':email,'permission':per,\
+            'page_number':1,'active1':'active'}
         #查询权限数据(限制10条)
         permission_info = Permission.query.limit(10).all()
         if len(permission_info) ==0:
@@ -1917,8 +1918,63 @@ def management_permission():
                 del data['_sa_instance_state']
                 data['style'] = random.choice(['success','info','warning','error'])
                 permission_info_list .append(data)              
-        return render_template('management.html',dic1 = dic1,list1 = permission_info_list)
+        return render_template('management.html',form = form,dic1 = dic1,list1 = permission_info_list)
 
+#后台管理权限表管理主页翻页
+@app.route('/management/permissionTable/page',methods = ['POST','GET'])
+@login_required
+#@routing_permission_check
+def management_permission_page():
+    form = SearchPlantForms()
+    current_user = session.get('user_id')
+    if request.method == 'GET':
+        page_number = request.args.get('page_number')
+        if page_number:
+            try:
+                page_number = int(page_number)
+            except:
+                return abort(404)
+            else:
+                #定义字典渲染页面
+                res = User.query.filter_by(username = current_user).first()
+                if res:
+                    chinese_name = res.chinese_name
+                    sex = res.sex
+                    birthday = res.birthday
+                    email = res.email
+                    group_id = res.group_id
+                    if sex == 'Male':
+                        sex = '男'
+                    elif sex == 'Female':
+                        sex = '女' 
+                    if group_id == 1:
+                        per = '管理员'
+                    elif group_id == 2:
+                        per = '普通用户'
+                dic1 = {'current_user':current_user,'chinese_name':chinese_name,\
+                    'sex':sex,'birthday':birthday,'email':email,'permission':per,\
+                    'page_number':page_number,'active1':'','active2':'','active3':'',\
+                    'active4':'','active5':''}
+                if 1<=page_number<=5:
+                    dic1['active'+str(page_number)] = 'active'
+                elif page_number>5:
+                    dic1['active_next'] = 'active'
+                #查询权限数据(限制10条)
+                limit_num = 10
+                offset_num = (page_number-1)*10
+                permission_info = Permission.query.limit(limit_num).offset(offset_num).all()
+                if len(permission_info) == 0:
+                    permission_info_list=[]
+                else:
+                    permission_info_list = []
+                    for i in permission_info:
+                        data = i.__dict__
+                        del data['_sa_instance_state']
+                        data['style'] = random.choice(['success','info','warning','error'])
+                        permission_info_list .append(data)              
+                return render_template('management.html',form = form,dic1 = dic1,list1 = permission_info_list)
+        else:
+            return abort(404)
 
 #后台管理用户表
 @app.route('/management/userTable',methods = ['POST','GET'])
