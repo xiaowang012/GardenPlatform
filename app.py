@@ -1,4 +1,5 @@
 #coding=utf-8
+from mimetypes import init
 from flask import Flask,render_template,request,Response,url_for,redirect,session,g,jsonify,abort,flash
 from forms import UserForms,RegisterForms,SearchPlantForms,AddDeviceForms,ImportDevicesForms,\
     UpdateDevicesForms,UserUpdatePasswordForms,MyFriendsSendMessageForms,MyFriendAddCommentsForms
@@ -1584,7 +1585,7 @@ def my_friend_next_page():
         try:
             page_number = int(page_number)
         except:
-            print('para err')
+            return abort(404)
         else:
             res = User.query.filter_by(username = current_user).first()
             if res:
@@ -1728,6 +1729,69 @@ def my_friend_commenting_message():
             friends_info_list.append(data)
         return render_template('blog_1.html',dic1 = dic1, form = form ,list1 = friends_info_list)
 
+#朋友圈动态评论翻页
+# @app.route('/my_friends/comments/nextpage',methods = ['GET'])
+# @login_required
+# #@routing_permission_check
+# def my_friend_comments_nextpage():
+#     form = MyFriendsSendMessageForms()
+#     current_user = session.get('user_id')
+#     if request.method == 'GET':
+#         #定义字典渲染页面
+#         page_number = request.args.get('page')
+#         try:
+#             page_number = int(page_number)
+#         except:
+#             return abort(404)
+#         else:
+#             res = User.query.filter_by(username = current_user).first()
+#             if res:
+#                 chinese_name = res.chinese_name
+#                 sex = res.sex
+#                 birthday = res.birthday
+#                 email = res.email
+#                 group_id = res.group_id
+#                 if sex == 'Male':
+#                     sex = '男'
+#                 elif sex == 'Female':
+#                     sex = '女' 
+#                 if group_id == 1:
+#                     per = '管理员'
+#                 elif group_id == 2:
+#                     per = '普通用户'
+#             dic1 = {'current_user':current_user,'chinese_name':chinese_name,\
+#                 'sex':sex,'birthday':birthday,'email':email,'permission':per,'page_number':page_number}
+#             #查询朋友动态信息
+#             #根据页码查询不同的数据
+#             offset_num = (page_number-1)*3
+#             limit_num = 3
+#             friends_info = FriendInfo.query.order_by(FriendInfo.create_time.desc()).limit(limit_num).offset(offset_num)
+#             friends_info_list = []
+#             for i in friends_info:
+#                 data = i.__dict__
+#                 #评论信息ID
+#                 comment_id = data['id']
+#                 comments_info = FriendComments.query.filter_by(friendinfo_id = comment_id).order_by(FriendComments.commenting_time.desc()).limit(5)
+#                 comments_list = []
+#                 for j in comments_info:
+#                     data_1 = j.__dict__
+#                     #删除多余字段
+#                     del data_1['_sa_instance_state']
+#                     data_1['style'] = random.choice(['success','info','warning','error',''])
+#                     comments_list.append(data_1)
+#                 data['comments_list'] = comments_list
+#                 #对data进行处理
+#                 del data['_sa_instance_state']
+#                 del data['picture_path']
+#                 #处理时间time_format
+#                 digital_week_dic = {'1':'星期一','2':'星期二','3':'星期三','4':'星期四','5':'星期五','6':'星期六','7':'星期日'}
+#                 time_list = data['time_format'].split(',')
+#                 data['week'] = digital_week_dic[ time_list[3]]
+#                 data['date'] = time_list[0] +'年' +time_list[1] +'月' + time_list[2] +'日'
+#                 friends_info_list.append(data)
+#             return render_template('blog_1.html',dic1 = dic1, form = form ,list1 = friends_info_list)
+
+
 #朋友圈点赞
 @app.route('/my_friends/send_message/add_likes',methods = ['GET'])
 @login_required
@@ -1767,23 +1831,64 @@ def my_friends_add_likes():
 def get_likes_list():
     pass
 
-#删除评论(只能删除自己添加的评论)
+#删除评论(只能删除自己添加的评论或者动态作者可以删除该动态下的评论)
 @app.route('/my_friends/send_message/delete_comments',methods = ['GET'])
 @login_required
 #@routing_permission_check
 def my_friend_delete_comments():
-    pass
+    current_user = session.get('user_id')
+    if request.method == 'GET':
+        delete_id = request.args.get('id')
+        if delete_id:
+            try:
+                delete_id = int(delete_id)
+            except:
+                return abort(404)
+            else:
+                #根据当前操作用户是否为评论发送者或者为动态作者
+                #否则不执行删除操作
+                #根据ID查发送者
+                sender_info = FriendComments.query.filter_by(id = delete_id).first()
+                if sender_info:
+                    #发送者
+                    sender = sender_info.commenting_user
+                    #作者
+                    author_info = FriendInfo.query.filter_by(id = sender_info.friendinfo_id).first()
+                    if author_info:
+                        author = author_info.send_user
+                    else:
+                        author = None
+                else:
+                    sender = None
+                    author = None
+                #判断
+                if current_user == sender or current_user == author:
+                    try:
+                        db.session.delete(sender_info)
+                        db.session.commit()
+                        flash('删除成功! ')
+                        return redirect('/my_friends')
+                    except:
+                        db.session.rollback()
+                        flash('删除失败! 数据库错误!')
+                        return redirect('/my_friends')
+                    finally:
+                        db.session.close()
+                else:
+                    flash('不是作者/评论用户 无权限删除该评论! ')
+                    return redirect('/my_friends')
+        else:
+            return abort(404)      
 
-#后台管理
-@app.route('/management',methods = ['POST','GET'])
+#后台管理权限表管理主页
+@app.route('/management/permissionTable',methods = ['POST','GET'])
 @login_required
 @routing_permission_check
-def management():
-    form = SearchPlantForms()
+def management_permission():
+    #form = SearchPlantForms()
     current_user = session.get('user_id')
     if request.method == 'GET':
         #定义字典渲染页面
-        #定义dic1
         res = User.query.filter_by(username = current_user).first()
         if res:
             chinese_name = res.chinese_name
@@ -1801,9 +1906,44 @@ def management():
                 per = '普通用户'
         dic1 = {'current_user':current_user,'chinese_name':chinese_name,\
             'sex':sex,'birthday':birthday,'email':email,'permission':per}
-        return render_template('management.html',form = form,dic1 = dic1)
-    else:
-        return 'f'
+        #查询权限数据(限制10条)
+        permission_info = Permission.query.limit(10).all()
+        if len(permission_info) ==0:
+            permission_info_list=[]
+        else:
+            permission_info_list = []
+            for i in permission_info:
+                data = i.__dict__
+                del data['_sa_instance_state']
+                data['style'] = random.choice(['success','info','warning','error'])
+                permission_info_list .append(data)              
+        return render_template('management.html',dic1 = dic1,list1 = permission_info_list)
+
+
+#后台管理用户表
+@app.route('/management/userTable',methods = ['POST','GET'])
+@login_required
+#@routing_permission_check
+def management_user():
+    pass
+
+#后台管理用户表
+@app.route('/management/Table',methods = ['POST','GET'])
+@login_required
+#@routing_permission_check
+def management_user1():
+    pass
+
+#后台管理用户组表
+
+#后台管理设备表
+
+#后台管理朋友圈动态表
+
+#后台管理朋友圈动态评论表
+
+#后台管理朋友圈评论点赞信息表
+
 
 if __name__ == '__main__':
     app.run(host = '0.0.0.0',port = 5001,debug = True)
