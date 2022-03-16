@@ -9,6 +9,20 @@
 	<script src="https://cdn.staticfile.org/twitter-bootstrap/3.3.7/js/bootstrap.min.js"></script>
 </head>
 <body>
+    <script>
+        function parameter_id(id1,name1,url1,description2) {
+        $( '#updateDeptId').val(id1);
+        $( '#updateDeptname').val(name1);
+        $( '#updateDepturl').val(url1);
+        $( '#updateDeptdescription').val(description2);
+        }
+        function delete_confirm(url)
+        {
+        var r=confirm("您确定要删除吗?")
+          if(r){window.location.href=url
+          }
+        }
+    </script>
     <div style="margin-top: 20px;" class="container">
         <div  class="row clearfix">
             <div  class="col-md-12 column">
@@ -117,8 +131,23 @@
                                 </li>
                             </ul>
                             <h3 class="text-center">
-                                权限表<a href="/management/refresh?cur_url=/management" style="float: right;font-size: medium;"> 刷新权限</a>
+                                权限表<a href="/management/refresh?cur_url=/management/permissionTable" style="float: right;font-size: medium;"> 刷新权限</a>
                             </h3>
+                            <!--消息提醒-->
+                            <div style="margin-top: 20px;" class="container">
+                                <div class="row clearfix">
+                                    <div style="padding-left:0" class="col-md-12 column">
+                                        <div style="margin-right: 15px;" class="{{ dic1['style'] }}">
+                                            <h4>
+                                                {{ dic1['title'] }}
+                                                {% for message in get_flashed_messages() %}
+                                                    <div style="color: red;" class="alert">{{ message }}</div>
+                                                {% endfor %}
+                                            </h4> <strong>{{ dic1['title'] }}</strong>{{ dic1['message'] }}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div> 
                             <table style="margin-top: 20px;" class="table table-bordered">
                                 <thead>
                                     <tr>
@@ -135,7 +164,7 @@
                                             description
                                         </th>
                                         <th>
-                                            <a role="button" style="font-size: smaller;" class="btn btn-default" href="#" >添加</a><a role="button" class="btn btn-default" style="float: right;font-size: smaller;" href="#" >导入</a>
+                                            <a role="button" id="modal-207299" href="#modal-container-207299" style="font-size: smaller;" class="btn btn-primary" data-toggle="modal" >添加</a><a role="button" id="modal-207300" href="#modal-container-207300" class="btn btn-default" style="font-size: smaller;margin-left: 17px;" data-toggle="modal" >导入</a>
                                         </th>
                                     </tr>
                                 </thead>
@@ -156,13 +185,112 @@
                                             </td>
                                             <td>
                                                 {% set id=item['id'] %}
-                                                <a id="modal-207275" onclick="parameter_id('{{ id }}')" href="#modal-container-207275" role="button" style="font-size: x-small;" class="btn btn-default" data-toggle="modal">修改</a><a role="button" class="btn btn-default btn-primary" style="margin-left: 15px;font-size: x-small;" href="/management/system/permission/delete?id={{ item['id'] }}">删除</a>
+                                                {% set name=item['name'] %}
+                                                {% set url=item['url'] %}
+                                                {% set description=item['description'] %}
+                                                <a id="modal-207301" onclick="parameter_id('{{ id }}','{{ name }}','{{ url }}','{{ description }}')" href="#modal-container-207301" role="button" style="font-size: x-small;" class="btn btn-default" data-toggle="modal">修改</a><button class="btn btn-default btn-primary" style="margin-left: 15px;font-size: x-small;" onclick="delete_confirm('/management/system/permission/delete?id={{ item.id }}')">删除</button>
                                             </td>
                                         </tr>  
                                     {% endfor %}
                                     
                                 </tbody>
                             </table>
+                            <!-- 添加权限模态框 -->
+                            <div class="modal fade" id="modal-container-207299" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+                                <div class="modal-dialog">
+                                    <div class="modal-content">
+                                        <div class="modal-header">
+                                            <button type="button" class="close" data-dismiss="modal" aria-hidden="true">x</button>
+                                            <h4 class="modal-title" id="myModalLabel">
+                                                添加权限
+                                            </h4>
+                                        </div>
+                                        <div class="modal-body">
+                                            <form role="form" action="/management/permissionTable/add" method="post" enctype = "multipart/form-data">
+                                                {{ form.csrf_token }}
+                                                <div class="form-group">
+                                                    <label for="user_group">用户组</label>
+                                                    <select name="user_group" class="form-control">
+                                                        <option value="admin">管理员</option>
+                                                        <option value="others">其他</option>
+                                                    </select>
+                                                </div>
+                                                <div class="form-group">
+                                                    <label for="url">URL</label><input type="text" class="form-control" name="url" />
+                                                </div>
+                                                <div class="form-group">
+                                                    <label for="description">描述信息</label>
+                                                    <textarea class="form-control" rows="3" name="description"></textarea>
+                                                </div>
+                                                
+                                                <button type="submit" class="btn btn-default btn-primary">提交</button>
+                                            </form>
+                                        </div>
+                                    </div> 
+                                </div>
+                            </div> 
+                            <!--批量导入设备的模态框-->
+                            <div class="modal fade" id="modal-container-207300" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+                                <div class="modal-dialog">
+                                    <div class="modal-content">
+                                        <div class="modal-header">
+                                            <button type="button" class="close" data-dismiss="modal" aria-hidden="true">x</button>
+                                            <h4 class="modal-title" id="myModalLabel">
+                                                导入权限
+                                            </h4>
+                                        </div>
+                                        <div class="modal-body">
+                                            <form role="form" action="/management/permissionTable/import" method="post" enctype = "multipart/form-data">
+                                                {{ form.csrf_token }}
+                                                <div style="margin-top: 15px;" class="form-group">
+                                                        <label for="file_permission">请上传EXCEL文件</label><input type="file" name="file_permission" />
+                                                    <p style="margin-top: 10px;" class="help-block">
+                                                        模板下载链接如下:
+                                                        <a href="/management/permissionTable/import/DownloadTemplateFile">点击下载</a>
+                                                    </p>
+                                                </div>
+                                                <button type="submit" class="btn btn-default btn-primary">导入</button>
+                                            </form>
+                                        </div>
+                                    </div> 
+                                </div>
+                            </div> 
+                            <!--修改权限信息模态框。-->
+                            <div class="modal fade" id="modal-container-207301" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+                                <div class="modal-dialog">
+                                    <div class="modal-content">
+                                        <div class="modal-header">
+                                            <button type="button" class="close" data-dismiss="modal" aria-hidden="true">x</button>
+                                            <h4 class="modal-title" id="myModalLabel">
+                                                修改权限信息界面
+                                            </h4>
+                                        </div>
+                                        <div class="modal-body">
+                                            <form role="form" action="/management/permissionTable/update" method="post" >
+                                                {{ form.csrf_token }}
+                                                <div class="form-group">
+                                                    <label for="id1">ID</label><input type="text" class="form-control" name="id1" id="updateDeptId"  readonly="readonly" />
+                                                </div>
+                                                <div class="form-group">
+                                                    <label for="name1">用户组</label>
+                                                    <select id="updateDeptname" name="name1" class="form-control">
+                                                        <option value="admin">管理员</option>
+                                                        <option value="others">其他</option>
+                                                    </select>
+                                                </div>
+                                                <div class="form-group">
+                                                    <label for="url1">URL</label><input type="text" class="form-control" id="updateDepturl" name="url1" />
+                                                </div>
+                                                <div class="form-group">
+                                                    <label for="description2">描述信息</label>
+                                                    <textarea class="form-control" rows="3" name="description2" id="updateDeptdescription" ></textarea>
+                                                </div>
+                                                <button type="submit" class="btn btn-default btn-primary">提交</button>
+                                            </form>
+                                        </div>
+                                    </div> 
+                                </div>
+                            </div>  
                             <ul style="float: right;" class="pagination">
                                 <li class="{{ dic1['active_Prev'] }}">
                                     {% if dic1['page_number'] <=2  %}
