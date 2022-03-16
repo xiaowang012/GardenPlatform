@@ -81,13 +81,21 @@ class MyFriendAddCommentsForms(FlaskForm):
     commenting_message = StringField('commenting_message',validators = [DataRequired('评论内容不能为空!'),Length(1,200,message = '评论内容长度必须为1-200!')])
 
 #添加权限表单
-class AddPermissionForms(FlaskForm):
-    group_name = StringField('group_name',validators=[DataRequired('name cannot be empty!')])
-    url = StringField('url',validators=[DataRequired('url cannot be empty!')])
-    description = StringField('description',validators=[DataRequired('permission description cannot be empty!')])
+class ManagementAddPermissionForms(FlaskForm):
+    user_group = StringField('user_group',validators=[DataRequired('用户组不能为空!')])
+    url = StringField('url',validators=[DataRequired('URL 不能为空!')])
+    description = StringField('description',validators=[DataRequired('描述信息不能为空!')])
     submit = SubmitField('submit')
 
 #批量导入权限的表单
-class UploadPermissionForms(FlaskForm):
-    file1 = FileField('file1',validators = [FileRequired(message = 'File cannot be empty!'),FileAllowed(['xlsx','xls'],message = 'File format error (XLSX/XLS only)!')])
+class ManagementImportPermissionForms(FlaskForm):
+    file_permission = FileField('file_permission',validators = [FileRequired(message = '文件不能为空!'),FileAllowed(['xlsx','xls'],message = '上传文件类型必须为XLS/XLSX!')])
+    submit = SubmitField('submit')
+
+#修改权限表单
+class ManagementUpdatePermissionForms(FlaskForm):
+    id1 = StringField('id1')
+    name1 = StringField('name1',validators=[DataRequired('用户组不能为空!')])
+    url1 = StringField('url1',validators=[DataRequired('URL 不能为空!')])
+    description2 = StringField('description2',validators=[DataRequired('描述信息不能为空!')])
     submit = SubmitField('submit')
