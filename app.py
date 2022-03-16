@@ -2,7 +2,8 @@
 from mimetypes import init
 from flask import Flask,render_template,request,Response,url_for,redirect,session,g,jsonify,abort,flash
 from forms import UserForms,RegisterForms,SearchPlantForms,AddDeviceForms,ImportDevicesForms,\
-    UpdateDevicesForms,UserUpdatePasswordForms,MyFriendsSendMessageForms,MyFriendAddCommentsForms
+    UpdateDevicesForms,UserUpdatePasswordForms,MyFriendsSendMessageForms,MyFriendAddCommentsForms,\
+    ManagementAddPermissionForms,ManagementImportPermissionForms,ManagementUpdatePermissionForms
 from werkzeug.utils import secure_filename
 from config import Config
 from models import User,Devices ,Permission,UserGroup,FriendInfo,FriendComments,FriendLikes
@@ -1885,7 +1886,7 @@ def my_friend_delete_comments():
 @login_required
 @routing_permission_check
 def management_permission():
-    form = SearchPlantForms()
+    form = ManagementAddPermissionForms()
     current_user = session.get('user_id')
     if request.method == 'GET':
         #定义字典渲染页面
@@ -1925,7 +1926,7 @@ def management_permission():
 @login_required
 #@routing_permission_check
 def management_permission_page():
-    form = SearchPlantForms()
+    form = ManagementAddPermissionForms()
     current_user = session.get('user_id')
     if request.method == 'GET':
         page_number = request.args.get('page_number')
@@ -1975,6 +1976,243 @@ def management_permission_page():
                 return render_template('management.html',form = form,dic1 = dic1,list1 = permission_info_list)
         else:
             return abort(404)
+
+#添加权限
+@app.route('/management/permissionTable/add',methods = ['POST'])
+@login_required
+#@routing_permission_check
+def management_add_permission():
+    form = ManagementAddPermissionForms()
+    current_user = session.get('user_id')
+    if request.method == 'POST':
+        if form.validate_on_submit():
+            name = request.form['user_group']
+            url = request.form['url']
+            description = request.form['description']
+            #print(name,url,description)
+            #写入数据库
+            try:
+                db.session.add(Permission(id = None,name = name ,url = url ,description = description))
+                db.session.commit()
+                message = '添加成功!'
+                title = '成功! '
+                style = 'alert alert-success alert-dismissable'
+            except:
+                db.session.rollback()
+                message = '添加失败!'
+                title = '错误! '
+                style = 'alert alert-dismissable alert-danger'
+            finally:
+                db.session.close()
+        else:
+            #未通过表单校验
+            err_dic = form.errors
+            errs = ''
+            for key,value in err_dic.items():
+                errs += value[0] + '  '
+            message = errs
+            title = '错误! '
+            style = 'alert alert-dismissable alert-danger'
+        #渲染页面
+        #定义字典渲染页面
+        res = User.query.filter_by(username = current_user).first()
+        if res:
+            chinese_name = res.chinese_name
+            sex = res.sex
+            birthday = res.birthday
+            email = res.email
+            group_id = res.group_id
+            if sex == 'Male':
+                sex = '男'
+            elif sex == 'Female':
+                sex = '女' 
+            if group_id == 1:
+                per = '管理员'
+            elif group_id == 2:
+                per = '普通用户'
+        dic1 = {'current_user':current_user,'chinese_name':chinese_name,\
+            'sex':sex,'birthday':birthday,'email':email,'permission':per,\
+            'page_number':1,'active1':'active'}
+        #奖提示信息加入到dic1
+        dic1['message'] = message
+        dic1['title'] = title
+        dic1['style'] = style
+        #查询权限数据(限制10条)
+        permission_info = Permission.query.limit(10).all()
+        if len(permission_info) ==0:
+            permission_info_list=[]
+        else:
+            permission_info_list = []
+            for i in permission_info:
+                data = i.__dict__
+                del data['_sa_instance_state']
+                data['style'] = random.choice(['success','info','warning','error'])
+                permission_info_list .append(data)              
+        return render_template('management.html',form = form,dic1 = dic1,list1 = permission_info_list)
+
+#导入权限
+@app.route('/management/permissionTable/import',methods = ['POST'])
+@login_required
+#@routing_permission_check
+def management_import_permission():
+    current_user = session.get('user_id')
+    form = ManagementImportPermissionForms()
+    if request.method == 'POST':
+        if form.validate_on_submit():
+             #通过表单验证
+            permission_file = request.files['file_permission']
+            if permission_file:
+                file_name = str(time.time()) + os.path.splitext(permission_file.filename)[-1]
+                file_path = os.getcwd() + os.sep + 'media' + os.sep 
+                permission_file.save(file_path + secure_filename(file_name))
+                #打开文件
+                if '.xlsx'  in file_name or '.xls' in file_name :
+                    table_head = ['groupname','url','description']
+                    work_book = xlrd.open_workbook(file_path + file_name)
+                    ws = work_book.sheet_by_name('Sheet1')
+                    msg_list = []
+                    if ws.row_values(0) == table_head:
+                        for row in range(1,ws.nrows):
+                            name = ws.cell_value(row,0)
+                            url = ws.cell_value(row,1)
+                            description = ws.cell_value(row,2)
+                            try:
+                                db.session.add(Permission(id= None,name = str(name),url = str(url),description = str(description)))
+                                db.session.commit()
+                                message = '添加权限: '+ str(name) + ' ' + str(url) + ' '+ str(description) +' 成功!'
+                                msg_list.append(message)
+                            except:
+                                db.session.rollback()
+                                message = '添加权限: '+ str(name) + ' ' + str(url) + ' '+ str(description) +' 失败!'
+                                msg_list.append(message)
+                            else:
+                                db.session.close()
+                        msgs = ''
+                        for msg_info in msg_list:
+                            msgs +=msg_info
+                        if msgs == '':
+                            message = 'EXCEL 中无数据!'
+                            style = 'alert alert-dismissable alert-danger'
+                            title = '错误!  '
+                        else:
+                            message = msgs
+                            style = 'alert alert-success alert-dismissable'
+                            title = '成功! '
+                    else:
+                        message = '数据格式错误! '
+                        style = 'alert alert-dismissable alert-danger'
+                        title = '错误!  '
+                else:
+                    message = '文件类型错误! '
+                    style = 'alert alert-dismissable alert-danger'
+                    title = '错误!  '
+            else:
+                message = '文件丢失 !'
+                style = 'alert alert-dismissable alert-danger'
+                title = '错误!  '
+        else:
+            #未通过表单校验
+            err_data = form.errors
+            errs = ''
+            for key,value in err_data.items():
+                errs += value[0] + '  '
+            style = 'alert alert-dismissable alert-danger'
+            title = '错误! '
+            message = errs
+        #渲染页面，返回对应的提示信息
+        #定义字典渲染页面
+        res = User.query.filter_by(username = current_user).first()
+        if res:
+            chinese_name = res.chinese_name
+            sex = res.sex
+            birthday = res.birthday
+            email = res.email
+            group_id = res.group_id
+            if sex == 'Male':
+                sex = '男'
+            elif sex == 'Female':
+                sex = '女' 
+            if group_id == 1:
+                per = '管理员'
+            elif group_id == 2:
+                per = '普通用户'
+        dic1 = {'current_user':current_user,'chinese_name':chinese_name,\
+            'sex':sex,'birthday':birthday,'email':email,'permission':per,\
+            'page_number':1,'active1':'active'}
+        #奖提示信息加入到dic1
+        dic1['message'] = message
+        dic1['title'] = title
+        dic1['style'] = style
+        #查询权限数据(限制10条)
+        permission_info = Permission.query.limit(10).all()
+        if len(permission_info) ==0:
+            permission_info_list=[]
+        else:
+            permission_info_list = []
+            for i in permission_info:
+                data = i.__dict__
+                del data['_sa_instance_state']
+                data['style'] = random.choice(['success','info','warning','error'])
+                permission_info_list .append(data)              
+        return render_template('management.html',form = form,dic1 = dic1,list1 = permission_info_list)
+
+#修改权限
+@app.route('/management/permissionTable/update',methods = ['POST'])
+@login_required
+#@routing_permission_check
+def managemnet_update_permission():
+    form = ManagementUpdatePermissionForms()
+    if request.method == 'POST':
+        #print(form.__dict__)
+        if form.validate_on_submit():
+            id = request.form['id1']
+            name = request.form['name1']
+            url = request.form['url1']
+            description = request.form['description2']
+            #print(id,name,url,description)
+            #查询该条目是否存在
+            permission_info = Permission.query.filter_by(id = id).first()
+            if permission_info:
+                #比较新数据和旧数据，有变动的就update
+                try:
+                    if permission_info.name != name:
+                        permission_info.name = name
+                        message1 = ' name'
+                    else:
+                        message1 = ''
+                    if permission_info.url != url:
+                        permission_info.url = url
+                        message2 = ' url'
+                    else:
+                        message2 = ''
+                    if permission_info.description != description:
+                        permission_info.description = description
+                        message3 = ' description'
+                    else:
+                        message3 = ''
+                    db.session.commit()
+                    message = message1 + message2 + message3
+                    flash('修改字段: '+ message + ' 成功!')
+                    return redirect('/management/permissionTable')
+                except:
+                    db.session.rollback()
+                    flash('数据库异常!')
+                    return redirect('/management/permissionTable')
+            else:
+                flash('要更新的数据不存在!')
+                return redirect('/management/permissionTable')
+        else:
+            #未通过表单校验
+            err_dic = form.errors
+            errs = ''
+            for key,value in err_dic.items():
+                errs += value[0] + '  '
+            flash(errs)
+            return redirect('/management/permissionTable')
+
+
+#删除权限
+
 
 #后台管理用户表
 @app.route('/management/userTable',methods = ['POST','GET'])
