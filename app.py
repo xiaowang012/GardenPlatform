@@ -3,7 +3,8 @@ from mimetypes import init
 from flask import Flask,render_template,request,Response,url_for,redirect,session,g,jsonify,abort,flash
 from forms import UserForms,RegisterForms,SearchPlantForms,AddDeviceForms,ImportDevicesForms,\
     UpdateDevicesForms,UserUpdatePasswordForms,MyFriendsSendMessageForms,MyFriendAddCommentsForms,\
-    ManagementAddPermissionForms,ManagementImportPermissionForms,ManagementUpdatePermissionForms
+    ManagementAddPermissionForms,ManagementImportPermissionForms,ManagementUpdatePermissionForms,\
+    ManagementAddUserForms
 from werkzeug.utils import secure_filename
 from config import Config
 from models import User,Devices ,Permission,UserGroup,FriendInfo,FriendComments,FriendLikes
@@ -2210,16 +2211,215 @@ def managemnet_update_permission():
             flash(errs)
             return redirect('/management/permissionTable')
 
-
 #删除权限
-
-
+@app.route('/management/permissionTable/delete',methods = ['GET'])
+@login_required
+#@routing_permission_check
+def management_delete_permission():
+    if request.method == 'GET':
+        delete_id = request.args.get('id')
+        if delete_id:
+            try:
+                delete_id = int(delete_id)
+            except:
+                return abort(404)
+            else:
+                #查表
+                permission_info = Permission.query.filter_by(id = delete_id).first()
+                if permission_info:
+                    db.session.delete(permission_info)
+                    flash('删除成功! ')
+                    return redirect('/management/permissionTable')
+                else:
+                    flash('数据错误! ')
+                    return redirect('/management/permissionTable')
+        else:
+            return abort(404)
+                
 #后台管理用户表
 @app.route('/management/userTable',methods = ['POST','GET'])
 @login_required
 #@routing_permission_check
 def management_user():
-    pass
+    form = ManagementAddUserForms()
+    current_user = session.get('user_id')
+    if request.method == 'GET':
+        #定义字典渲染页面
+        res = User.query.filter_by(username = current_user).first()
+        if res:
+            chinese_name = res.chinese_name
+            sex = res.sex
+            birthday = res.birthday
+            email = res.email
+            group_id = res.group_id
+            if sex == 'Male':
+                sex = '男'
+            elif sex == 'Female':
+                sex = '女' 
+            if group_id == 1:
+                per = '管理员'
+            elif group_id == 2:
+                per = '普通用户'
+        dic1 = {'current_user':current_user,'chinese_name':chinese_name,\
+            'sex':sex,'birthday':birthday,'email':email,'permission':per,\
+            'page_number':1,'active1':'active'}
+        #查询权限数据(限制10条)
+        user_info = User.query.limit(10).all()
+        if len(user_info) ==0:
+            user_info_list=[]
+        else:
+            user_info_list = []
+            for i in user_info:
+                data = i.__dict__
+                del data['_sa_instance_state']
+                data['style'] = random.choice(['success','info','warning','error'])
+                user_info_list .append(data)              
+        return render_template('user.html',form = form,dic1 = dic1,list1 = user_info_list)
+
+#后台管理用户表管理主页翻页
+@app.route('/management/userTable/page',methods = ['POST','GET'])
+@login_required
+#@routing_permission_check
+def management_user_page():
+    form = ManagementAddUserForms()
+    current_user = session.get('user_id')
+    if request.method == 'GET':
+        page_number = request.args.get('page_number')
+        if page_number:
+            try:
+                page_number = int(page_number)
+            except:
+                return abort(404)
+            else:
+                #定义字典渲染页面
+                res = User.query.filter_by(username = current_user).first()
+                if res:
+                    chinese_name = res.chinese_name
+                    sex = res.sex
+                    birthday = res.birthday
+                    email = res.email
+                    group_id = res.group_id
+                    if sex == 'Male':
+                        sex = '男'
+                    elif sex == 'Female':
+                        sex = '女' 
+                    if group_id == 1:
+                        per = '管理员'
+                    elif group_id == 2:
+                        per = '普通用户'
+                dic1 = {'current_user':current_user,'chinese_name':chinese_name,\
+                    'sex':sex,'birthday':birthday,'email':email,'permission':per,\
+                    'page_number':page_number,'active1':'','active2':'','active3':'',\
+                    'active4':'','active5':''}
+                if 1<=page_number<=5:
+                    dic1['active'+str(page_number)] = 'active'
+                elif page_number>5:
+                    dic1['active_next'] = 'active'
+                #查询权限数据(限制10条)
+                limit_num = 10
+                offset_num = (page_number-1)*10
+                user_info = User.query.limit(limit_num).offset(offset_num).all()
+                if len(user_info) == 0:
+                    user_info_list=[]
+                else:
+                    user_info_list = []
+                    for i in user_info:
+                        data = i.__dict__
+                        del data['_sa_instance_state']
+                        data['style'] = random.choice(['success','info','warning','error'])
+                        user_info_list .append(data)              
+                return render_template('user.html',form = form,dic1 = dic1,list1 = user_info_list)
+        else:
+            return abort(404)
+
+#添加用户
+@app.route('/management/userTable/add',methods = ['POST'])
+@login_required
+#@routing_permission_check
+def management_add_user():
+    form = ManagementAddUserForms()
+    current_user = session.get('user_id')
+    if request.method == 'POST':
+        if form.validate_on_submit():
+            username = request.form['username']
+            password = request.form['password']
+            chinese_name = request.form['chinese_name']
+            sex = request.form['sex']
+            email = request.form['email']
+            group_id = request.form['group_id']
+            birthday = request.form['birthday']
+            #判断用户是否已经存在
+            if not User.query.filter_by(username = username).first():
+                #写入数据库
+                try:
+                    salt = str(time.time())
+                    hash_pwd = get_hash_value(password,salt)
+                    add_time = time.strftime('%Y-%m-%d %H:%M:%S')
+                    db.session.add(User(username = username,salt = salt,\
+                        hash_pwd = hash_pwd,add_time= add_time,chinese_name = chinese_name,\
+                        sex = sex,birthday = birthday, email= email,group_id = int(group_id)))
+                    db.session.commit()
+                    message = '添加成功!'
+                    title = '成功! '
+                    style = 'alert alert-success alert-dismissable'
+                except:
+                    db.session.rollback()
+                    message = '添加失败!'
+                    title = '错误! '
+                    style = 'alert alert-dismissable alert-danger'
+                finally:
+                    db.session.close()
+            else:
+                message = '添加失败! 请不要重复创建用户! '
+                title = '错误! '
+                style = 'alert alert-dismissable alert-danger'
+        else:
+            #未通过表单校验
+            err_dic = form.errors
+            errs = ''
+            for key,value in err_dic.items():
+                errs += value[0] + '  '
+            message = errs
+            title = '错误! '
+            style = 'alert alert-dismissable alert-danger'
+        #渲染页面
+        #定义字典渲染页面
+        res = User.query.filter_by(username = current_user).first()
+        if res:
+            chinese_name = res.chinese_name
+            sex = res.sex
+            birthday = res.birthday
+            email = res.email
+            group_id = res.group_id
+            if sex == 'Male':
+                sex = '男'
+            elif sex == 'Female':
+                sex = '女' 
+            if group_id == 1:
+                per = '管理员'
+            elif group_id == 2:
+                per = '普通用户'
+        dic1 = {'current_user':current_user,'chinese_name':chinese_name,\
+            'sex':sex,'birthday':birthday,'email':email,'permission':per,\
+            'page_number':1,'active1':'active'}
+        #奖提示信息加入到dic1
+        dic1['message'] = message
+        dic1['title'] = title
+        dic1['style'] = style
+        #查询用户数据(限制10条)
+        user_info = User.query.limit(10).all()
+        if len(user_info) ==0:
+            user_info_list=[]
+        else:
+            user_info_list = []
+            for i in user_info:
+                data = i.__dict__
+                del data['_sa_instance_state']
+                data['style'] = random.choice(['success','info','warning','error'])
+                user_info_list .append(data)              
+        return render_template('user.html',form = form,dic1 = dic1,list1 = user_info_list)
+    
+
 
 #后台管理用户表
 @app.route('/management/Table',methods = ['POST','GET'])
