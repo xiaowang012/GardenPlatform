@@ -82,9 +82,9 @@ class MyFriendAddCommentsForms(FlaskForm):
 
 #添加权限表单
 class ManagementAddPermissionForms(FlaskForm):
-    user_group = StringField('user_group',validators=[DataRequired('用户组不能为空!')])
-    url = StringField('url',validators=[DataRequired('URL 不能为空!')])
-    description = StringField('description',validators=[DataRequired('描述信息不能为空!')])
+    user_group = StringField('user_group',validators=[DataRequired('用户组不能为空!'),Length(1,50,message = '用户组长度必须为1-50!')])
+    url = StringField('url',validators=[DataRequired('URL 不能为空!'),Length(1,100,message = 'URL长度必须为1-100!')])
+    description = StringField('description',validators=[DataRequired('描述信息不能为空!'),Length(1,200,message = '描述信息长度必须为1-200!')])
     submit = SubmitField('submit')
 
 #批量导入权限的表单
@@ -95,7 +95,21 @@ class ManagementImportPermissionForms(FlaskForm):
 #修改权限表单
 class ManagementUpdatePermissionForms(FlaskForm):
     id1 = StringField('id1')
-    name1 = StringField('name1',validators=[DataRequired('用户组不能为空!')])
-    url1 = StringField('url1',validators=[DataRequired('URL 不能为空!')])
-    description2 = StringField('description2',validators=[DataRequired('描述信息不能为空!')])
+    name1 = StringField('name1',validators=[DataRequired('用户组不能为空!'),Length(1,50,message = '用户组长度必须为1-50!')])
+    url1 = StringField('url1',validators=[DataRequired('URL 不能为空!'),Length(1,100,message = 'URL长度必须为1-100!')])
+    description2 = StringField('description2',validators=[DataRequired('描述信息不能为空!'),Length(1,200,message = '描述信息长度必须为1-200!')])
     submit = SubmitField('submit')
+
+#添加用户表单
+class ManagementAddUserForms(FlaskForm):
+    username = StringField('username',validators=[DataRequired('用户名不能为空!'),Length(1,50,message = '用户名长度必须为1-50!')])
+    password = StringField('password',validators=[DataRequired('密码不能为空!'),Length(1,50,message = '密码长度必须为1-50!')])
+    chinese_name = StringField('chinese_name',validators=[DataRequired('中文名不能为空!'),Length(1,100,message = '中文名长度必须为1-100!')])
+    sex = StringField('sex',validators=[DataRequired('性别不能为空!'),Length(1,50,message = '性别信息长度必须为1-50!')])
+    birthday = StringField('birthday',validators=[DataRequired('生日不能为空!'),Length(1,50,message = '生日信息长度必须为1-50!')])
+    email = StringField('email',validators=[DataRequired('邮箱不能为空!'),Length(1,50,message = '邮箱信息长度必须为1-50!')])
+    group_id = StringField('group_id',validators=[DataRequired('用户组不能为空!'),Length(1,50,message = '用户组信息长度必须为1-50!')])
+    submit = SubmitField('submit')
+
+#批量导入用户表单
+#修改用户表单
