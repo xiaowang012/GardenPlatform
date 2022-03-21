@@ -1,10 +1,12 @@
 #coding=utf-8
-from mimetypes import init
 from flask import Flask,render_template,request,Response,url_for,redirect,session,g,jsonify,abort,flash
 from forms import UserForms,RegisterForms,SearchPlantForms,AddDeviceForms,ImportDevicesForms,\
     UpdateDevicesForms,UserUpdatePasswordForms,MyFriendsSendMessageForms,MyFriendAddCommentsForms,\
     ManagementAddPermissionForms,ManagementImportPermissionForms,ManagementUpdatePermissionForms,\
-    ManagementAddUserForms
+    ManagementAddUserForms,ManagementImportUserForms,ManagementUpdateUserForms,ManagementAddUserGroupForms,\
+    ManagementUpdateUserGroupForms,ManagementImportUserGroupForms,ManagementImportDevicesForms,\
+    ManagementSendFriendMessageForms,ManagementUpdateFriendMessageForms,ManagementAddFriendCommentsForms,\
+    ManagementUpdateFriendCommentsForms,ManagementAddFriendLikesForms,ManagementUpdateFriendLikesForms
 from werkzeug.utils import secure_filename
 from config import Config
 from models import User,Devices ,Permission,UserGroup,FriendInfo,FriendComments,FriendLikes
@@ -1420,7 +1422,7 @@ def my_friends():
             del data['_sa_instance_state']
             del data['picture_path']
             #处理时间time_format
-            digital_week_dic = {'1':'星期一','2':'星期二','3':'星期三','4':'星期四','5':'星期五','6':'星期六','7':'星期日'}
+            digital_week_dic = {'1':'星期一','2':'星期二','3':'星期三','4':'星期四','5':'星期五','6':'星期六','7':'星期日','0':'星期日'}
             time_list = data['time_format'].split(',')
             data['week'] = digital_week_dic[ time_list[3]]
             data['date'] = time_list[0] +'年' +time_list[1] +'月' + time_list[2] +'日'
@@ -1447,6 +1449,8 @@ def my_friends_send_message():
                 f.save(file_path + secure_filename(file_name))
                 picture_path = '.' + os.sep + 'static' + os.sep + 'imgs' + os.sep + file_name
                 picture_path_html = '/static/imgs/' + file_name
+                #兼容html中路径的显示  "\" 替换为"\\"
+                picture_path = picture_path.replace(os.sep, os.sep+os.sep)
             else:
                 picture_path = None
                 picture_path_html = None
@@ -1528,7 +1532,7 @@ def my_friends_send_message():
             del data['_sa_instance_state']
             del data['picture_path']
             #处理时间time_format
-            digital_week_dic = {'1':'星期一','2':'星期二','3':'星期三','4':'星期四','5':'星期五','6':'星期六','7':'星期日'}
+            digital_week_dic = {'1':'星期一','2':'星期二','3':'星期三','4':'星期四','5':'星期五','6':'星期六','7':'星期日','0':'星期日'}
             time_list = data['time_format'].split(',')
             data['week'] = digital_week_dic[ time_list[3]]
             data['date'] = time_list[0] +'年' +time_list[1] +'月' + time_list[2] +'日'
@@ -1630,7 +1634,7 @@ def my_friend_next_page():
                 del data['_sa_instance_state']
                 del data['picture_path']
                 #处理时间time_format
-                digital_week_dic = {'1':'星期一','2':'星期二','3':'星期三','4':'星期四','5':'星期五','6':'星期六','7':'星期日'}
+                digital_week_dic = {'1':'星期一','2':'星期二','3':'星期三','4':'星期四','5':'星期五','6':'星期六','7':'星期日','0':'星期日'}
                 time_list = data['time_format'].split(',')
                 data['week'] = digital_week_dic[ time_list[3]]
                 data['date'] = time_list[0] +'年' +time_list[1] +'月' + time_list[2] +'日'
@@ -1724,7 +1728,7 @@ def my_friend_commenting_message():
             del data['_sa_instance_state']
             del data['picture_path']
             #处理时间time_format
-            digital_week_dic = {'1':'星期一','2':'星期二','3':'星期三','4':'星期四','5':'星期五','6':'星期六','7':'星期日'}
+            digital_week_dic = {'1':'星期一','2':'星期二','3':'星期三','4':'星期四','5':'星期五','6':'星期六','7':'星期日','0':'星期日'}
             time_list = data['time_format'].split(',')
             data['week'] = digital_week_dic[ time_list[3]]
             data['date'] = time_list[0] +'年' +time_list[1] +'月' + time_list[2] +'日'
@@ -1786,7 +1790,7 @@ def my_friend_commenting_message():
 #                 del data['_sa_instance_state']
 #                 del data['picture_path']
 #                 #处理时间time_format
-#                 digital_week_dic = {'1':'星期一','2':'星期二','3':'星期三','4':'星期四','5':'星期五','6':'星期六','7':'星期日'}
+#                 digital_week_dic = {'1':'星期一','2':'星期二','3':'星期三','4':'星期四','5':'星期五','6':'星期六','7':'星期日','0':'星期日'}
 #                 time_list = data['time_format'].split(',')
 #                 data['week'] = digital_week_dic[ time_list[3]]
 #                 data['date'] = time_list[0] +'年' +time_list[1] +'月' + time_list[2] +'日'
@@ -1885,7 +1889,7 @@ def my_friend_delete_comments():
 #后台管理权限表管理主页
 @app.route('/management/permissionTable',methods = ['POST','GET'])
 @login_required
-@routing_permission_check
+#@routing_permission_check
 def management_permission():
     form = ManagementAddPermissionForms()
     current_user = session.get('user_id')
@@ -2060,7 +2064,7 @@ def management_import_permission():
     form = ManagementImportPermissionForms()
     if request.method == 'POST':
         if form.validate_on_submit():
-             #通过表单验证
+            #通过表单验证
             permission_file = request.files['file_permission']
             if permission_file:
                 file_name = str(time.time()) + os.path.splitext(permission_file.filename)[-1]
@@ -2078,16 +2082,17 @@ def management_import_permission():
                             url = ws.cell_value(row,1)
                             description = ws.cell_value(row,2)
                             try:
-                                db.session.add(Permission(id= None,name = str(name),url = str(url),description = str(description)))
+                                db.session.add(Permission(id= None,name = name,url = url,description = description))
                                 db.session.commit()
-                                message = '添加权限: '+ str(name) + ' ' + str(url) + ' '+ str(description) +' 成功!'
+                                message = '添加权限: '+ name + ' ' + url + ' '+ description +' 成功!'
                                 msg_list.append(message)
                             except:
                                 db.session.rollback()
-                                message = '添加权限: '+ str(name) + ' ' + str(url) + ' '+ str(description) +' 失败!'
+                                message = '添加权限: '+ name + ' ' + url + ' '+ description +' 失败!'
                                 msg_list.append(message)
                             else:
                                 db.session.close()
+            
                         msgs = ''
                         for msg_info in msg_list:
                             msgs +=msg_info
@@ -2228,6 +2233,7 @@ def management_delete_permission():
                 permission_info = Permission.query.filter_by(id = delete_id).first()
                 if permission_info:
                     db.session.delete(permission_info)
+                    db.session.commit()
                     flash('删除成功! ')
                     return redirect('/management/permissionTable')
                 else:
@@ -2235,7 +2241,31 @@ def management_delete_permission():
                     return redirect('/management/permissionTable')
         else:
             return abort(404)
-                
+
+#下载批量导入权限的模板
+#我的盆摘页面批量导入设备下载模板文件
+@app.route("/management/permissionTable/import/DownloadTemplateFile",methods = ['GET'])
+@login_required
+#@routing_permission_check
+def download_import_permission_template():
+    file_name = 'template_permission.zip'
+    file_path = os.getcwd() + os.path.join(os.sep,'media',file_name )
+    if os.path.isfile(file_path) == True:
+        #打开指定文件准备传输
+        #循环读取文件
+        def sendfile(file_path):
+            with open(file_path, 'rb') as targetfile:
+                while True:
+                    data = targetfile.read(20*1024*1024)
+                    if not data:
+                        break
+                    yield data
+        response = Response(sendfile(file_path), content_type='app/octet-stream')
+        response.headers["Content-disposition"] = 'attachment; filename=%s' % file_name 
+        return response
+    else:  
+        return render_template('error_404.html')
+
 #后台管理用户表
 @app.route('/management/userTable',methods = ['POST','GET'])
 @login_required
@@ -2418,26 +2448,1758 @@ def management_add_user():
                 data['style'] = random.choice(['success','info','warning','error'])
                 user_info_list .append(data)              
         return render_template('user.html',form = form,dic1 = dic1,list1 = user_info_list)
-    
 
-
-#后台管理用户表
-@app.route('/management/Table',methods = ['POST','GET'])
+#导入用户
+@app.route('/management/userTable/import',methods = ['POST'])
 @login_required
 #@routing_permission_check
-def management_user1():
-    pass
+def management_import_user():
+    form = ManagementImportUserForms()
+    current_user = session.get('user_id')
+    if request.method == 'POST':
+        if form.validate_on_submit():
+            user_file = request.files['file_user']
+            if user_file:
+                file_name = str(time.time()) + os.path.splitext(user_file.filename)[-1]
+                file_path = os.getcwd() + os.sep + 'media' + os.sep 
+                user_file.save(file_path + secure_filename(file_name))
+                #打开文件
+                if '.xlsx'  in file_name or '.xls' in file_name :
+                    table_head = ['username','password','chinese_name','sex','birthday','email','group']
+                    work_book = xlrd.open_workbook(file_path + file_name)
+                    ws = work_book.sheet_by_name('Sheet1')
+                    add_user_list = []
+                    msg_list = []
+                    #print(ws.row_values(0))
+                    if ws.row_values(0) == table_head:
+                        for row in range(1,ws.nrows):
+                            username = ws.cell_value(row,0)
+                            password = ws.cell_value(row,1)
+                            ctype = ws.cell(row,1).ctype
+                            if ctype == 2:
+                                password = str(password).replace('.0','')
+                            chinese_name = ws.cell_value(row,2)
+                            sex = ws.cell_value(row,3)
+                            birthday = ws.cell_value(row,4)
+                            email = ws.cell_value(row,5)
+                            group = ws.cell_value(row,6)
+                            if group == 'admin':
+                                group_id = 1
+                            elif group == 'others':
+                                group_id = 2
+                            else:
+                                group = None
+                            salt = str(time.time())
+                            hash_pwd = get_hash_value(password,salt)
+                            add_time = time.strftime('%Y-%m-%d %H:%M:%S')
+                            if not User.query.filter_by(username = username).first():
+                                add_user_list.append(User(username = username,chinese_name = chinese_name,sex = sex,birthday = birthday,\
+                                    email = email,group_id = group_id,salt = salt,hash_pwd = hash_pwd,add_time = add_time))
+                            else:
+                                msg = username
+                                msg_list.append(msg)
+                        try:
+                            db.session.add_all(add_user_list)
+                            db.session.commit()
+                            if len(msg_list) == 0:
+                                message = '批量导入用户成功!'
+                            else:
+                                errs = ''
+                                for i in msg_list:
+                                    errs += i +' '
+                                message = '批量导入用户成功!(' + '用户: '+ errs +' 已经存在! 请不要重复创建!)'
+                            style = 'alert alert-success alert-dismissable'
+                            title = '成功! '
+                        except:
+                            db.session.rollback()
+                            message = '导入用户失败!'
+                            style = 'alert alert-dismissable alert-danger'
+                            title = '错误!  '
+                        finally:
+                            db.session.close()
+                    else:
+                        message = '数据格式错误! '
+                        style = 'alert alert-dismissable alert-danger'
+                        title = '错误!  '
+                else:
+                    message = '文件类型错误! '
+                    style = 'alert alert-dismissable alert-danger'
+                    title = '错误!  '
+            else:
+                message = '文件丢失 !'
+                style = 'alert alert-dismissable alert-danger'
+                title = '错误!  '
+        else:
+            #未通过表单校验
+            err_data = form.errors
+            errs = ''
+            for key,value in err_data.items():
+                errs += value[0] + '  '
+            style = 'alert alert-dismissable alert-danger'
+            title = '错误! '
+            message = errs
+        #渲染页面，返回对应的提示信息
+        res = User.query.filter_by(username = current_user).first()
+        if res:
+            chinese_name = res.chinese_name
+            sex = res.sex
+            birthday = res.birthday
+            email = res.email
+            group_id = res.group_id
+            if sex == 'Male':
+                sex = '男'
+            elif sex == 'Female':
+                sex = '女' 
+            if group_id == 1:
+                per = '管理员'
+            elif group_id == 2:
+                per = '普通用户'
+        dic1 = {'current_user':current_user,'chinese_name':chinese_name,\
+            'sex':sex,'birthday':birthday,'email':email,'permission':per,\
+            'page_number':1,'active1':'active'}
+        #奖提示信息加入到dic1
+        dic1['message'] = message
+        dic1['title'] = title
+        dic1['style'] = style
+        #查询权限数据(限制10条)
+        user_info = User.query.limit(10).all()
+        if len(user_info) ==0:
+            user_info_list=[]
+        else:
+            user_info_list = []
+            for i in user_info:
+                data = i.__dict__
+                del data['_sa_instance_state']
+                data['style'] = random.choice(['success','info','warning','error'])
+                user_info_list .append(data)              
+        return render_template('user.html',form = form,dic1 = dic1,list1 = user_info_list)
 
-#后台管理用户组表
+#修改用户
+@app.route('/management/userTable/update',methods = ['POST'])
+@login_required
+#@routing_permission_check
+def managemnet_update_user():
+    form = ManagementUpdateUserForms()
+    if request.method == 'POST':
+        if form.validate_on_submit():
+            username = request.form['username2']
+            chinese_name = request.form['chinese_name2']
+            sex = request.form['sex2']
+            birthday = request.form['birthday2']
+            email = request.form['email2']
+            group_id = request.form['group_id2']
+            print(username,chinese_name,sex,birthday,email,group_id)
+            #查询该条目是否存在
+            user_info = User.query.filter_by(username = username).first()
+            if user_info:
+                #比较新数据和旧数据，有变动的就update
+                try:
+                    if user_info.username != username:
+                        user_info.username = username
+                        message1 = ' username'
+                    else:
+                        message1 = ''
+                    if user_info.chinese_name != chinese_name:
+                        user_info.chinese_name = chinese_name
+                        message2 = ' chinese_name'
+                    else:
+                        message2 = ''
+                    if user_info.sex != sex:
+                        user_info.sex = sex
+                        message3 = ' sex'
+                    else:
+                        message3 = ''
+                    if user_info.birthday != birthday:
+                        user_info.birthday = birthday
+                        message4 = ' birthday'
+                    else:
+                        message4 = ''
+                    if user_info.email != email :
+                        user_info.email  = email
+                        message5 = ' email '
+                    else:
+                        message5 = ''
+                    if user_info.group_id != group_id :
+                        user_info.group_id  = group_id 
+                        message6 = ' group_id '
+                    else:
+                        message6 = ''
+                    db.session.commit()
+                    message = message1 + message2 + message3 + message4 + message5 + message6
+                    flash('修改字段: '+ message + ' 成功!')
+                    return redirect('/management/userTable')
+                except:
+                    db.session.rollback()
+                    flash('数据库异常!')
+                    return redirect('/management/userTable')
+            else:
+                flash('要更新的数据不存在!')
+                return redirect('/management/userTable')
+        else:
+            #未通过表单校验
+            err_dic = form.errors
+            errs = ''
+            for key,value in err_dic.items():
+                errs += value[0] + '  '
+            flash(errs)
+            return redirect('/management/userTable')
+
+#删除用户
+@app.route('/management/userTable/delete',methods = ['GET'])
+@login_required
+#@routing_permission_check
+def management_delete_user():
+    if request.method == 'GET':
+        delete_user = request.args.get('username')
+        if delete_user:
+            user_info = User.query.filter_by(username = delete_user).first()
+            if user_info:
+                db.session.delete(user_info)
+                db.session.commit()
+                flash('删除成功! ')
+                return redirect('/management/userTable')
+            else:
+                flash('数据错误! ')
+                return redirect('/management/userTable')
+        else:
+            return abort(404)
+
+#下载批量导入用户的模板
+@app.route("/management/userTable/import/DownloadTemplateFile",methods = ['GET'])
+@login_required
+#@routing_permission_check
+def download_import_user_template():
+    file_name = 'template_user.zip'
+    file_path = os.getcwd() + os.path.join(os.sep,'media',file_name )
+    if os.path.isfile(file_path) == True:
+        #打开指定文件准备传输
+        #循环读取文件
+        def sendfile(file_path):
+            with open(file_path, 'rb') as targetfile:
+                while True:
+                    data = targetfile.read(20*1024*1024)
+                    if not data:
+                        break
+                    yield data
+        response = Response(sendfile(file_path), content_type='app/octet-stream')
+        response.headers["Content-disposition"] = 'attachment; filename=%s' % file_name 
+        return response
+    else:  
+        return render_template('error_404.html')
+
+#后台管理用户组
+@app.route('/management/userGroupTable',methods = ['POST','GET'])
+@login_required
+#@routing_permission_check
+def management_user_group():
+    form = ManagementAddUserForms()
+    current_user = session.get('user_id')
+    if request.method == 'GET':
+        #定义字典渲染页面
+        res = User.query.filter_by(username = current_user).first()
+        if res:
+            chinese_name = res.chinese_name
+            sex = res.sex
+            birthday = res.birthday
+            email = res.email
+            group_id = res.group_id
+            if sex == 'Male':
+                sex = '男'
+            elif sex == 'Female':
+                sex = '女' 
+            if group_id == 1:
+                per = '管理员'
+            elif group_id == 2:
+                per = '普通用户'
+        dic1 = {'current_user':current_user,'chinese_name':chinese_name,\
+            'sex':sex,'birthday':birthday,'email':email,'permission':per,\
+            'page_number':1,'active1':'active'}
+        #查询权限数据(限制10条)
+        user_group_info = UserGroup.query.limit(10).all()
+        #print(user_group_info)
+        if len(user_group_info) ==0:
+            user_group_info_list=[]
+        else:
+            user_group_info_list = []
+            for i in user_group_info:
+                data = i.__dict__
+                del data['_sa_instance_state']
+                data['style'] = random.choice(['success','info','warning','error'])
+                user_group_info_list .append(data)              
+        return render_template('user_group.html',form = form,dic1 = dic1,list1 = user_group_info_list)
+
+#后台管理用户组表格翻页
+@app.route('/management/userGroupTable/page',methods = ['POST','GET'])
+@login_required
+#@routing_permission_check
+def management_user_group_page():
+    form = ManagementAddUserGroupForms()
+    current_user = session.get('user_id')
+    if request.method == 'GET':
+        page_number = request.args.get('page_number')
+        if page_number:
+            try:
+                page_number = int(page_number)
+            except:
+                return abort(404)
+            else:
+                #定义字典渲染页面
+                res = User.query.filter_by(username = current_user).first()
+                if res:
+                    chinese_name = res.chinese_name
+                    sex = res.sex
+                    birthday = res.birthday
+                    email = res.email
+                    group_id = res.group_id
+                    if sex == 'Male':
+                        sex = '男'
+                    elif sex == 'Female':
+                        sex = '女' 
+                    if group_id == 1:
+                        per = '管理员'
+                    elif group_id == 2:
+                        per = '普通用户'
+                dic1 = {'current_user':current_user,'chinese_name':chinese_name,\
+                    'sex':sex,'birthday':birthday,'email':email,'permission':per,\
+                    'page_number':page_number,'active1':'','active2':'','active3':'',\
+                    'active4':'','active5':''}
+                if 1<=page_number<=5:
+                    dic1['active'+str(page_number)] = 'active'
+                elif page_number>5:
+                    dic1['active_next'] = 'active'
+                #查询权限数据(限制10条)
+                limit_num = 10
+                offset_num = (page_number-1)*10
+                user_group_info = UserGroup.query.limit(limit_num).offset(offset_num).all()
+                if len(user_group_info) == 0:
+                    user_group_info_list=[]
+                else:
+                    user_group_info_list = []
+                    for i in user_group_info:
+                        data = i.__dict__
+                        del data['_sa_instance_state']
+                        data['style'] = random.choice(['success','info','warning','error'])
+                        user_group_info_list .append(data)              
+                return render_template('user_group.html',form = form,dic1 = dic1,list1 = user_group_info_list)
+        else:
+            return abort(404)
+
+#后台管理用户组表添加角色
+@app.route('/management/userGroupTable/add',methods = ['POST','GET'])
+@login_required
+#@routing_permission_check
+def management_user_group_add():
+    form = ManagementAddUserGroupForms()
+    current_user = session.get('user_id')
+    if request.method == 'POST':
+        if form.validate_on_submit():
+            name = request.form['group1']
+            if name:
+                try:
+                    db.session.add(UserGroup(id = None ,name = name))
+                    db.session.commit()
+                    message = '添加角色: ' + name + ' 成功!'
+                    title = '成功! '
+                    style = 'alert alert-success alert-dismissable'
+                except:
+                    db.session.rollback()
+                    message = '添加失败!'
+                    title = '错误! '
+                    style = 'alert alert-dismissable alert-danger'
+                finally:
+                    db.session.close()
+            else:
+                message = '参数错误!'
+                title = '错误! '
+                style = 'alert alert-dismissable alert-danger'
+           
+        else:
+            #未通过表单校验
+            err_dic = form.errors
+            errs = ''
+            for key,value in err_dic.items():
+                errs += value[0] + '  '
+            message = errs
+            title = '错误! '
+            style = 'alert alert-dismissable alert-danger'
+        #渲染页面
+        #定义字典渲染页面
+        res = User.query.filter_by(username = current_user).first()
+        if res:
+            chinese_name = res.chinese_name
+            sex = res.sex
+            birthday = res.birthday
+            email = res.email
+            group_id = res.group_id
+            if sex == 'Male':
+                sex = '男'
+            elif sex == 'Female':
+                sex = '女' 
+            if group_id == 1:
+                per = '管理员'
+            elif group_id == 2:
+                per = '普通用户'
+        dic1 = {'current_user':current_user,'chinese_name':chinese_name,\
+            'sex':sex,'birthday':birthday,'email':email,'permission':per,\
+            'page_number':1,'active1':'active'}
+        #奖提示信息加入到dic1
+        dic1['message'] = message
+        dic1['title'] = title
+        dic1['style'] = style
+        #查询用户数据(限制10条)
+        user_group_info = UserGroup.query.limit(10).all()
+        if len(user_group_info) ==0:
+            user_group_info_list=[]
+        else:
+            user_group_info_list = []
+            for i in user_group_info:
+                data = i.__dict__
+                del data['_sa_instance_state']
+                data['style'] = random.choice(['success','info','warning','error'])
+                user_group_info_list .append(data)              
+        return render_template('user_group.html',form = form,dic1 = dic1,list1 = user_group_info_list)
+    
+#后台管理用户组表删除角色
+@app.route('/management/userGroupTable/delete',methods = ['POST','GET'])
+@login_required
+#@routing_permission_check
+def management_delete_user_group():
+    if request.method == 'GET':
+        delete_user_group = request.args.get('id')
+        try:
+            delete_user_group = int(delete_user_group)
+        except:
+            return abort(404)
+        else:
+            user_group_info = UserGroup.query.filter_by(id = delete_user_group).first()
+            #print(user_info)
+            if user_group_info:
+                db.session.delete(user_group_info)
+                db.session.commit()
+                flash('删除成功! ')
+                return redirect('/management/userGroupTable')
+            else:
+                flash('数据错误! ')
+                return redirect('/management/userGroupTable')
+
+#后台管理用户组表修改角色
+@app.route('/management/userGroupTable/update',methods = ['POST'])
+@login_required
+#@routing_permission_check
+def managemnet_update_user_group():
+    form = ManagementUpdateUserGroupForms()
+    if request.method == 'POST':
+        if form.validate_on_submit():
+            id = request.form['id']
+            group_name = request.form['group_name']
+            print(id,group_name)
+            #查询该条目是否存在
+            user_group_info = UserGroup.query.filter_by(id = id).first()
+            if user_group_info:
+                #比较新数据和旧数据，有变动的就update
+                try:
+                    if user_group_info.name != group_name:
+                        user_group_info.name = group_name
+                        message1 = ' group_name'
+                    else:
+                        message1 = ''
+                    db.session.commit()
+                    message = message1
+                    flash('修改字段: '+ message + ' 成功!')
+                    return redirect('/management/userGroupTable')
+                except:
+                    db.session.rollback()
+                    flash('数据库异常!')
+                    return redirect('/management/userGroupTable')
+            else:
+                flash('要更新的数据不存在!')
+                return redirect('/management/userGroupTable')
+        else:
+            #未通过表单校验
+            err_dic = form.errors
+            errs = ''
+            for key,value in err_dic.items():
+                errs += value[0] + '  '
+            flash(errs)
+            return redirect('/management/userGroupTable')
+
+#后台管理导入用户组
+@app.route('/management/userGroupTable/import',methods = ['POST'])
+@login_required
+#@routing_permission_check
+def management_import_user_group():
+    form = ManagementImportUserGroupForms()
+    current_user = session.get('user_id')
+    if request.method == 'POST':
+        if form.validate_on_submit():
+            user_group_file = request.files['file_user_group']
+            if user_group_file:
+                file_name = str(time.time()) + os.path.splitext(user_group_file.filename)[-1]
+                file_path = os.getcwd() + os.sep + 'media' + os.sep 
+                user_group_file.save(file_path + secure_filename(file_name))
+                #打开文件
+                if '.xlsx'  in file_name or '.xls' in file_name :
+                    table_head = ['group_name']
+                    work_book = xlrd.open_workbook(file_path + file_name)
+                    ws = work_book.sheet_by_name('Sheet1')
+                    add_user_list = []
+                    msg_list = []
+                    if ws.row_values(0) == table_head:
+                        for row in range(1,ws.nrows):
+                            group_name = ws.cell_value(row,0)
+                            add_user_list.append(UserGroup(id = None ,name = group_name))
+                        try:
+                            db.session.add_all(add_user_list)
+                            db.session.commit()
+                            message = '批量导入用户组成功!'
+                            style = 'alert alert-success alert-dismissable'
+                            title = '成功! '
+                        except:
+                            db.session.rollback()
+                            message = '导入用户组失败!'
+                            style = 'alert alert-dismissable alert-danger'
+                            title = '错误!  '
+                        finally:
+                            db.session.close()
+                    else:
+                        message = '数据格式错误! '
+                        style = 'alert alert-dismissable alert-danger'
+                        title = '错误!  '
+                else:
+                    message = '文件类型错误! '
+                    style = 'alert alert-dismissable alert-danger'
+                    title = '错误!  '
+            else:
+                message = '文件丢失 !'
+                style = 'alert alert-dismissable alert-danger'
+                title = '错误!  '
+        else:
+            #未通过表单校验
+            err_data = form.errors
+            errs = ''
+            for key,value in err_data.items():
+                errs += value[0] + '  '
+            style = 'alert alert-dismissable alert-danger'
+            title = '错误! '
+            message = errs
+        #渲染页面，返回对应的提示信息
+        res = User.query.filter_by(username = current_user).first()
+        if res:
+            chinese_name = res.chinese_name
+            sex = res.sex
+            birthday = res.birthday
+            email = res.email
+            group_id = res.group_id
+            if sex == 'Male':
+                sex = '男'
+            elif sex == 'Female':
+                sex = '女' 
+            if group_id == 1:
+                per = '管理员'
+            elif group_id == 2:
+                per = '普通用户'
+        dic1 = {'current_user':current_user,'chinese_name':chinese_name,\
+            'sex':sex,'birthday':birthday,'email':email,'permission':per,\
+            'page_number':1,'active1':'active'}
+        #奖提示信息加入到dic1
+        dic1['message'] = message
+        dic1['title'] = title
+        dic1['style'] = style
+        #查询权限数据(限制10条)
+        user_group_info = UserGroup.query.limit(10).all()
+        if len(user_group_info) ==0:
+            user_group_info_list=[]
+        else:
+            user_group_info_list = []
+            for i in user_group_info:
+                data = i.__dict__
+                del data['_sa_instance_state']
+                data['style'] = random.choice(['success','info','warning','error'])
+                user_group_info_list .append(data)              
+        return render_template('user_group.html',form = form,dic1 = dic1,list1 = user_group_info_list)
+
+#后台管理导入用户组下载模板
+@app.route("/management/userGroupTable/import/DownloadTemplateFile",methods = ['GET'])
+@login_required
+#@routing_permission_check
+def download_import_user_group_template():
+    file_name = 'template_user_group.zip'
+    file_path = os.getcwd() + os.path.join(os.sep,'media',file_name )
+    if os.path.isfile(file_path) == True:
+        #打开指定文件准备传输
+        #循环读取文件
+        def sendfile(file_path):
+            with open(file_path, 'rb') as targetfile:
+                while True:
+                    data = targetfile.read(20*1024*1024)
+                    if not data:
+                        break
+                    yield data
+        response = Response(sendfile(file_path), content_type='app/octet-stream')
+        response.headers["Content-disposition"] = 'attachment; filename=%s' % file_name 
+        return response
+    else:  
+        return render_template('error_404.html')
 
 #后台管理设备表
+@app.route('/management/devicesTable',methods = ['POST','GET'])
+@login_required
+#@routing_permission_check
+def management_devices_Table():
+    form = AddDeviceForms()
+    current_user = session.get('user_id')
+    if request.method == 'GET':
+        #定义字典渲染页面
+        res = User.query.filter_by(username = current_user).first()
+        if res:
+            chinese_name = res.chinese_name
+            sex = res.sex
+            birthday = res.birthday
+            email = res.email
+            group_id = res.group_id
+            if sex == 'Male':
+                sex = '男'
+            elif sex == 'Female':
+                sex = '女' 
+            if group_id == 1:
+                per = '管理员'
+            elif group_id == 2:
+                per = '普通用户'
+        dic1 = {'current_user':current_user,'chinese_name':chinese_name,\
+            'sex':sex,'birthday':birthday,'email':email,'permission':per,\
+            'page_number':1,'active1':'active'}
+        #查询权限数据(限制10条)
+        device_info = Devices.query.limit(10).all()
+        if len(device_info) ==0:
+            device_info_list=[]
+        else:
+            device_info_list = []
+            for i in device_info:
+                data = i.__dict__
+                del data['_sa_instance_state']
+                data['style'] = random.choice(['success','info','warning','error'])
+                device_info_list .append(data)              
+        return render_template('device.html',form = form,dic1 = dic1,list1 = device_info_list)
+
+#后台管理设备表翻页
+@app.route('/management/devicesTable/page',methods = ['POST','GET'])
+@login_required
+#@routing_permission_check
+def management_user_devices_page():
+    form = AddDeviceForms()
+    current_user = session.get('user_id')
+    if request.method == 'GET':
+        page_number = request.args.get('page_number')
+        if page_number:
+            try:
+                page_number = int(page_number)
+            except:
+                return abort(404)
+            else:
+                #定义字典渲染页面
+                res = User.query.filter_by(username = current_user).first()
+                if res:
+                    chinese_name = res.chinese_name
+                    sex = res.sex
+                    birthday = res.birthday
+                    email = res.email
+                    group_id = res.group_id
+                    if sex == 'Male':
+                        sex = '男'
+                    elif sex == 'Female':
+                        sex = '女' 
+                    if group_id == 1:
+                        per = '管理员'
+                    elif group_id == 2:
+                        per = '普通用户'
+                dic1 = {'current_user':current_user,'chinese_name':chinese_name,\
+                    'sex':sex,'birthday':birthday,'email':email,'permission':per,\
+                    'page_number':page_number,'active1':'','active2':'','active3':'',\
+                    'active4':'','active5':''}
+                if 1<=page_number<=5:
+                    dic1['active'+str(page_number)] = 'active'
+                elif page_number>5:
+                    dic1['active_next'] = 'active'
+                #查询权限数据(限制10条)
+                limit_num = 10
+                offset_num = (page_number-1)*10
+                devices_info = Devices.query.limit(limit_num).offset(offset_num).all()
+                if len(devices_info) == 0:
+                    devices_info_list=[]
+                else:
+                    devices_info_list = []
+                    for i in devices_info:
+                        data = i.__dict__
+                        del data['_sa_instance_state']
+                        data['style'] = random.choice(['success','info','warning','error'])
+                        devices_info_list .append(data)              
+                return render_template('device.html',form = form,dic1 = dic1,list1 = devices_info_list)
+        else:
+            return abort(404)
+
+#后台管理设备表添加设备
+@app.route('/management/devicesTable/add',methods = ['POST','GET'])
+@login_required
+#@routing_permission_check
+def management_devices_add():
+    form = AddDeviceForms()
+    current_user = session.get('user_id')
+    if request.method == 'POST':
+        if form.validate_on_submit():
+            plant_name = request.form['plant_name']
+            plant_type = request.form['plant_type']
+            suggest_watering_time = request.form['suggest_watering_time']
+            device_name = request.form['device_name']
+            switch_number = request.form['switch_number']
+            #添加到数据库
+            try:
+                db.session.add(Devices(id = None,user_name = current_user,plant_name = plant_name,plant_type = plant_type,\
+                    status = None,last_watering_time = None,suggest_watering_time = suggest_watering_time,device_name = device_name,\
+                    switch_number = switch_number,add_time = time.strftime('%Y-%m-%d %H:%M:%S')))
+                db.session.commit()
+                message = '添加设备成功!'
+                title = '成功! '
+                style = 'alert alert-success alert-dismissable'
+            except:
+                db.session.rollback()
+                message = '添加失败!'
+                title = '错误! '
+                style = 'alert alert-dismissable alert-danger'
+            finally:
+                db.session.close()
+        else:
+            #未通过表单校验
+            err_dic = form.errors
+            errs = ''
+            for key,value in err_dic.items():
+                errs += value[0] + ' '
+            message = errs
+            title = '错误! '
+            style = 'alert alert-dismissable alert-danger'
+        #渲染页面
+        res = User.query.filter_by(username = current_user).first()
+        if res:
+            chinese_name = res.chinese_name
+            sex = res.sex
+            birthday = res.birthday
+            email = res.email
+            group_id = res.group_id
+            if sex == 'Male':
+                sex = '男'
+            elif sex == 'Female':
+                sex = '女' 
+            if group_id == 1:
+                per = '管理员'
+            elif group_id == 2:
+                per = '普通用户'
+        dic1 = {'current_user':current_user,'chinese_name':chinese_name,\
+            'sex':sex,'birthday':birthday,'email':email,'permission':per,\
+            'page_number':1,'active1':'active'}
+        #将提示信息加入到dic1
+        dic1['message'] = message
+        dic1['title'] = title
+        dic1['style'] = style
+        #查询用户数据(限制10条)
+        devices_info = Devices.query.limit(10).all()
+        if len(devices_info) ==0:
+            devices_info_list=[]
+        else:
+            devices_info_list = []
+            for i in devices_info:
+                data = i.__dict__
+                del data['_sa_instance_state']
+                data['style'] = random.choice(['success','info','warning','error'])
+                devices_info_list.append(data)              
+        return render_template('device.html',form = form,dic1 = dic1,list1 = devices_info_list)
+
+#后台管理设备表修改设备
+@app.route('/management/devicesTable/update',methods = ['POST'])
+@login_required
+#@routing_permission_check
+def managemnet_update_devices():
+    form = UpdateDevicesForms()
+    if request.method == 'POST':
+        if form.validate_on_submit():
+            id = request.form['id1']
+            plant_name = request.form['plant_name1']
+            plant_type = request.form['plant_type1']
+            suggest_watering_time = request.form['suggest_watering_time1']
+            device_name = request.form['device_name1']
+            switch_number = request.form['switch_number1']
+            #查询该条目是否存在
+            devices_info = Devices.query.filter_by(id = id).first()
+            if devices_info:
+                #比较新数据和旧数据，有变动的就update
+                try:
+                    if devices_info.plant_name != plant_name:
+                        devices_info.name = plant_name
+                        message1 = ' plant_name'
+                    else:
+                        message1 = ''
+                    if devices_info.plant_type != plant_type:
+                        devices_info.plant_type = plant_type
+                        message2 = ' plant_type'
+                    else:
+                        message2 = ''
+                    if devices_info.suggest_watering_time != suggest_watering_time:
+                        devices_info. suggest_watering_time = suggest_watering_time
+                        message3 = ' suggest_watering_time'
+                    else:
+                        message3 = ''
+                    if devices_info.device_name != device_name:
+                        devices_info.device_name = device_name
+                        message4 = ' device_name'
+                    else:
+                        message4 = ''
+                    if devices_info.switch_number != int(switch_number):
+                        devices_info.switch_number = int(switch_number)
+                        message5 = ' switch_number'
+                    else:
+                        message5 = ''
+                    db.session.commit()
+                    message = message1 + message2 + message3 + message4 + message5
+                    flash('修改字段: '+ message + ' 成功!')
+                    return redirect('/management/devicesTable')
+                except:
+                    db.session.rollback()
+                    flash('数据库异常!')
+                    return redirect('/management/devicesTable')
+            else:
+                flash('要更新的数据不存在!')
+                return redirect('/management/devicesTable')
+        else:
+            #未通过表单校验
+            err_dic = form.errors
+            errs = ''
+            for key,value in err_dic.items():
+                errs += value[0] + '  '
+            flash(errs)
+            return redirect('/management/devicesTable')
+
+#后台管理设备表删除设备
+@app.route('/management/devicesTable/delete',methods = ['POST','GET'])
+@login_required
+#@routing_permission_check
+def management_delete_devices():
+    if request.method == 'GET':
+        delete_device_id = request.args.get('id')
+        try:
+            delete_device_id = int(delete_device_id)
+        except:
+            return abort(404)
+        else:
+            devices_info = Devices.query.filter_by(id = delete_device_id).first()
+            #print(user_info)
+            if devices_info:
+                db.session.delete(devices_info)
+                db.session.commit()
+                flash('删除成功! ')
+                return redirect('/management/devicesTable')
+            else:
+                flash('数据错误! ')
+                return redirect('/management/devicesTable')
+
+#后台管理设备表导入设备
+@app.route('/management/devicesTable/import',methods = ['POST'])
+@login_required
+#@routing_permission_check
+def management_import_devices():
+    form = ManagementImportDevicesForms()
+    current_user = session.get('user_id')
+    if request.method == 'POST':
+        if form.validate_on_submit():
+            devices_file = request.files['file_devices']
+            if devices_file:
+                file_name = str(time.time()) + os.path.splitext(devices_file.filename)[-1]
+                file_path = os.getcwd() + os.sep + 'media' + os.sep 
+                devices_file.save(file_path + secure_filename(file_name))
+                #打开文件
+                if '.xlsx'  in file_name or '.xls' in file_name :
+                    table_head = ['植物名称','植物类别','浇水周期','绑定设备','开关编号']
+                    work_book = xlrd.open_workbook(file_path + file_name)
+                    ws = work_book.sheet_by_name('Sheet1')
+                    add_user_list = []
+                    msg_list = []
+                    if ws.row_values(0) == table_head:
+                        for row in range(1,ws.nrows):
+                            plant_name = ws.cell_value(row,0)
+                            plant_type = ws.cell_value(row,1)
+                            water_time_suggest = ws.cell_value(row,2)
+                            device_name = ws.cell_value(row,3)
+                            switch_number = ws.cell_value(row,4)
+                            ctype = ws.cell(row,4).ctype
+                            if ctype == 2:
+                                switch_number = int(str(switch_number).replace('.0',''))
+                            add_user_list.append(Devices(id = None ,user_name = current_user,plant_name = plant_name,plant_type = plant_type,\
+                                status = None , last_watering_time = None , suggest_watering_time = water_time_suggest ,device_name = device_name,\
+                                switch_number = switch_number,add_time= time.strftime('%Y-%m-%d %H:%M:%S')))
+                        try:
+                            db.session.add_all(add_user_list)
+                            db.session.commit()
+                            message = '批量导入设备功!'
+                            style = 'alert alert-success alert-dismissable'
+                            title = '成功! '
+                        except:
+                            db.session.rollback()
+                            message = '导入设备失败!'
+                            style = 'alert alert-dismissable alert-danger'
+                            title = '错误!  '
+                        finally:
+                            db.session.close()
+                    else:
+                        message = '数据格式错误! '
+                        style = 'alert alert-dismissable alert-danger'
+                        title = '错误!  '
+                else:
+                    message = '文件类型错误! '
+                    style = 'alert alert-dismissable alert-danger'
+                    title = '错误!  '
+            else:
+                message = '文件丢失 !'
+                style = 'alert alert-dismissable alert-danger'
+                title = '错误!  '
+        else:
+            #未通过表单校验
+            err_data = form.errors
+            errs = ''
+            for key,value in err_data.items():
+                errs += value[0] + '  '
+            style = 'alert alert-dismissable alert-danger'
+            title = '错误! '
+            message = errs
+        #渲染页面，返回对应的提示信息
+        res = User.query.filter_by(username = current_user).first()
+        if res:
+            chinese_name = res.chinese_name
+            sex = res.sex
+            birthday = res.birthday
+            email = res.email
+            group_id = res.group_id
+            if sex == 'Male':
+                sex = '男'
+            elif sex == 'Female':
+                sex = '女' 
+            if group_id == 1:
+                per = '管理员'
+            elif group_id == 2:
+                per = '普通用户'
+        dic1 = {'current_user':current_user,'chinese_name':chinese_name,\
+            'sex':sex,'birthday':birthday,'email':email,'permission':per,\
+            'page_number':1,'active1':'active'}
+        #奖提示信息加入到dic1
+        dic1['message'] = message
+        dic1['title'] = title
+        dic1['style'] = style
+        #查询权限数据(限制10条)
+        devices_info = Devices.query.limit(10).all()
+        if len(devices_info) ==0:
+            devices_info_list=[]
+        else:
+            devices_info_list = []
+            for i in devices_info:
+                data = i.__dict__
+                del data['_sa_instance_state']
+                data['style'] = random.choice(['success','info','warning','error'])
+                devices_info_list .append(data)              
+        return render_template('device.html',form = form,dic1 = dic1,list1 = devices_info_list)
+
+#后台管理批量导入设备下载模板文件
+@app.route("/management/devicesTable/import/DownloadTemplateFile",methods = ['GET'])
+@login_required
+#@routing_permission_check
+def management_import_devices_template():
+    file_name = 'template_devices.zip'
+    file_path = os.getcwd() + os.path.join(os.sep,'media',file_name )
+    if os.path.isfile(file_path) == True:
+        #打开指定文件准备传输
+        #循环读取文件
+        def sendfile(file_path):
+            with open(file_path, 'rb') as targetfile:
+                while True:
+                    data = targetfile.read(20*1024*1024)
+                    if not data:
+                        break
+                    yield data
+        response = Response(sendfile(file_path), content_type='app/octet-stream')
+        response.headers["Content-disposition"] = 'attachment; filename=%s' % file_name 
+        return response
+    else:  
+        return render_template('error_404.html')
 
 #后台管理朋友圈动态表
+@app.route("/management/friendInfoTable",methods = ['GET'])
+@login_required
+#@routing_permission_check
+def management_firend_info():
+    form = ManagementSendFriendMessageForms()
+    current_user = session.get('user_id')
+    if request.method == 'GET':
+        #定义字典渲染页面
+        res = User.query.filter_by(username = current_user).first()
+        if res:
+            chinese_name = res.chinese_name
+            sex = res.sex
+            birthday = res.birthday
+            email = res.email
+            group_id = res.group_id
+            if sex == 'Male':
+                sex = '男'
+            elif sex == 'Female':
+                sex = '女' 
+            if group_id == 1:
+                per = '管理员'
+            elif group_id == 2:
+                per = '普通用户'
+        dic1 = {'current_user':current_user,'chinese_name':chinese_name,\
+            'sex':sex,'birthday':birthday,'email':email,'permission':per,\
+            'page_number':1,'active1':'active'}
+        #查询权限数据(限制10条)
+        friends_info = FriendInfo.query.order_by(FriendInfo.create_time.desc()).limit(10).all()
+        # print(friends_info)
+        if not friends_info:
+            friends_info_list=[]
+        else:
+            #print(friends_info)
+            friends_info_list = []
+            for i in friends_info:
+                data = i.__dict__
+                del data['_sa_instance_state']
+                data['style'] = random.choice(['success','info','warning','error'])
+                friends_info_list .append(data)              
+        return render_template('friendinfo.html',form = form,dic1 = dic1,list1 = friends_info_list)
+        
+#后台管理朋友圈动态表翻页
+@app.route('/management/friendInfoTable/page',methods = ['POST','GET'])
+@login_required
+#@routing_permission_check
+def management_friendinfo_page():
+    form = AddDeviceForms()
+    current_user = session.get('user_id')
+    if request.method == 'GET':
+        page_number = request.args.get('page_number')
+        if page_number:
+            try:
+                page_number = int(page_number)
+            except:
+                return abort(404)
+            else:
+                #定义字典渲染页面
+                res = User.query.filter_by(username = current_user).first()
+                if res:
+                    chinese_name = res.chinese_name
+                    sex = res.sex
+                    birthday = res.birthday
+                    email = res.email
+                    group_id = res.group_id
+                    if sex == 'Male':
+                        sex = '男'
+                    elif sex == 'Female':
+                        sex = '女' 
+                    if group_id == 1:
+                        per = '管理员'
+                    elif group_id == 2:
+                        per = '普通用户'
+                dic1 = {'current_user':current_user,'chinese_name':chinese_name,\
+                    'sex':sex,'birthday':birthday,'email':email,'permission':per,\
+                    'page_number':page_number,'active1':'','active2':'','active3':'',\
+                    'active4':'','active5':''}
+                if 1<=page_number<=5:
+                    dic1['active'+str(page_number)] = 'active'
+                elif page_number>5:
+                    dic1['active_next'] = 'active'
+                #查询权限数据(限制10条)
+                limit_num = 10
+                offset_num = (page_number-1)*10
+                friend_info = FriendInfo.query.order_by(FriendInfo.create_time.desc()).limit(10).offset(offset_num).all()
+                if not friend_info:
+                    friends_info_list=[]
+                else:
+                    friends_info_list = []
+                    for i in friend_info:
+                        data = i.__dict__
+                        del data['_sa_instance_state']
+                        data['style'] = random.choice(['success','info','warning','error'])
+                        friends_info_list .append(data)              
+                return render_template('friendinfo.html',form = form,dic1 = dic1,list1 = friends_info_list)
+        else:
+            return abort(404)
+
+#后台管理朋友圈动态表添加动态
+@app.route('/management/friendInfoTable/add',methods = ['POST','GET'])
+@login_required
+#@routing_permission_check
+def management_friendinfo_add():
+    form = MyFriendsSendMessageForms()
+    current_user = session.get('user_id')
+    if request.method == 'POST':
+        if form.validate_on_submit():
+            message_title = request.form['message_title']
+            message_content = request.form['message_content']
+            #接收图片
+            f = request.files['picture']
+            #print(f)
+            if f:
+                file_name = str(time.time()) + os.path.splitext(f.filename)[-1]
+                file_path = os.getcwd() + os.sep + 'static' + os.sep + 'imgs' +os.sep
+                f.save(file_path + secure_filename(file_name))
+                picture_path = '.' + os.sep + 'static' + os.sep + 'imgs' + os.sep + file_name
+                picture_path_html = '/static/imgs/' + file_name
+                #兼容html中路径的显示  "\" 替换为"\\"
+                picture_path = picture_path.replace(os.sep, os.sep + os.sep)
+            else:
+                picture_path = None
+                picture_path_html = None
+            try:
+                #获取格式化时间，包括星期，用逗号分隔，用于前端的渲染,split
+                time_format = time.strftime('%Y,%m,%d,%w')
+                send_user = current_user
+                #评论数
+                comments_number = 0
+                #点赞数
+                like_number = 0
+                db.session.add(FriendInfo(id = None,send_user = send_user ,\
+                    time_format = time_format,picture_path = picture_path,\
+                    message_title = message_title,messgae_content = message_content,\
+                    comments_number = comments_number,picture_path_html = picture_path_html,\
+                    like_number = like_number,create_time = datetime.datetime.now()))
+                db.session.commit()
+                message = '添加动态成功!刷新后查看'
+                title = '成功!'
+                style = 'alert alert-success alert-dismissable'
+            except:
+                db.session.rollback()
+                message = '写入数据错误!'
+                title = '错误!'
+                style = 'alert alert-dismissable alert-danger'
+            finally:
+                db.session.close()
+        else:
+            #未通过表单校验
+            err_dic = form.errors
+            errs = ''
+            for key,value in err_dic.items():
+                errs += value[0] + '  '
+            message = errs
+            title = '错误!'
+            style = 'alert alert-dismissable alert-danger'
+        #渲染页面
+        #查询用户个人信息
+        res = User.query.filter_by(username = current_user).first()
+        if res:
+            chinese_name = res.chinese_name
+            sex = res.sex
+            birthday = res.birthday
+            email = res.email
+            group_id = res.group_id
+            if sex == 'Male':
+                sex = '男'
+            elif sex == 'Female':
+                sex = '女' 
+            if group_id == 1:
+                per = '管理员'
+            elif group_id == 2:
+                per = '普通用户'
+        dic1 = {'current_user':current_user,'chinese_name':chinese_name,\
+            'sex':sex,'birthday':birthday,'email':email,'permission':per,'page_number':1}
+        #把对应的提示信息加入到dic1中
+        dic1['message'] = message
+        dic1['title'] = title
+        dic1['style'] = style
+        #查询朋友动态信息
+        friends_info = FriendInfo.query.order_by(FriendInfo.create_time.desc()).limit(10).all()
+        friends_info_list = []
+        for i in friends_info:
+            data = i.__dict__
+            #对data进行处理
+            del data['_sa_instance_state']
+            friends_info_list.append(data)
+        return render_template('friendinfo.html',dic1 = dic1, form = form ,list1 = friends_info_list)
+
+#后台管理朋友圈动态表修改动态
+@app.route('/management/friendInfoTable/update',methods = ['POST'])
+@login_required
+#@routing_permission_check
+def managemnet_update_friendinfo():
+    form = ManagementUpdateFriendMessageForms()
+    if request.method == 'POST':
+        if form.validate_on_submit():
+            id = request.form['id1']
+            message_title = request.form['message_title1']
+            message_content = request.form['message_content1']
+            #查询该条目是否存在
+            friend_info = FriendInfo.query.filter_by(id = id).first()
+            if friend_info:
+                #比较新数据和旧数据，有变动的就update
+                try:
+                    if message_title != '':
+                        if friend_info.message_title != message_title:
+                            friend_info.message_title = message_title
+                            message1 = ' message_title'
+                        else:
+                            message1 = ''
+                    else:
+                        message1 = ''
+                    if message_content != '':
+                        if friend_info.message_content != message_content:
+                            friend_info.message_content = message_content
+                            message2 = ' message_content'
+                        else:
+                            message2 = ''
+                    else:
+                        message2 = ''
+                    db.session.commit()
+                    message = message1 + message2
+                    flash('修改字段: '+ message + ' 成功!')
+                    return redirect('/management/friendInfoTable')
+                except:
+                    db.session.rollback()
+                    flash('数据库异常!')
+                    return redirect('/management/friendInfoTable')
+            else:
+                flash('要更新的数据不存在!')
+                return redirect('/management/friendInfoTable')
+        else:
+            #未通过表单校验
+            err_dic = form.errors
+            errs = ''
+            for key,value in err_dic.items():
+                errs += value[0] + '  '
+            flash(errs)
+            return redirect('/management/friendInfoTable')
+
+#后台管理朋友圈动态表删除动态
+@app.route('/management/friendInfoTable/delete',methods = ['POST','GET'])
+@login_required
+#@routing_permission_check
+def management_delete_friendinfo():
+    if request.method == 'GET':
+        delete_friendinfo_id = request.args.get('id')
+        try:
+            delete_friendinfo_id = int(delete_friendinfo_id)
+        except:
+            return abort(404)
+        else:
+            friend_info = FriendInfo.query.filter_by(id = delete_friendinfo_id).first()
+            #print(user_info)
+            if friend_info:
+                file_path_remove = friend_info.picture_path
+                if file_path_remove:
+                    if os.path.isfile(file_path_remove) == True:
+                        os.remove(file_path_remove)
+                db.session.delete(friend_info)
+                db.session.commit()
+                flash('删除成功! ')
+                return redirect('/management/friendInfoTable')
+            else:
+                flash('数据错误! ')
+                return redirect('/management/friendInfoTable')
 
 #后台管理朋友圈动态评论表
+@app.route("/management/friendCommentsTable",methods = ['GET'])
+@login_required
+#@routing_permission_check
+def management_firend_comments():
+    form = MyFriendAddCommentsForms()
+    current_user = session.get('user_id')
+    if request.method == 'GET':
+        #定义字典渲染页面
+        res = User.query.filter_by(username = current_user).first()
+        if res:
+            chinese_name = res.chinese_name
+            sex = res.sex
+            birthday = res.birthday
+            email = res.email
+            group_id = res.group_id
+            if sex == 'Male':
+                sex = '男'
+            elif sex == 'Female':
+                sex = '女' 
+            if group_id == 1:
+                per = '管理员'
+            elif group_id == 2:
+                per = '普通用户'
+        dic1 = {'current_user':current_user,'chinese_name':chinese_name,\
+            'sex':sex,'birthday':birthday,'email':email,'permission':per,\
+            'page_number':1,'active1':'active'}
+        #查询权限数据(限制10条)
+        comments_info = FriendComments.query.order_by(FriendComments.commenting_time.desc()).limit(10).all()
+        # print(friends_info)
+        if not comments_info:
+            comments_info_list=[]
+        else:
+            #print(friends_info)
+            comments_info_list = []
+            for i in comments_info:
+                data = i.__dict__
+                del data['_sa_instance_state']
+                data['style'] = random.choice(['success','info','warning','error'])
+                comments_info_list .append(data)              
+        return render_template('friend_comments.html',form = form,dic1 = dic1,list1 = comments_info_list)
+
+##后台管理朋友圈动态评论表翻页
+@app.route("/management/friendCommentsTable/page",methods = ['GET'])
+@login_required
+#@routing_permission_check
+def management_firend_comments_page():
+    form = MyFriendAddCommentsForms()
+    current_user = session.get('user_id')
+    if request.method == 'GET':
+        page_number = request.args.get('page_number')
+        if page_number:
+            try:
+                page_number = int(page_number)
+            except:
+                return abort(404)
+            else:
+                #定义字典渲染页面
+                res = User.query.filter_by(username = current_user).first()
+                if res:
+                    chinese_name = res.chinese_name
+                    sex = res.sex
+                    birthday = res.birthday
+                    email = res.email
+                    group_id = res.group_id
+                    if sex == 'Male':
+                        sex = '男'
+                    elif sex == 'Female':
+                        sex = '女' 
+                    if group_id == 1:
+                        per = '管理员'
+                    elif group_id == 2:
+                        per = '普通用户'
+                #dic1
+                dic1 = {'current_user':current_user,'chinese_name':chinese_name,\
+                    'sex':sex,'birthday':birthday,'email':email,'permission':per,\
+                    'page_number':page_number,'active1':'','active2':'','active3':'',\
+                    'active4':'','active5':''}
+                if 1<=page_number<=5:
+                    dic1['active'+str(page_number)] = 'active'
+                elif page_number>5:
+                    dic1['active_next'] = 'active'
+                #查询权限数据(限制10条)
+                limit_num = 10
+                offset_num = (page_number-1)*10
+                #查询权限数据(限制10条)
+                comments_info = FriendComments.query.order_by(FriendComments.commenting_time.desc()).limit(10).offset(offset_num).all()
+                # print(friends_info)
+                if not comments_info:
+                    comments_info_list=[]
+                else:
+                    #print(friends_info)
+                    comments_info_list = []
+                    for i in comments_info:
+                        data = i.__dict__
+                        del data['_sa_instance_state']
+                        data['style'] = random.choice(['success','info','warning','error'])
+                        comments_info_list .append(data)              
+                return render_template('friend_comments.html',form = form,dic1 = dic1,list1 = comments_info_list)
+        else:
+            return abort(404)
+
+#后台管理朋友圈动态评论表添加评论数据
+@app.route('/management/friendCommentsTable/add',methods = ['POST','GET'])
+@login_required
+#@routing_permission_check
+def management_friendComments_add():
+    form = ManagementAddFriendCommentsForms()
+    current_user = session.get('user_id')
+    if request.method == 'POST':
+        if form.validate_on_submit():
+            friendinfo_id = request.form['friendinfo_id']
+            commenting_user = request.form['commenting_user']
+            commenting_message = request.form['commenting_message']
+            commenting_time = datetime.datetime.now()
+            #添加到数据库
+            try:
+                db.session.add(FriendComments(id = None,friendinfo_id = friendinfo_id,\
+                    commenting_user= commenting_user,commenting_message = commenting_message,\
+                    commenting_time = commenting_time))
+                db.session.commit()
+                message = '添加评论成功!'
+                title = '成功! '
+                style = 'alert alert-success alert-dismissable'
+            except:
+                db.session.rollback()
+                message = '添加失败!'
+                title = '错误! '
+                style = 'alert alert-dismissable alert-danger'
+            finally:
+                db.session.close()
+        else:
+            #未通过表单校验
+            err_dic = form.errors
+            errs = ''
+            for key,value in err_dic.items():
+                errs += value[0] + ' '
+            message = errs
+            title = '错误! '
+            style = 'alert alert-dismissable alert-danger'
+        #渲染页面
+        res = User.query.filter_by(username = current_user).first()
+        if res:
+            chinese_name = res.chinese_name
+            sex = res.sex
+            birthday = res.birthday
+            email = res.email
+            group_id = res.group_id
+            if sex == 'Male':
+                sex = '男'
+            elif sex == 'Female':
+                sex = '女' 
+            if group_id == 1:
+                per = '管理员'
+            elif group_id == 2:
+                per = '普通用户'
+        dic1 = {'current_user':current_user,'chinese_name':chinese_name,\
+            'sex':sex,'birthday':birthday,'email':email,'permission':per,\
+            'page_number':1,'active1':'active'}
+        #将提示信息加入到dic1
+        dic1['message'] = message
+        dic1['title'] = title
+        dic1['style'] = style
+        #查询用户数据(限制10条)
+        comments_info = FriendComments.query.order_by(FriendComments.commenting_time.desc()).limit(10).all()
+        if len(comments_info) ==0:
+            comments_info_list=[]
+        else:
+            comments_info_list = []
+            for i in comments_info:
+                data = i.__dict__
+                del data['_sa_instance_state']
+                data['style'] = random.choice(['success','info','warning','error'])
+                comments_info_list.append(data)              
+        return render_template('friend_comments.html',form = form,dic1 = dic1,list1 = comments_info_list)
+
+#后台管理朋友圈动态评论表删除评论数据
+@app.route('/management/friendCommentsTable/delete',methods = ['POST','GET'])
+@login_required
+#@routing_permission_check
+def management_delete_friendcomments():
+    if request.method == 'GET':
+        delete_friendcomments_id = request.args.get('id')
+        try:
+            delete_friendcomments_id = int(delete_friendcomments_id)
+        except:
+            return abort(404)
+        else:
+            comments_info = FriendComments.query.filter_by(id = delete_friendcomments_id).first()
+            if comments_info:
+                db.session.delete(comments_info)
+                db.session.commit()
+                flash('删除成功! ')
+                return redirect('/management/friendCommentsTable')
+            else:
+                flash('数据错误! ')
+                return redirect('/management/friendCommentsTable')
+
+#后台管理朋友圈动态评论表修改评论数据
+@app.route('/management/friendCommentsTable/update',methods = ['POST'])
+@login_required
+#@routing_permission_check
+def managemnet_update_friendcomments():
+    form = ManagementUpdateFriendCommentsForms()
+    if request.method == 'POST':
+        if form.validate_on_submit():
+            id = request.form['id']
+            friendinfo_id = request.form['friendinfo_id']
+            commenting_user = request.form['commenting_user']
+            commenting_message = request.form['commenting_message']
+            #查询该条目是否存在
+            comments_info = FriendComments.query.filter_by(id = id).first()
+            if comments_info:
+                #比较新数据和旧数据，有变动的就update
+                try:
+                    if comments_info.friendinfo_id != int(friendinfo_id):
+                        comments_info.friendinfo_id = int(friendinfo_id)
+                        message1 = ' friendinfo_id'
+                    else:
+                        message1 = ''
+                
+                    if comments_info.commenting_user != commenting_user:
+                        comments_info.commenting_user = commenting_user
+                        message2 = ' comments_info'
+                    else:
+                        message2 = ''
+
+                    if comments_info.commenting_message != commenting_message:
+                        comments_info.commenting_message = commenting_message
+                        message3 = ' commenting_message'
+                    else:
+                        message3 = ''
+                    
+                    db.session.commit()
+                    message = message1 + message2 + message3
+                    flash('修改字段: '+ message + ' 成功!')
+                    return redirect('/management/friendCommentsTable')
+                except:
+                    db.session.rollback()
+                    flash('数据库异常!')
+                    return redirect('/management/friendCommentsTable')
+            else:
+                flash('要更新的数据不存在!')
+                return redirect('/management/friendCommentsTable')
+        else:
+            #未通过表单校验
+            err_dic = form.errors
+            errs = ''
+            for key,value in err_dic.items():
+                errs += value[0] + '  '
+            flash(errs)
+            return redirect('/management/friendCommentsTable')
 
 #后台管理朋友圈评论点赞信息表
+@app.route("/management/friendLikesTable",methods = ['GET'])
+@login_required
+#@routing_permission_check
+def management_firend_likes():
+    form = MyFriendAddCommentsForms()
+    current_user = session.get('user_id')
+    if request.method == 'GET':
+        #定义字典渲染页面
+        res = User.query.filter_by(username = current_user).first()
+        if res:
+            chinese_name = res.chinese_name
+            sex = res.sex
+            birthday = res.birthday
+            email = res.email
+            group_id = res.group_id
+            if sex == 'Male':
+                sex = '男'
+            elif sex == 'Female':
+                sex = '女' 
+            if group_id == 1:
+                per = '管理员'
+            elif group_id == 2:
+                per = '普通用户'
+        dic1 = {'current_user':current_user,'chinese_name':chinese_name,\
+            'sex':sex,'birthday':birthday,'email':email,'permission':per,\
+            'page_number':1,'active1':'active'}
+        #查询权限数据(限制10条)
+        likes_info = FriendLikes.query.order_by(FriendLikes.like_time.desc()).limit(10).all()
+        # print(friends_info)
+        if not likes_info:
+            likes_info_list=[]
+        else:
+            #print(friends_info)
+            likes_info_list = []
+            for i in likes_info:
+                data = i.__dict__
+                del data['_sa_instance_state']
+                data['style'] = random.choice(['success','info','warning','error'])
+                likes_info_list .append(data)              
+        return render_template('friend_likes.html',form = form,dic1 = dic1,list1 = likes_info_list)
 
+
+#后台管理朋友圈评论点赞信息表翻页
+@app.route("/management/friendLikesTable/page",methods = ['GET'])
+@login_required
+#@routing_permission_check
+def management_firend_likes_page():
+    form = ManagementAddFriendLikesForms()
+    current_user = session.get('user_id')
+    if request.method == 'GET':
+        page_number = request.args.get('page_number')
+        if page_number:
+            try:
+                page_number = int(page_number)
+            except:
+                return abort(404)
+            else:
+                #定义字典渲染页面
+                res = User.query.filter_by(username = current_user).first()
+                if res:
+                    chinese_name = res.chinese_name
+                    sex = res.sex
+                    birthday = res.birthday
+                    email = res.email
+                    group_id = res.group_id
+                    if sex == 'Male':
+                        sex = '男'
+                    elif sex == 'Female':
+                        sex = '女' 
+                    if group_id == 1:
+                        per = '管理员'
+                    elif group_id == 2:
+                        per = '普通用户'
+                #dic1
+                dic1 = {'current_user':current_user,'chinese_name':chinese_name,\
+                    'sex':sex,'birthday':birthday,'email':email,'permission':per,\
+                    'page_number':page_number,'active1':'','active2':'','active3':'',\
+                    'active4':'','active5':''}
+                if 1<=page_number<=5:
+                    dic1['active'+str(page_number)] = 'active'
+                elif page_number>5:
+                    dic1['active_next'] = 'active'
+                #查询权限数据(限制10条)
+                limit_num = 10
+                offset_num = (page_number-1)*10
+                #查询权限数据(限制10条)
+                likes_info = FriendLikes.query.order_by(FriendLikes.like_time.desc()).limit(10).offset(offset_num).all()
+                # print(friends_info)
+                if not likes_info:
+                    likes_info_list=[]
+                else:
+                    #print(friends_info)
+                    likes_info_list = []
+                    for i in likes_info:
+                        data = i.__dict__
+                        del data['_sa_instance_state']
+                        data['style'] = random.choice(['success','info','warning','error'])
+                        likes_info_list .append(data)              
+                return render_template('friend_likes.html',form = form,dic1 = dic1,list1 = likes_info_list)
+        else:
+            return abort(404)
+
+#后台管理朋友圈评论点赞信息添加点赞信息
+@app.route('/management/friendLikesTable/add',methods = ['POST','GET'])
+@login_required
+#@routing_permission_check
+def management_friendLikes_add():
+    form = ManagementAddFriendLikesForms()
+    current_user = session.get('user_id')
+    if request.method == 'POST':
+        if form.validate_on_submit():
+            friendinfo_id = request.form['friendinfo_id']
+            likes_user = request.form['like_user']
+            like_time = datetime.datetime.now()
+            #添加到数据库
+            try:
+                db.session.add(FriendLikes(id = None,friendinfo_id = friendinfo_id,like_user = likes_user,like_time = like_time))
+                #更新点赞数
+                friends_info = FriendInfo.query.filter_by(id = friendinfo_id).first()
+                if friends_info:
+                    old_likes = friends_info.like_number
+                    friends_info.like_number = old_likes + 1
+                db.session.commit()
+                message = '添加点赞数据成功!'
+                title = '成功! '
+                style = 'alert alert-success alert-dismissable'
+            except:
+                db.session.rollback()
+                message = '添加点赞数据失败!'
+                title = '错误! '
+                style = 'alert alert-dismissable alert-danger'
+            finally:
+                db.session.close()
+        else:
+            #未通过表单校验
+            err_dic = form.errors
+            errs = ''
+            for key,value in err_dic.items():
+                errs += value[0] + ' '
+            message = errs
+            title = '错误! '
+            style = 'alert alert-dismissable alert-danger'
+        #渲染页面
+        res = User.query.filter_by(username = current_user).first()
+        if res:
+            chinese_name = res.chinese_name
+            sex = res.sex
+            birthday = res.birthday
+            email = res.email
+            group_id = res.group_id
+            if sex == 'Male':
+                sex = '男'
+            elif sex == 'Female':
+                sex = '女' 
+            if group_id == 1:
+                per = '管理员'
+            elif group_id == 2:
+                per = '普通用户'
+        dic1 = {'current_user':current_user,'chinese_name':chinese_name,\
+            'sex':sex,'birthday':birthday,'email':email,'permission':per,\
+            'page_number':1,'active1':'active'}
+        #将提示信息加入到dic1
+        dic1['message'] = message
+        dic1['title'] = title
+        dic1['style'] = style
+        #查询用户数据(限制10条)
+        likes_info = FriendLikes.query.order_by(FriendLikes.like_time.desc()).limit(10).all()
+        if len(likes_info) ==0:
+            likes_info_list=[]
+        else:
+            likes_info_list = []
+            for i in likes_info:
+                data = i.__dict__
+                del data['_sa_instance_state']
+                data['style'] = random.choice(['success','info','warning','error'])
+                likes_info_list.append(data)              
+        return render_template('friend_likes.html',form = form,dic1 = dic1,list1 = likes_info_list)
+
+#后台管理朋友圈评论点赞信息表删除点赞数据
+@app.route('/management/friendLikesTable/delete',methods = ['POST','GET'])
+@login_required
+#@routing_permission_check
+def management_delete_friendlikes():
+    if request.method == 'GET':
+        delete_friendlikes_id = request.args.get('id')
+        friendinfo_id = request.args.get('id1')
+        try:
+            delete_friendlikes_id = int(delete_friendlikes_id)
+            friendinfo_id = int(friendinfo_id)
+        except:
+            return abort(404)
+        else:
+            likes_info = FriendLikes.query.filter_by(id = delete_friendlikes_id).first()
+            if likes_info:
+                db.session.delete(likes_info)
+                #更新点赞数
+                friends_info = FriendInfo.query.filter_by(id = friendinfo_id).first()
+                if friends_info:
+                    old_likes = friends_info.like_number
+                    friends_info.like_number = old_likes - 1
+                db.session.commit()
+                flash('删除成功! ')
+                return redirect('/management/friendLikesTable')
+            else:
+                flash('数据错误! ')
+                return redirect('/management/friendLikesTable')
+
+#后台管理朋友圈评论点赞信息表修改点赞数据
+@app.route('/management/friendLikesTable/update',methods = ['POST'])
+@login_required
+#@routing_permission_check
+def managemnet_update_friendlikes():
+    form = ManagementUpdateFriendLikesForms()
+    if request.method == 'POST':
+        if form.validate_on_submit():
+            id = request.form['id']
+            friendinfo_id = request.form['friendinfo_id']
+            like_user = request.form['like_user']
+            #查询该条目是否存在
+            likes_info = FriendLikes.query.filter_by(id = id).first()
+            if likes_info:
+                #比较新数据和旧数据，有变动的就update
+                try:
+                    if likes_info.friendinfo_id != int(friendinfo_id):
+                        likes_info.friendinfo_id = int(friendinfo_id)
+                        message1 = ' friendinfo_id'
+                    else:
+                        message1 = ''
+                    if likes_info.like_user != like_user:
+                        likes_info.like_user = like_user
+                        message2 = ' like_user'
+                    else:
+                        message2 = ''
+                    db.session.commit()
+                    message = message1 + message2 
+                    flash('修改字段: '+ message + ' 成功!')
+                    return redirect('/management/friendLikesTable')
+                except:
+                    db.session.rollback()
+                    flash('数据库异常!')
+                    return redirect('/management/friendLikesTable')
+            else:
+                flash('要更新的数据不存在!')
+                return redirect('/management/friendLikesTable')
+        else:
+            #未通过表单校验
+            err_dic = form.errors
+            errs = ''
+            for key,value in err_dic.items():
+                errs += value[0] + '  '
+            flash(errs)
+            return redirect('/management/friendLikesTable')
 
 if __name__ == '__main__':
     app.run(host = '0.0.0.0',port = 5001,debug = True)
