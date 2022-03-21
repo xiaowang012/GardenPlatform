@@ -15,7 +15,7 @@ def login_required(func):
         user_id = session.get('user_id')
         #print("session user_id:", user_id)
         if not user_id:
-            return render_template('error_403_login.html')
+            return render_template('error_403.html')
         else:
             g.user_id = user_id
             return func(*args, **kwargs)
