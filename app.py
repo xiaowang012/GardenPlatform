@@ -147,7 +147,7 @@ def index():
 #用户查看个人信息页面
 # @app.route('/UserProfile',methods = ['GET'])
 # @login_required
-# #@routing_permission_check
+# @routing_permission_check
 # def get_user_profile():
 #     #定义dic1字典用于渲染html的数据准备
 #     dic1 = {}
@@ -1542,7 +1542,7 @@ def my_friends_send_message():
 #删除朋友圈动态(用户界面,管理员和普通用户都只能删除自己发的)
 @app.route('/my_friends/delete_message',methods = ['GET'])
 @login_required
-#@routing_permission_check
+@routing_permission_check
 def delete_my_message():
     if request.method == 'GET':
         cur_user = session.get('user_id')
@@ -1580,7 +1580,7 @@ def delete_my_message():
 #朋友圈动态翻页
 @app.route('/my_friends/nextpage',methods = ['GET'])
 @login_required
-#@routing_permission_check
+@routing_permission_check
 def my_friend_next_page():
     form = MyFriendsSendMessageForms()
     current_user = session.get('user_id')
@@ -1644,7 +1644,7 @@ def my_friend_next_page():
 #添加朋友圈动态评论
 @app.route('/my_friends/send_message/add_comments',methods = ['POST'])
 @login_required
-#@routing_permission_check
+@routing_permission_check
 def my_friend_commenting_message():
     current_user = session.get('user_id')
     form = MyFriendAddCommentsForms()
@@ -1738,7 +1738,7 @@ def my_friend_commenting_message():
 #朋友圈动态评论翻页
 # @app.route('/my_friends/comments/nextpage',methods = ['GET'])
 # @login_required
-# #@routing_permission_check
+# @routing_permission_check
 # def my_friend_comments_nextpage():
 #     form = MyFriendsSendMessageForms()
 #     current_user = session.get('user_id')
@@ -1801,7 +1801,7 @@ def my_friend_commenting_message():
 #朋友圈点赞
 @app.route('/my_friends/send_message/add_likes',methods = ['GET'])
 @login_required
-#@routing_permission_check
+@routing_permission_check
 def my_friends_add_likes():
     current_user = session.get('user_id')
     if request.method == 'GET':
@@ -1833,14 +1833,14 @@ def my_friends_add_likes():
 #查看点赞列表
 @app.route('/my_friends/send_message/get_likes_list',methods = ['GET'])
 @login_required
-#@routing_permission_check
+@routing_permission_check
 def get_likes_list():
     pass
 
 #删除评论(只能删除自己添加的评论或者动态作者可以删除该动态下的评论)
 @app.route('/my_friends/send_message/delete_comments',methods = ['GET'])
 @login_required
-#@routing_permission_check
+@routing_permission_check
 def my_friend_delete_comments():
     current_user = session.get('user_id')
     if request.method == 'GET':
@@ -1889,7 +1889,7 @@ def my_friend_delete_comments():
 #后台管理权限表管理主页
 @app.route('/management/permissionTable',methods = ['POST','GET'])
 @login_required
-#@routing_permission_check
+@routing_permission_check
 def management_permission():
     form = ManagementAddPermissionForms()
     current_user = session.get('user_id')
@@ -1929,7 +1929,7 @@ def management_permission():
 #后台管理权限表管理主页翻页
 @app.route('/management/permissionTable/page',methods = ['POST','GET'])
 @login_required
-#@routing_permission_check
+@routing_permission_check
 def management_permission_page():
     form = ManagementAddPermissionForms()
     current_user = session.get('user_id')
@@ -1985,7 +1985,7 @@ def management_permission_page():
 #添加权限
 @app.route('/management/permissionTable/add',methods = ['POST'])
 @login_required
-#@routing_permission_check
+@routing_permission_check
 def management_add_permission():
     form = ManagementAddPermissionForms()
     current_user = session.get('user_id')
@@ -2058,7 +2058,7 @@ def management_add_permission():
 #导入权限
 @app.route('/management/permissionTable/import',methods = ['POST'])
 @login_required
-#@routing_permission_check
+@routing_permission_check
 def management_import_permission():
     current_user = session.get('user_id')
     form = ManagementImportPermissionForms()
@@ -2165,7 +2165,7 @@ def management_import_permission():
 #修改权限
 @app.route('/management/permissionTable/update',methods = ['POST'])
 @login_required
-#@routing_permission_check
+@routing_permission_check
 def managemnet_update_permission():
     form = ManagementUpdatePermissionForms()
     if request.method == 'POST':
@@ -2219,7 +2219,7 @@ def managemnet_update_permission():
 #删除权限
 @app.route('/management/permissionTable/delete',methods = ['GET'])
 @login_required
-#@routing_permission_check
+@routing_permission_check
 def management_delete_permission():
     if request.method == 'GET':
         delete_id = request.args.get('id')
@@ -2246,7 +2246,7 @@ def management_delete_permission():
 #我的盆摘页面批量导入设备下载模板文件
 @app.route("/management/permissionTable/import/DownloadTemplateFile",methods = ['GET'])
 @login_required
-#@routing_permission_check
+@routing_permission_check
 def download_import_permission_template():
     file_name = 'template_permission.zip'
     file_path = os.getcwd() + os.path.join(os.sep,'media',file_name )
@@ -2269,7 +2269,7 @@ def download_import_permission_template():
 #后台管理用户表
 @app.route('/management/userTable',methods = ['POST','GET'])
 @login_required
-#@routing_permission_check
+@routing_permission_check
 def management_user():
     form = ManagementAddUserForms()
     current_user = session.get('user_id')
@@ -2309,7 +2309,7 @@ def management_user():
 #后台管理用户表管理主页翻页
 @app.route('/management/userTable/page',methods = ['POST','GET'])
 @login_required
-#@routing_permission_check
+@routing_permission_check
 def management_user_page():
     form = ManagementAddUserForms()
     current_user = session.get('user_id')
@@ -2365,7 +2365,7 @@ def management_user_page():
 #添加用户
 @app.route('/management/userTable/add',methods = ['POST'])
 @login_required
-#@routing_permission_check
+@routing_permission_check
 def management_add_user():
     form = ManagementAddUserForms()
     current_user = session.get('user_id')
@@ -2452,7 +2452,7 @@ def management_add_user():
 #导入用户
 @app.route('/management/userTable/import',methods = ['POST'])
 @login_required
-#@routing_permission_check
+@routing_permission_check
 def management_import_user():
     form = ManagementImportUserForms()
     current_user = session.get('user_id')
@@ -2577,7 +2577,7 @@ def management_import_user():
 #修改用户
 @app.route('/management/userTable/update',methods = ['POST'])
 @login_required
-#@routing_permission_check
+@routing_permission_check
 def managemnet_update_user():
     form = ManagementUpdateUserForms()
     if request.method == 'POST':
@@ -2647,7 +2647,7 @@ def managemnet_update_user():
 #删除用户
 @app.route('/management/userTable/delete',methods = ['GET'])
 @login_required
-#@routing_permission_check
+@routing_permission_check
 def management_delete_user():
     if request.method == 'GET':
         delete_user = request.args.get('username')
@@ -2667,7 +2667,7 @@ def management_delete_user():
 #下载批量导入用户的模板
 @app.route("/management/userTable/import/DownloadTemplateFile",methods = ['GET'])
 @login_required
-#@routing_permission_check
+@routing_permission_check
 def download_import_user_template():
     file_name = 'template_user.zip'
     file_path = os.getcwd() + os.path.join(os.sep,'media',file_name )
@@ -2690,7 +2690,7 @@ def download_import_user_template():
 #后台管理用户组
 @app.route('/management/userGroupTable',methods = ['POST','GET'])
 @login_required
-#@routing_permission_check
+@routing_permission_check
 def management_user_group():
     form = ManagementAddUserForms()
     current_user = session.get('user_id')
@@ -2731,7 +2731,7 @@ def management_user_group():
 #后台管理用户组表格翻页
 @app.route('/management/userGroupTable/page',methods = ['POST','GET'])
 @login_required
-#@routing_permission_check
+@routing_permission_check
 def management_user_group_page():
     form = ManagementAddUserGroupForms()
     current_user = session.get('user_id')
@@ -2787,7 +2787,7 @@ def management_user_group_page():
 #后台管理用户组表添加角色
 @app.route('/management/userGroupTable/add',methods = ['POST','GET'])
 @login_required
-#@routing_permission_check
+@routing_permission_check
 def management_user_group_add():
     form = ManagementAddUserGroupForms()
     current_user = session.get('user_id')
@@ -2862,7 +2862,7 @@ def management_user_group_add():
 #后台管理用户组表删除角色
 @app.route('/management/userGroupTable/delete',methods = ['POST','GET'])
 @login_required
-#@routing_permission_check
+@routing_permission_check
 def management_delete_user_group():
     if request.method == 'GET':
         delete_user_group = request.args.get('id')
@@ -2885,7 +2885,7 @@ def management_delete_user_group():
 #后台管理用户组表修改角色
 @app.route('/management/userGroupTable/update',methods = ['POST'])
 @login_required
-#@routing_permission_check
+@routing_permission_check
 def managemnet_update_user_group():
     form = ManagementUpdateUserGroupForms()
     if request.method == 'POST':
@@ -2926,7 +2926,7 @@ def managemnet_update_user_group():
 #后台管理导入用户组
 @app.route('/management/userGroupTable/import',methods = ['POST'])
 @login_required
-#@routing_permission_check
+@routing_permission_check
 def management_import_user_group():
     form = ManagementImportUserGroupForms()
     current_user = session.get('user_id')
@@ -3021,7 +3021,7 @@ def management_import_user_group():
 #后台管理导入用户组下载模板
 @app.route("/management/userGroupTable/import/DownloadTemplateFile",methods = ['GET'])
 @login_required
-#@routing_permission_check
+@routing_permission_check
 def download_import_user_group_template():
     file_name = 'template_user_group.zip'
     file_path = os.getcwd() + os.path.join(os.sep,'media',file_name )
@@ -3044,7 +3044,7 @@ def download_import_user_group_template():
 #后台管理设备表
 @app.route('/management/devicesTable',methods = ['POST','GET'])
 @login_required
-#@routing_permission_check
+@routing_permission_check
 def management_devices_Table():
     form = AddDeviceForms()
     current_user = session.get('user_id')
@@ -3084,7 +3084,7 @@ def management_devices_Table():
 #后台管理设备表翻页
 @app.route('/management/devicesTable/page',methods = ['POST','GET'])
 @login_required
-#@routing_permission_check
+@routing_permission_check
 def management_user_devices_page():
     form = AddDeviceForms()
     current_user = session.get('user_id')
@@ -3140,7 +3140,7 @@ def management_user_devices_page():
 #后台管理设备表添加设备
 @app.route('/management/devicesTable/add',methods = ['POST','GET'])
 @login_required
-#@routing_permission_check
+@routing_permission_check
 def management_devices_add():
     form = AddDeviceForms()
     current_user = session.get('user_id')
@@ -3215,7 +3215,7 @@ def management_devices_add():
 #后台管理设备表修改设备
 @app.route('/management/devicesTable/update',methods = ['POST'])
 @login_required
-#@routing_permission_check
+@routing_permission_check
 def managemnet_update_devices():
     form = UpdateDevicesForms()
     if request.method == 'POST':
@@ -3279,7 +3279,7 @@ def managemnet_update_devices():
 #后台管理设备表删除设备
 @app.route('/management/devicesTable/delete',methods = ['POST','GET'])
 @login_required
-#@routing_permission_check
+@routing_permission_check
 def management_delete_devices():
     if request.method == 'GET':
         delete_device_id = request.args.get('id')
@@ -3302,7 +3302,7 @@ def management_delete_devices():
 #后台管理设备表导入设备
 @app.route('/management/devicesTable/import',methods = ['POST'])
 @login_required
-#@routing_permission_check
+@routing_permission_check
 def management_import_devices():
     form = ManagementImportDevicesForms()
     current_user = session.get('user_id')
@@ -3406,7 +3406,7 @@ def management_import_devices():
 #后台管理批量导入设备下载模板文件
 @app.route("/management/devicesTable/import/DownloadTemplateFile",methods = ['GET'])
 @login_required
-#@routing_permission_check
+@routing_permission_check
 def management_import_devices_template():
     file_name = 'template_devices.zip'
     file_path = os.getcwd() + os.path.join(os.sep,'media',file_name )
@@ -3429,7 +3429,7 @@ def management_import_devices_template():
 #后台管理朋友圈动态表
 @app.route("/management/friendInfoTable",methods = ['GET'])
 @login_required
-#@routing_permission_check
+@routing_permission_check
 def management_firend_info():
     form = ManagementSendFriendMessageForms()
     current_user = session.get('user_id')
@@ -3471,7 +3471,7 @@ def management_firend_info():
 #后台管理朋友圈动态表翻页
 @app.route('/management/friendInfoTable/page',methods = ['POST','GET'])
 @login_required
-#@routing_permission_check
+@routing_permission_check
 def management_friendinfo_page():
     form = AddDeviceForms()
     current_user = session.get('user_id')
@@ -3527,7 +3527,7 @@ def management_friendinfo_page():
 #后台管理朋友圈动态表添加动态
 @app.route('/management/friendInfoTable/add',methods = ['POST','GET'])
 @login_required
-#@routing_permission_check
+@routing_permission_check
 def management_friendinfo_add():
     form = MyFriendsSendMessageForms()
     current_user = session.get('user_id')
@@ -3618,7 +3618,7 @@ def management_friendinfo_add():
 #后台管理朋友圈动态表修改动态
 @app.route('/management/friendInfoTable/update',methods = ['POST'])
 @login_required
-#@routing_permission_check
+@routing_permission_check
 def managemnet_update_friendinfo():
     form = ManagementUpdateFriendMessageForms()
     if request.method == 'POST':
@@ -3670,7 +3670,7 @@ def managemnet_update_friendinfo():
 #后台管理朋友圈动态表删除动态
 @app.route('/management/friendInfoTable/delete',methods = ['POST','GET'])
 @login_required
-#@routing_permission_check
+@routing_permission_check
 def management_delete_friendinfo():
     if request.method == 'GET':
         delete_friendinfo_id = request.args.get('id')
@@ -3697,7 +3697,7 @@ def management_delete_friendinfo():
 #后台管理朋友圈动态评论表
 @app.route("/management/friendCommentsTable",methods = ['GET'])
 @login_required
-#@routing_permission_check
+@routing_permission_check
 def management_firend_comments():
     form = MyFriendAddCommentsForms()
     current_user = session.get('user_id')
@@ -3739,7 +3739,7 @@ def management_firend_comments():
 ##后台管理朋友圈动态评论表翻页
 @app.route("/management/friendCommentsTable/page",methods = ['GET'])
 @login_required
-#@routing_permission_check
+@routing_permission_check
 def management_firend_comments_page():
     form = MyFriendAddCommentsForms()
     current_user = session.get('user_id')
@@ -3799,7 +3799,7 @@ def management_firend_comments_page():
 #后台管理朋友圈动态评论表添加评论数据
 @app.route('/management/friendCommentsTable/add',methods = ['POST','GET'])
 @login_required
-#@routing_permission_check
+@routing_permission_check
 def management_friendComments_add():
     form = ManagementAddFriendCommentsForms()
     current_user = session.get('user_id')
@@ -3873,7 +3873,7 @@ def management_friendComments_add():
 #后台管理朋友圈动态评论表删除评论数据
 @app.route('/management/friendCommentsTable/delete',methods = ['POST','GET'])
 @login_required
-#@routing_permission_check
+@routing_permission_check
 def management_delete_friendcomments():
     if request.method == 'GET':
         delete_friendcomments_id = request.args.get('id')
@@ -3895,7 +3895,7 @@ def management_delete_friendcomments():
 #后台管理朋友圈动态评论表修改评论数据
 @app.route('/management/friendCommentsTable/update',methods = ['POST'])
 @login_required
-#@routing_permission_check
+@routing_permission_check
 def managemnet_update_friendcomments():
     form = ManagementUpdateFriendCommentsForms()
     if request.method == 'POST':
@@ -3950,7 +3950,7 @@ def managemnet_update_friendcomments():
 #后台管理朋友圈评论点赞信息表
 @app.route("/management/friendLikesTable",methods = ['GET'])
 @login_required
-#@routing_permission_check
+@routing_permission_check
 def management_firend_likes():
     form = MyFriendAddCommentsForms()
     current_user = session.get('user_id')
@@ -3993,7 +3993,7 @@ def management_firend_likes():
 #后台管理朋友圈评论点赞信息表翻页
 @app.route("/management/friendLikesTable/page",methods = ['GET'])
 @login_required
-#@routing_permission_check
+@routing_permission_check
 def management_firend_likes_page():
     form = ManagementAddFriendLikesForms()
     current_user = session.get('user_id')
@@ -4053,7 +4053,7 @@ def management_firend_likes_page():
 #后台管理朋友圈评论点赞信息添加点赞信息
 @app.route('/management/friendLikesTable/add',methods = ['POST','GET'])
 @login_required
-#@routing_permission_check
+@routing_permission_check
 def management_friendLikes_add():
     form = ManagementAddFriendLikesForms()
     current_user = session.get('user_id')
@@ -4129,7 +4129,7 @@ def management_friendLikes_add():
 #后台管理朋友圈评论点赞信息表删除点赞数据
 @app.route('/management/friendLikesTable/delete',methods = ['POST','GET'])
 @login_required
-#@routing_permission_check
+@routing_permission_check
 def management_delete_friendlikes():
     if request.method == 'GET':
         delete_friendlikes_id = request.args.get('id')
@@ -4158,7 +4158,7 @@ def management_delete_friendlikes():
 #后台管理朋友圈评论点赞信息表修改点赞数据
 @app.route('/management/friendLikesTable/update',methods = ['POST'])
 @login_required
-#@routing_permission_check
+@routing_permission_check
 def managemnet_update_friendlikes():
     form = ManagementUpdateFriendLikesForms()
     if request.method == 'POST':
