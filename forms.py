@@ -1,4 +1,5 @@
 #coding=utf-8
+
 from flask_wtf import FlaskForm
 from wtforms import StringField,PasswordField,SelectField,DateField,SubmitField,FileField,TextAreaField
 from wtforms.fields.core import IntegerField
@@ -112,4 +113,77 @@ class ManagementAddUserForms(FlaskForm):
     submit = SubmitField('submit')
 
 #批量导入用户表单
+class ManagementImportUserForms(FlaskForm):
+    file_user = FileField('file_user',validators = [FileRequired(message = '文件不能为空!'),FileAllowed(['xlsx','xls'],message = '上传文件类型必须为XLS/XLSX!')])
+    submit = SubmitField('submit')
+
 #修改用户表单
+class ManagementUpdateUserForms(FlaskForm):
+    username2 = StringField('username2',validators=[DataRequired('用户名不能为空!'),Length(1,50,message = '用户名长度必须为1-50!')])
+    chinese_name2 = StringField('chinese_name2',validators=[DataRequired('中文名不能为空!'),Length(1,100,message = '中文名长度必须为1-100!')])
+    sex2 = StringField('sex2',validators=[DataRequired('性别不能为空!'),Length(1,50,message = '性别信息长度必须为1-50!')])
+    birthday2 = StringField('birthday2',validators=[DataRequired('生日不能为空!'),Length(1,50,message = '生日信息长度必须为1-50!')])
+    email2 = StringField('email2',validators=[DataRequired('邮箱不能为空!'),Length(1,50,message = '邮箱信息长度必须为1-50!')])
+    group_id2 = StringField('group_id2',validators=[DataRequired('用户组不能为空!'),Length(1,50,message = '用户组信息长度必须为1-50!')])
+    submit = SubmitField('submit')
+
+#添加用户组角色
+class ManagementAddUserGroupForms(FlaskForm):
+    group1 = StringField('group1',validators=[DataRequired('角色名不能为空!'),Length(1,50,message = '角色名长度必须为1-50!')])
+
+#修改用户组角色
+class ManagementUpdateUserGroupForms(FlaskForm):
+    id = StringField('id')
+    group_name = StringField('group_name',validators=[DataRequired('角色名不能为空!'),Length(1,50,message = '角色名长度必须为1-50!')])
+
+#导入用户角色
+class ManagementImportUserGroupForms(FlaskForm):
+    file_user_group = FileField('file_user_group',validators = [FileRequired(message = '文件不能为空!'),FileAllowed(['xlsx','xls'],message = '上传文件类型必须为XLS/XLSX!')])
+    submit = SubmitField('submit')
+
+#后台管理导入设备
+class ManagementImportDevicesForms(FlaskForm):
+    file_devices = FileField('file_devices',validators = [FileRequired(message = '文件不能为空!'),FileAllowed(['xlsx','xls'],message = '上传文件类型必须为XLS/XLSX!')])
+    submit = SubmitField('submit')
+
+#后台管理添加朋友圈动态表单
+class ManagementSendFriendMessageForms(FlaskForm):
+    message_title = StringField('message_title',validators = [DataRequired('标题不能为空!'),Length(1,100,message = '标题长度必须为1-100!')])
+    message_content = StringField('message_content',validators = [DataRequired('内容不能为空!'),Length(1,200,message = '内容长度必须为1-200!')])
+    picture = FileField('picture',validators = [FileAllowed(['jpg','jpeg','png','gif'],message = '只支持jpg,jpeg,png,gif 图片!')])
+    submit = SubmitField('submit')
+
+#后台管理修改盆友圈信息
+class ManagementUpdateFriendMessageForms(FlaskForm):
+    id = StringField('id1')
+    message_title1 = StringField('message_title1',validators = [Length(max = 100,message = '标题长度最大为100!')])
+    message_content1 = StringField('message_content1',validators = [Length(max = 200,message = '内容长度最大为200!')])
+    submit = SubmitField('submit')
+   
+#后台管理添加评论数据
+class ManagementAddFriendCommentsForms(FlaskForm):
+    friendinfo_id = StringField('friendinfo_id',validators = [DataRequired('动态ID不能为空!'),Length(1,50,message = '动态ID长度必须为1-50!')])
+    commenting_user = StringField('commenting_user',validators = [DataRequired('评论用户不能为空!'),Length(1,50,message = '评论用户长度必须为1-50!')])
+    commenting_message = StringField('commenting_message',validators = [DataRequired('评论信息不能为空!'),Length(1,200,message = '评论信息长度必须为1-200!')])
+    submit = SubmitField('submit')
+
+#后台管理修改评论数据
+class ManagementUpdateFriendCommentsForms(FlaskForm):
+    id = StringField('id')
+    friendinfo_id = StringField('friendinfo_id',validators = [DataRequired('动态ID不能为空!'),Length(1,50,message = '动态ID长度必须为1-50!')])
+    commenting_user = StringField('commenting_user',validators = [DataRequired('评论用户不能为空!'),Length(1,50,message = '评论用户长度必须为1-50!')])
+    commenting_message = StringField('commenting_message',validators = [DataRequired('评论信息不能为空!'),Length(1,200,message = '评论信息长度必须为1-200!')])
+    submit = SubmitField('submit')
+
+#后台管理添加点赞数据
+class ManagementAddFriendLikesForms(FlaskForm):
+    friendinfo_id = StringField('friendinfo_id',validators = [DataRequired('动态ID不能为空!'),Length(1,50,message = '动态ID长度必须为1-50!')])
+    like_user = StringField('like_user',validators = [DataRequired('点赞用户不能为空!'),Length(1,50,message = '点赞用户长度必须为1-50!')])
+    submit = SubmitField('submit')
+
+#后台管理修改点赞数据
+class ManagementUpdateFriendLikesForms(FlaskForm):
+    id = StringField('id')
+    friendinfo_id = StringField('friendinfo_id',validators = [DataRequired('动态ID不能为空!'),Length(1,50,message = '动态ID长度必须为1-50!')])
+    like_user = StringField('like_user',validators = [DataRequired('点赞用户不能为空!'),Length(1,50,message = '点赞用户长度必须为1-50!')])
+    submit = SubmitField('submit')
