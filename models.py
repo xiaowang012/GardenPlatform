@@ -54,8 +54,8 @@ class User(db.Model):
 class Permission(db.Model):
     id = db.Column(db.Integer,autoincrement=True,primary_key = True)
     name = db.Column(db.String(50))
-    url = db.Column(db.String(50))
-    description = db.Column(db.String(100))
+    url = db.Column(db.String(100))
+    description = db.Column(db.String(200))
     def __init__(self,id,name,url,description):
         self.id = id
         self.name = name
