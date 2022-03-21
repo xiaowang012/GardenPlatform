@@ -392,12 +392,6 @@
                                     {% set device1=item['device_name'] %}
                                     {% set switch1=item['switch_number'] %}
                                     {% set type1=item['plant_type'] %}
-                                    {% set id1=item['id'] %}
-                                    {% set name1=item['plant_name'] %}
-                                    {% set water1=item['suggest_watering_time'] %}
-                                    {% set device1=item['device_name'] %}
-                                    {% set switch1=item['switch_number'] %}
-                                    {% set type1=item['plant_type'] %}
                                     <!--根据渲染的花名计判断value写入模态框。-->
                                     {% if type1=='请选择类别' %}{% set type2='None' %}{% endif %}
                                     {% if type1=='月季花' %}{% set type2='1' %}{% endif %}

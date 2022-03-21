@@ -10,11 +10,13 @@
 </head>
 <body>
     <script>
-        function parameter_id(id1,name1,url1,description2) {
-        $( '#updateDeptId').val(id1);
-        $( '#updateDeptname').val(name1);
-        $( '#updateDepturl').val(url1);
-        $( '#updateDeptdescription').val(description2);
+        function parameter_id(username,chinese_name,sex,birthday,email,group_id) {
+        $( '#inputname').val(username);
+        $( '#inputchinese_name').val(chinese_name);
+        $( '#inputsex').val(sex);
+        $( '#inputbirthday').val(birthday);
+        $( '#inputemail').val(email);
+        $( '#inputgroup_id').val(group_id);
         }
         function delete_confirm(url)
         {
@@ -131,7 +133,7 @@
                                 </li>
                             </ul>
                             <h3 class="text-center">
-                                权限表<a href="/management/refresh?cur_url=/management/permissionTable" style="float: right;font-size: medium;"> 刷新权限</a>
+                                用户表
                             </h3>
                             <!--消息提醒-->
                             <div style="margin-top: 20px;" class="container">
@@ -152,16 +154,25 @@
                                 <thead>
                                     <tr>
                                         <th>
-                                            id
+                                            用户名
                                         </th>
                                         <th>
-                                            用户组
+                                            中文名
                                         </th>
                                         <th>
-                                            URL
+                                            性别
                                         </th>
                                         <th>
-                                            描述信息
+                                            生日
+                                        </th>
+                                        <th>
+                                            邮箱
+                                        </th>
+                                        <th>
+                                            用户组ID
+                                        </th>
+                                        <th>
+                                            添加时间
                                         </th>
                                         <th>
                                             <a role="button" id="modal-207299" href="#modal-container-207299" style="font-size: smaller;" class="btn btn-primary" data-toggle="modal" >添加</a><a role="button" id="modal-207300" href="#modal-container-207300" class="btn btn-default" style="font-size: smaller;margin-left: 17px;" data-toggle="modal" >导入</a>
@@ -172,55 +183,81 @@
                                     {% for item in list1 %}
                                         <tr class="{{ item['style'] }}">
                                             <td>
-                                                {{ item['id'] }}
+                                                {{ item['username'] }}
                                             </td>
                                             <td>
-                                                {{ item['name'] }}
+                                                {{ item['chinese_name'] }}
                                             </td>
                                             <td>
-                                                {{ item['url'] }}
+                                                {{ item['sex'] }}
                                             </td>
                                             <td>
-                                                {{ item['description'] }} 
+                                                {{ item['birthday'] }} 
                                             </td>
                                             <td>
-                                                {% set id=item['id'] %}
-                                                {% set name=item['name'] %}
-                                                {% set url=item['url'] %}
-                                                {% set description=item['description'] %}
-                                                <a id="modal-207301" onclick="parameter_id('{{ id }}','{{ name }}','{{ url }}','{{ description }}')" href="#modal-container-207301" role="button" style="font-size: x-small;" class="btn btn-default" data-toggle="modal">修改</a><button class="btn btn-default btn-primary" style="margin-left: 15px;font-size: x-small;" onclick="delete_confirm('/management/permissionTable/delete?id={{ item.id }}')">删除</button>
+                                                {{ item['email'] }} 
+                                            </td>
+                                            <td>
+                                                {{ item['group_id'] }} 
+                                            </td>
+                                            <td>
+                                                {{ item['add_time'] }} 
+                                            </td>
+                                            <td>
+                                                {% set username=item['username'] %}
+                                                {% set chinese_name=item['chinese_name'] %}
+                                                {% set sex=item['sex'] %}
+                                                {% set birthday=item['birthday'] %}
+                                                {% set email=item['email'] %}
+                                                {% set group_id=item['group_id'] %}
+                                                <a id="modal-207301" onclick="parameter_id('{{ username }}','{{ chinese_name }}','{{ sex }}','{{ birthday }}','{{ email}}','{{ group_id }}')" href="#modal-container-207301" role="button" style="font-size: x-small;" class="btn btn-default" data-toggle="modal">修改</a><button class="btn btn-default btn-primary" style="margin-left: 15px;font-size: x-small;" onclick="delete_confirm('/management/userTable/delete?username={{ item.username }}')">删除</button>
                                             </td>
                                         </tr>  
                                     {% endfor %}
                                     
                                 </tbody>
                             </table>
-                            <!-- 添加权限模态框 -->
+                            <!-- 添加用户模态框 -->
                             <div class="modal fade" id="modal-container-207299" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
                                 <div class="modal-dialog">
                                     <div class="modal-content">
                                         <div class="modal-header">
                                             <button type="button" class="close" data-dismiss="modal" aria-hidden="true">x</button>
                                             <h4 class="modal-title" id="myModalLabel">
-                                                添加权限
+                                                添加用户
                                             </h4>
                                         </div>
                                         <div class="modal-body">
-                                            <form role="form" action="/management/permissionTable/add" method="post" enctype = "multipart/form-data">
+                                            <form role="form" action="/management/userTable/add" method="post" enctype = "multipart/form-data">
                                                 {{ form.csrf_token }}
                                                 <div class="form-group">
-                                                    <label for="user_group">用户组</label>
-                                                    <select name="user_group" class="form-control">
-                                                        <option value="admin">管理员</option>
-                                                        <option value="others">其他</option>
+                                                    <label for="username">用户名</label><input type="text" class="form-control" name="username" />
+                                                </div>
+                                                <div class="form-group">
+                                                    <label for="password">密码</label><input type="password" class="form-control" name="password" />
+                                                </div>
+                                                <div class="form-group">
+                                                    <label for="chinese_name">中文名</label><input type="text" class="form-control" name="chinese_name" />
+                                                </div>
+                                                <div class="form-group">
+                                                    <label for="sex">性别</label>
+                                                    <select name="sex" class="form-control">
+                                                        <option value="Male">男</option>
+                                                        <option value="Female">女</option>
                                                     </select>
                                                 </div>
                                                 <div class="form-group">
-                                                    <label for="url">URL</label><input type="text" class="form-control" name="url" />
+                                                    <label for="birthday">生日</label><input  type="date" class="form-control" name="birthday" />
                                                 </div>
                                                 <div class="form-group">
-                                                    <label for="description">描述信息</label>
-                                                    <textarea class="form-control" rows="3" name="description"></textarea>
+                                                    <label for="email">邮箱</label><input type="email" class="form-control" name="email" />
+                                                </div>
+                                                <div class="form-group">
+                                                    <label for="group_id">用户组</label>
+                                                    <select name="group_id" class="form-control">
+                                                        <option value="1">管理员</option>
+                                                        <option value="2">其他</option>
+                                                    </select>
                                                 </div>
                                                 
                                                 <button type="submit" class="btn btn-default btn-primary">提交</button>
@@ -229,24 +266,24 @@
                                     </div> 
                                 </div>
                             </div> 
-                            <!--批量导入设备的模态框-->
+                            <!--批量导入用户的模态框-->
                             <div class="modal fade" id="modal-container-207300" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
                                 <div class="modal-dialog">
                                     <div class="modal-content">
                                         <div class="modal-header">
                                             <button type="button" class="close" data-dismiss="modal" aria-hidden="true">x</button>
                                             <h4 class="modal-title" id="myModalLabel">
-                                                导入权限
+                                                导入用户
                                             </h4>
                                         </div>
                                         <div class="modal-body">
-                                            <form role="form" action="/management/permissionTable/import" method="post" enctype = "multipart/form-data">
+                                            <form role="form" action="/management/userTable/import" method="post" enctype = "multipart/form-data">
                                                 {{ form.csrf_token }}
                                                 <div style="margin-top: 15px;" class="form-group">
-                                                        <label for="file_permission">请上传EXCEL文件</label><input type="file" name="file_permission" />
+                                                        <label for="file_user">请上传EXCEL文件</label><input type="file" name="file_user" />
                                                     <p style="margin-top: 10px;" class="help-block">
                                                         模板下载链接如下:
-                                                        <a href="/management/permissionTable/import/DownloadTemplateFile">点击下载</a>
+                                                        <a href="/management/userTable/import/DownloadTemplateFile">点击下载</a>
                                                     </p>
                                                 </div>
                                                 <button type="submit" class="btn btn-default btn-primary">导入</button>
@@ -255,67 +292,76 @@
                                     </div> 
                                 </div>
                             </div> 
-                            <!--修改权限信息模态框。-->
+                            <!-- 修改用户信息模态框 -->
                             <div class="modal fade" id="modal-container-207301" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
                                 <div class="modal-dialog">
                                     <div class="modal-content">
                                         <div class="modal-header">
                                             <button type="button" class="close" data-dismiss="modal" aria-hidden="true">x</button>
                                             <h4 class="modal-title" id="myModalLabel">
-                                                修改权限信息界面
+                                                修改用户信息
                                             </h4>
                                         </div>
                                         <div class="modal-body">
-                                            <form role="form" action="/management/permissionTable/update" method="post" >
+                                            <form role="form" action="/management/userTable/update" method="post" enctype = "multipart/form-data">
                                                 {{ form.csrf_token }}
                                                 <div class="form-group">
-                                                    <label for="id1">ID</label><input type="text" class="form-control" name="id1" id="updateDeptId"  readonly="readonly" />
+                                                    <label for="username2">用户名</label><input type="text" class="form-control" name="username2" readonly="readonly" id="inputname" />
                                                 </div>
                                                 <div class="form-group">
-                                                    <label for="name1">用户组</label>
-                                                    <select id="updateDeptname" name="name1" class="form-control">
-                                                        <option value="admin">管理员</option>
-                                                        <option value="others">其他</option>
+                                                    <label for="chinese_name2">中文名</label><input type="text" class="form-control" name="chinese_name2" id="inputchinese_name" />
+                                                </div>
+                                                <div class="form-group">
+                                                    <label for="sex2">性别</label>
+                                                    <select name="sex2" class="form-control" id="inputsex" >
+                                                        <option value="Male">男</option>
+                                                        <option value="Female">女</option>
                                                     </select>
                                                 </div>
                                                 <div class="form-group">
-                                                    <label for="url1">URL</label><input type="text" class="form-control" id="updateDepturl" name="url1" />
+                                                    <label for="birthday2">生日</label><input  type="date" class="form-control" name="birthday2" id="inputbirthday" />
                                                 </div>
                                                 <div class="form-group">
-                                                    <label for="description2">描述信息</label>
-                                                    <textarea class="form-control" rows="3" name="description2" id="updateDeptdescription" ></textarea>
+                                                    <label for="email2">邮箱</label><input type="email" class="form-control" name="email2" id="inputemail" />
+                                                </div>
+                                                <div class="form-group">
+                                                    <label for="group_id2">用户组</label>
+                                                    <select name="group_id2" id="inputgroup_id" class="form-control">
+                                                        <option value="1">管理员</option>
+                                                        <option value="2">其他</option>
+                                                    </select>
                                                 </div>
                                                 <button type="submit" class="btn btn-default btn-primary">提交</button>
                                             </form>
                                         </div>
                                     </div> 
                                 </div>
-                            </div>  
+                            </div> 
                             <ul style="float: right;" class="pagination">
                                 <li class="{{ dic1['active_Prev'] }}">
                                     {% if dic1['page_number'] <=2  %}
-                                        <a href="/management/permissionTable/page?page_number=1">Prev</a>
+                                        <a href="/management/userTable/page?page_number=1">Prev</a>
                                     {% else %}
-                                        <a href="/management/permissionTable/page?page_number={{ dic1['page_number']-1 }}">Prev</a>
+                                        <a href="/management/userTable/page?page_number={{ dic1['page_number']-1 }}">Prev</a>
                                     {% endif %}
                                    </li>
                                 <li class="{{ dic1['active1'] }}">
-                                     <a href="/management/permissionTable/page?page_number=1">1</a>
+                                     <a href="/management/userTable/page?page_number=1">1</a>
                                 </li>
                                 <li class="{{ dic1['active2'] }}">
-                                     <a href="/management/permissionTable/page?page_number=2">2</a>
+                                     <a href="/management/userTable/page?page_number=2">2</a>
                                 </li>
                                 <li class="{{ dic1['active3'] }}">
-                                     <a href="/management/permissionTable/page?page_number=3">3</a>
+                                     <a href="/management/userTable/page?page_number=3">3</a>
                                 </li>
                                 <li class="{{ dic1['active4'] }}">
-                                     <a href="/management/permissionTable/page?page_number=4">4</a>
+                                     <a href="/management/userTable/page?page_number=4">4</a>
                                 </li>
                                 <li class="{{ dic1['active5'] }}">
-                                     <a href="/management/permissionTable/page?page_number=5">5</a>
+                                     <a href="/management/userTable/page?page_number=5">5</a>
                                 </li>
                                 <li class="{{ dic1['active_next'] }}">
-                                     <a href="/management/permissionTable/page?page_number={{ dic1['page_number']+1 }}">Next</a>
+                                     <a href="/management/userTable/page?page_number={{ dic1['page_number']+1 }}">Next</a>
                                 </li>
                             </ul>
                         </div>

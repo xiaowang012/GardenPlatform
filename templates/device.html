@@ -10,11 +10,13 @@
 </head>
 <body>
     <script>
-        function parameter_id(id1,name1,url1,description2) {
+        function parameter(id1,plant_name1,plant_type1,suggest_watering_time1,device_name1,switch_number1) {
         $( '#updateDeptId').val(id1);
-        $( '#updateDeptname').val(name1);
-        $( '#updateDepturl').val(url1);
-        $( '#updateDeptdescription').val(description2);
+        $( '#updateDeptname').val(plant_name1);
+        $( '#updateDepttype').val(plant_type1);
+        $( '#updateDeptwater').val(suggest_watering_time1);
+        $( '#updateDeptdevice').val(device_name1);
+        $( '#updateDeptnumber').val(switch_number1);
         }
         function delete_confirm(url)
         {
@@ -131,7 +133,7 @@
                                 </li>
                             </ul>
                             <h3 class="text-center">
-                                权限表<a href="/management/refresh?cur_url=/management/permissionTable" style="float: right;font-size: medium;"> 刷新权限</a>
+                                设备表
                             </h3>
                             <!--消息提醒-->
                             <div style="margin-top: 20px;" class="container">
@@ -152,16 +154,34 @@
                                 <thead>
                                     <tr>
                                         <th>
-                                            id
+                                            设备ID
                                         </th>
                                         <th>
-                                            用户组
+                                            用户名
                                         </th>
                                         <th>
-                                            URL
+                                            植物名称
                                         </th>
                                         <th>
-                                            描述信息
+                                            植物类别
+                                        </th>
+                                        <th>
+                                            在线状态
+                                        </th>
+                                        <th>
+                                            上次浇水时间
+                                        </th>
+                                        <th>
+                                            建议浇水周期
+                                        </th>
+                                        <th>
+                                            绑定设备
+                                        </th>
+                                        <th>
+                                            开关编号
+                                        </th>
+                                        <th>
+                                            添加时间
                                         </th>
                                         <th>
                                             <a role="button" id="modal-207299" href="#modal-container-207299" style="font-size: smaller;" class="btn btn-primary" data-toggle="modal" >添加</a><a role="button" id="modal-207300" href="#modal-container-207300" class="btn btn-default" style="font-size: smaller;margin-left: 17px;" data-toggle="modal" >导入</a>
@@ -175,54 +195,112 @@
                                                 {{ item['id'] }}
                                             </td>
                                             <td>
-                                                {{ item['name'] }}
+                                                {{ item['user_name'] }}
                                             </td>
                                             <td>
-                                                {{ item['url'] }}
+                                                {{ item['plant_name'] }}
                                             </td>
                                             <td>
-                                                {{ item['description'] }} 
+                                                {{ item['plant_type'] }} 
                                             </td>
                                             <td>
-                                                {% set id=item['id'] %}
-                                                {% set name=item['name'] %}
-                                                {% set url=item['url'] %}
-                                                {% set description=item['description'] %}
-                                                <a id="modal-207301" onclick="parameter_id('{{ id }}','{{ name }}','{{ url }}','{{ description }}')" href="#modal-container-207301" role="button" style="font-size: x-small;" class="btn btn-default" data-toggle="modal">修改</a><button class="btn btn-default btn-primary" style="margin-left: 15px;font-size: x-small;" onclick="delete_confirm('/management/permissionTable/delete?id={{ item.id }}')">删除</button>
+                                                {{ item['status'] }}
+                                            </td>
+                                            <td>
+                                                {{ item['last_watering_time'] }}
+                                            </td>
+                                            <td>
+                                                {{ item['suggest_watering_time'] }}
+                                            </td>
+                                            <td>
+                                                {{ item['device_name'] }}
+                                            </td>
+                                            <td>
+                                                {{ item['switch_number'] }}
+                                            </td>
+                                            <td>
+                                                {{ item['add_time'] }}
+                                            </td>
+                                            <td>
+                                                {% set id1=item['id'] %}
+                                                {% set name1=item['plant_name'] %}
+                                                {% set water1=item['suggest_watering_time'] %}
+                                                {% set device1=item['device_name'] %}
+                                                {% set switch1=item['switch_number'] %}
+                                                {% set type1=item['plant_type'] %}
+                                                <!--根据渲染的花名计判断value写入模态框。-->
+                                                {% if type1=='请选择类别' %}{% set type2='None' %}{% endif %}
+                                                {% if type1=='月季花' %}{% set type2='1' %}{% endif %}
+                                                {% if type1=='玫瑰花' %}{% set type2='2' %}{% endif %}
+                                                {% if type1=='栀子花' %}{% set type2='3' %}{% endif %}
+                                                {% if type1=='太阳花' %}{% set type2='4' %}{% endif %}
+                                                {% if type1=='牡丹花' %}{% set type2='5' %}{% endif %}
+                                                {% if type1=='杜鹃花' %}{% set type2='6' %}{% endif %}
+                                                {% if type1=='其他' %}{% set type2='7' %}{% endif %}
+                                                <a id="modal-207301" onclick="parameter('{{ id1 }}','{{ name1 }}','{{ type1 }}','{{ water1 }}','{{ device1 }}','{{ switch1 }}')" href="#modal-container-207301" role="button" style="font-size: x-small;" class="btn btn-default" data-toggle="modal">修改</a><button class="btn btn-default btn-primary" style="margin-left: 15px;font-size: x-small;" onclick="delete_confirm('/management/devicesTable/delete?id={{ item.id }}')">删除</button>
                                             </td>
                                         </tr>  
                                     {% endfor %}
                                     
                                 </tbody>
                             </table>
-                            <!-- 添加权限模态框 -->
+                            <!--添加设备的模态框-->
                             <div class="modal fade" id="modal-container-207299" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
                                 <div class="modal-dialog">
                                     <div class="modal-content">
                                         <div class="modal-header">
                                             <button type="button" class="close" data-dismiss="modal" aria-hidden="true">x</button>
                                             <h4 class="modal-title" id="myModalLabel">
-                                                添加权限
+                                                添加设备界面
                                             </h4>
                                         </div>
                                         <div class="modal-body">
-                                            <form role="form" action="/management/permissionTable/add" method="post" enctype = "multipart/form-data">
+                                            <form role="form" action="/management/devicesTable/add" method="post" enctype = "multipart/form-data">
                                                 {{ form.csrf_token }}
                                                 <div class="form-group">
-                                                    <label for="user_group">用户组</label>
-                                                    <select name="user_group" class="form-control">
-                                                        <option value="admin">管理员</option>
-                                                        <option value="others">其他</option>
+                                                    <label for="plant_name">植物名称</label><input type="text" class="form-control" name="plant_name" />
+                                                </div>
+                                                <div class="form-group">
+                                                    <label for="plant_type">植物类别</label>
+                                                    <select name="plant_type" class="form-control">
+                                                        <option value="None">请选择类别</option>
+                                                        <option value="1">月季花</option>
+                                                        <option value="2">玫瑰花</option>
+                                                        <option value="3">栀子花</option>
+                                                        <option value="4">太阳花</option>
+                                                        <option value="5">牡丹花</option>
+                                                        <option value="6">杜鹃花</option>
+                                                        <option value="7">其他</option>
                                                     </select>
                                                 </div>
                                                 <div class="form-group">
-                                                    <label for="url">URL</label><input type="text" class="form-control" name="url" />
+                                                    <label for="suggest_watering_time">浇水周期</label><input type="text" class="form-control" name="suggest_watering_time" />
                                                 </div>
                                                 <div class="form-group">
-                                                    <label for="description">描述信息</label>
-                                                    <textarea class="form-control" rows="3" name="description"></textarea>
+                                                    <label for="device_name">绑定设备</label><input type="text" class="form-control" name="device_name" />
                                                 </div>
-                                                
+                                                <div class="form-group">
+                                                    <label for="switch_number">开关编号</label>
+                                                    <select name="switch_number" class="form-control">
+                                                        <option value="None">请选择编号</option>
+                                                        <option value="1">1号开关</option>
+                                                        <option value="2">2号开关</option>
+                                                        <option value="3">3号开关</option>
+                                                        <option value="4">4号开关</option>
+                                                        <option value="5">5号开关</option>
+                                                        <option value="6">6号开关</option>
+                                                        <option value="7">7号开关</option>
+                                                        <option value="8">8号开关</option>
+                                                        <option value="9">9号开关</option>
+                                                        <option value="10">10号开关</option>
+                                                        <option value="11">11号开关</option>
+                                                        <option value="12">12号开关</option>
+                                                        <option value="13">13号开关</option>
+                                                        <option value="14">14号开关</option>
+                                                        <option value="15">15号开关</option>
+                                                        <option value="16">16号开关</option>
+                                                    </select>
+                                                </div>
                                                 <button type="submit" class="btn btn-default btn-primary">提交</button>
                                             </form>
                                         </div>
@@ -236,17 +314,17 @@
                                         <div class="modal-header">
                                             <button type="button" class="close" data-dismiss="modal" aria-hidden="true">x</button>
                                             <h4 class="modal-title" id="myModalLabel">
-                                                导入权限
+                                                导入设备
                                             </h4>
                                         </div>
                                         <div class="modal-body">
-                                            <form role="form" action="/management/permissionTable/import" method="post" enctype = "multipart/form-data">
+                                            <form role="form" action="/management/devicesTable/import" method="post" enctype = "multipart/form-data">
                                                 {{ form.csrf_token }}
                                                 <div style="margin-top: 15px;" class="form-group">
-                                                        <label for="file_permission">请上传EXCEL文件</label><input type="file" name="file_permission" />
+                                                        <label for="file_devices">请上传EXCEL文件</label><input type="file" name="file_devices" />
                                                     <p style="margin-top: 10px;" class="help-block">
                                                         模板下载链接如下:
-                                                        <a href="/management/permissionTable/import/DownloadTemplateFile">点击下载</a>
+                                                        <a href="/management/devicesTable/import/DownloadTemplateFile">点击下载</a>
                                                     </p>
                                                 </div>
                                                 <button type="submit" class="btn btn-default btn-primary">导入</button>
@@ -255,35 +333,65 @@
                                     </div> 
                                 </div>
                             </div> 
-                            <!--修改权限信息模态框。-->
+                            <!--修改设备信息模态框。-->
                             <div class="modal fade" id="modal-container-207301" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
                                 <div class="modal-dialog">
                                     <div class="modal-content">
                                         <div class="modal-header">
                                             <button type="button" class="close" data-dismiss="modal" aria-hidden="true">x</button>
                                             <h4 class="modal-title" id="myModalLabel">
-                                                修改权限信息界面
+                                                修改设备信息界面
                                             </h4>
                                         </div>
                                         <div class="modal-body">
-                                            <form role="form" action="/management/permissionTable/update" method="post" >
+                                            <form role="form" action="/management/devicesTable/update" method="post" >
                                                 {{ form.csrf_token }}
                                                 <div class="form-group">
                                                     <label for="id1">ID</label><input type="text" class="form-control" name="id1" id="updateDeptId"  readonly="readonly" />
                                                 </div>
                                                 <div class="form-group">
-                                                    <label for="name1">用户组</label>
-                                                    <select id="updateDeptname" name="name1" class="form-control">
-                                                        <option value="admin">管理员</option>
-                                                        <option value="others">其他</option>
+                                                    <label for="plant_name1">植物名称</label><input type="text" class="form-control" id="updateDeptname" name="plant_name1" />
+                                                </div>
+                                                <div class="form-group">
+                                                    <label for="plant_type1">植物类别</label>
+                                                    <select id="updateDepttype" name="plant_type1" class="form-control">
+                                                        <option value="None">请选择类别</option>
+                                                        <option value="1">月季花</option>
+                                                        <option value="2">玫瑰花</option>
+                                                        <option value="3">栀子花</option>
+                                                        <option value="4">太阳花</option>
+                                                        <option value="5">牡丹花</option>
+                                                        <option value="6">杜鹃花</option>
+                                                        <option value="7">其他</option>
                                                     </select>
                                                 </div>
                                                 <div class="form-group">
-                                                    <label for="url1">URL</label><input type="text" class="form-control" id="updateDepturl" name="url1" />
+                                                    <label for="suggest_watering_time1">浇水周期</label><input type="text" class="form-control" id="updateDeptwater" name="suggest_watering_time1" />
                                                 </div>
                                                 <div class="form-group">
-                                                    <label for="description2">描述信息</label>
-                                                    <textarea class="form-control" rows="3" name="description2" id="updateDeptdescription" ></textarea>
+                                                    <label for="device_name1">绑定设备</label><input type="text" class="form-control" id="updateDeptdevice" name="device_name1" />
+                                                </div>
+                                                <div class="form-group">
+                                                    <label for="switch_number1">开关编号</label>
+                                                    <select id="updateDeptnumber" name="switch_number1" class="form-control">
+                                                        <option value="None">请选择编号</option>
+                                                        <option value="1">1号开关</option>
+                                                        <option value="2">2号开关</option>
+                                                        <option value="3">3号开关</option>
+                                                        <option value="4">4号开关</option>
+                                                        <option value="5">5号开关</option>
+                                                        <option value="6">6号开关</option>
+                                                        <option value="7">7号开关</option>
+                                                        <option value="8">8号开关</option>
+                                                        <option value="9">9号开关</option>
+                                                        <option value="10">10号开关</option>
+                                                        <option value="11">11号开关</option>
+                                                        <option value="12">12号开关</option>
+                                                        <option value="13">13号开关</option>
+                                                        <option value="14">14号开关</option>
+                                                        <option value="15">15号开关</option>
+                                                        <option value="16">16号开关</option>
+                                                    </select>
                                                 </div>
                                                 <button type="submit" class="btn btn-default btn-primary">提交</button>
                                             </form>
@@ -294,28 +402,28 @@
                             <ul style="float: right;" class="pagination">
                                 <li class="{{ dic1['active_Prev'] }}">
                                     {% if dic1['page_number'] <=2  %}
-                                        <a href="/management/permissionTable/page?page_number=1">Prev</a>
+                                        <a href="/management/devicesTable/page?page_number=1">Prev</a>
                                     {% else %}
-                                        <a href="/management/permissionTable/page?page_number={{ dic1['page_number']-1 }}">Prev</a>
+                                        <a href="/management/devicesTable/page?page_number={{ dic1['page_number']-1 }}">Prev</a>
                                     {% endif %}
                                    </li>
                                 <li class="{{ dic1['active1'] }}">
-                                     <a href="/management/permissionTable/page?page_number=1">1</a>
+                                     <a href="/management/devicesTable/page?page_number=1">1</a>
                                 </li>
                                 <li class="{{ dic1['active2'] }}">
-                                     <a href="/management/permissionTable/page?page_number=2">2</a>
+                                     <a href="/management/devicesTable/page?page_number=2">2</a>
                                 </li>
                                 <li class="{{ dic1['active3'] }}">
-                                     <a href="/management/permissionTable/page?page_number=3">3</a>
+                                     <a href="/management/devicesTable/page?page_number=3">3</a>
                                 </li>
                                 <li class="{{ dic1['active4'] }}">
-                                     <a href="/management/permissionTable/page?page_number=4">4</a>
+                                     <a href="/management/devicesTable/page?page_number=4">4</a>
                                 </li>
                                 <li class="{{ dic1['active5'] }}">
-                                     <a href="/management/permissionTable/page?page_number=5">5</a>
+                                     <a href="/management/devicesTable/page?page_number=5">5</a>
                                 </li>
                                 <li class="{{ dic1['active_next'] }}">
-                                     <a href="/management/permissionTable/page?page_number={{ dic1['page_number']+1 }}">Next</a>
+                                     <a href="/management/devicesTable/page?page_number={{ dic1['page_number']+1 }}">Next</a>
                                 </li>
                             </ul>
                         </div>
