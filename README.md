@@ -95,6 +95,12 @@ Linux下：
 
 ## 3. 运行web应用程序
 
+在权限表中导入权限数据：
+
+权限数据在：database文件夹中(permission.sql,permissions.xlsx)
+
+执行sql脚本或者在网页的后台管理权限表中批量导入。
+
 进入虚拟环境后：python app.py 即可运行该应用程序。
 
 ![](./img/run.png)
