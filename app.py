@@ -25,7 +25,7 @@ app.config.from_object(Config)
 db.init_app(app)
 
 #创建数据表
-db.create_all(app=app)
+#db.create_all(app=app)
 
 #全局变量植物名称
 PLANT_NAME = []
@@ -1070,8 +1070,7 @@ def watering_operation_start():
         for dict_data in devices_info_list:
             dict_data['style'] = random.choice(style_list)
     return render_template('my_plant.html',form = form,dic1 = dic1,list1 = devices_info_list)
-    
-
+ 
 #我的盆摘页面浇花操作停止
 @app.route('/my_plant/WateringOperation/end',methods = ['GET'])
 @login_required
@@ -1171,7 +1170,6 @@ def watering_operation_stop():
             dict_data['style'] = random.choice(style_list)
     return render_template('my_plant.html',form = form,dic1 = dic1,list1 = devices_info_list)
     
-
 #我的盆摘页面浇花操作定时浇花
 @app.route('/my_plant/AutoWatering',methods = ['GET'])
 @login_required
@@ -2892,7 +2890,7 @@ def managemnet_update_user_group():
         if form.validate_on_submit():
             id = request.form['id']
             group_name = request.form['group_name']
-            print(id,group_name)
+            #print(id,group_name)
             #查询该条目是否存在
             user_group_info = UserGroup.query.filter_by(id = id).first()
             if user_group_info:
@@ -2908,8 +2906,8 @@ def managemnet_update_user_group():
                     flash('修改字段: '+ message + ' 成功!')
                     return redirect('/management/userGroupTable')
                 except:
-                    db.session.rollback()
                     flash('数据库异常!')
+                    db.session.rollback()
                     return redirect('/management/userGroupTable')
             else:
                 flash('要更新的数据不存在!')
