@@ -31,15 +31,41 @@
 
 
 
-### （7）管理员后台管理界面
+### （7）管理员后台管理界面权限表
 
-![](./img/mgr.png)
+![](./img/mgr_permission.png)
 
 
 
-### 	
+### 	（8）管理员后台管理用户表
+
+​			![](./img/mgr_user.png)
+
+###       (9) 管理员后台管理用户组表
+
+![](./img/mgr_usergroup.png)
+
+### （10）管理员后台管理设备表
+
+![](./img/mgr_device.png)
+
+### （11）管理员后台管理朋友圈动态表
+
+![](./img/mgr_friendinfo.png)
+
+### （12）管理员后台管理朋友圈动态评论表
+
+![](./img/mgr_friendcomments.png)
+
+### （13）管理员后台管理朋友圈点赞信息表
+
+![](./img/mgr_friendlikes.png)
+
+
 
 ## 2.环境配置
+
+
 
 ### （1）安装Python环境
 
